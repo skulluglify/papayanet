@@ -1,18 +1,19 @@
-# PapayaNet
+# PpNet (PapayaNet)
 
-PapayaNet is a Web Framework built in Golang programming language, make it simple use for testing code ...
+PpNet (PapayaNet) is a web framework for API server, built-in from library Echo, Gorm, Etc. Make it easy use for production, development, and testing code ...
 
-![PapayaNet Test](docs/imgs/papayanet_test.png)
+![PapayaNet Showcase](docs/imgs/papayanet_showcase.png)
 
 ## Features
 
-- Swag
-- Console
+- Swag, Swagger
+- Console, Koala
+- Vector, Panda
 
 ## Built With
 
-- Echo
-- Gorm
+- Echo, Context
+- Gorm, Postgres
 
 ## Getting Started
 
@@ -32,6 +33,4 @@ Distributed under the BSD 3-Clause License. See `LICENSE` for more information.
 
 ## Contact
 
-Ahmad Asy Syafiq - skulluglify@gmail.com
-
-Project Link: [https://github.com/skulluglify/papayanet](https://github.com/skulluglify/papayanet)
+[author]()

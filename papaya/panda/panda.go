@@ -2,51 +2,113 @@ package panda
 
 import "math"
 
+func Abs(value int) int {
+
+  if value > 0 {
+
+    return value
+  }
+
+  return -value
+}
+
+func Ceil(size float64) int {
+
+  ex := size - float64(int(size))
+
+  if ex > 0 {
+
+    return int(size + .5)
+  }
+
+  return int(size)
+}
+
+func Floor(size float64) int {
+
+  ex := size - float64(int(size))
+
+  if ex > 0 {
+
+    return int(size - .5)
+  }
+
+  return int(size)
+}
+
+func CeilHalf(size int) int {
+
+  if size < math.MaxInt {
+
+    if size&1 == 1 {
+
+      size++
+    }
+
+    //} else {
+
+    // half of int
+    //return 2147483647
+  }
+
+  return size / 2
+}
+
+func FloorHalf(size int) int {
+
+  if size&1 == 1 {
+
+    size--
+  }
+
+  return size / 2
+}
+
 func Min(nums ...int) int {
 
-	num := math.MaxInt
+  num := math.MaxInt
 
-	for _, v := range nums {
+  for _, v := range nums {
 
-		if v < num {
+    if v < num {
 
-			num = v
-		}
-	}
+      num = v
+    }
+  }
 
-	return num
+  return num
 }
 
 func Max(nums ...int) int {
 
-	num := math.MinInt
+  num := math.MinInt
 
-	for _, v := range nums {
+  for _, v := range nums {
 
-		if num < v {
+    if num < v {
 
-			num = v
-		}
-	}
+      num = v
+    }
+  }
 
-	return num
+  return num
 }
 
 func Avg(nums ...int) int {
 
-	num := 0
-	k := 0
+  num := 0
+  k := 0
 
-	for _, v := range nums {
+  for _, v := range nums {
 
-		if k == 1 {
+    if k == 1 {
 
-			num += v
-			num /= 2
-		}
-		num = v
-		k = 1
-	}
+      num += v
+      num /= 2
+    }
+    num = v
+    k = 1
+  }
 
-	return num
+  return num
 }

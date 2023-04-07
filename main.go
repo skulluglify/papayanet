@@ -4,27 +4,24 @@ import (
 	"PapayaNet/app"
 	"PapayaNet/papaya"
 	"fmt"
-	"os"
 )
 
 func main() {
 
 	fmt.Println("Papaya Net v1.0 testing ...")
 
-	pn := papaya.PapayaNet{}
-	if err := pn.Init(); err != nil {
+	pn := papaya.NetNew()
+	pn.Init()
 
-		panic(err)
+	if err := app.App(pn); err != nil {
+
+		pn.Logger().Error(err)
 	}
 
-	if err := app.App(&pn); err != nil {
+	if err := pn.Close(); err != nil {
 
-		pn.Console.Error(err)
-		os.Exit(1)
+		pn.Logger().Error(err)
 	}
 
-	if err := pn.Serve("127.0.0.1", 8000); err != nil {
-
-		pn.Console.Error(err)
-	}
+	pn.Logger().Log("Shutdown ...")
 }

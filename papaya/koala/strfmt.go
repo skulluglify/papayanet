@@ -1,148 +1,172 @@
 package koala
 
 import (
-  "PapayaNet/papaya/koala/pp"
-  "PapayaNet/papaya/panda"
-  "reflect"
-  "strconv"
+	"PapayaNet/papaya/koala/pp"
+	"PapayaNet/papaya/panda"
+	"reflect"
+	"strconv"
 )
 
 // Method String to Number
 
 func KStrToNum(value string) int {
 
-  // try convert
-  if v, err := strconv.Atoi(value); err == nil {
+	// try convert
+	if v, err := strconv.Atoi(value); err == nil {
 
-    return v
-  }
+		return v
+	}
 
-  // default value
-  return 0
+	// default value
+	return 0
 }
 
 // Method convert String to Boolean
 
 func KStrToBool(value string) bool {
 
-  // try convert
-  if v, err := strconv.ParseBool(value); err == nil {
+	// try convert
+	if v, err := strconv.ParseBool(value); err == nil {
 
-    return v
-  }
+		return v
+	}
 
-  // default value
-  return false
+	// default value
+	return false
 }
 
 // Method convert String into Bytes
 
 func KStrToBytes(value string) []byte {
 
-  return []byte(value)
+	return []byte(value)
 }
 
 func KStrZeroFill(text string, s int) string {
 
-  var zeros string
+	var zeros string
 
-  k := panda.Min(len(text), s)
-  z := s - k
+	k := panda.Min(len(text), s)
+	z := s - k
 
-  for i := 0; i < z; i++ {
+	for i := 0; i < z; i++ {
 
-    zeros += "0"
-  }
+		zeros += "0"
+	}
 
-  return zeros + text[:k]
+	return zeros + text[:k]
 }
 
 func KStrPadStart(text string, s int) string {
 
-  var pads string
+	var pads string
 
-  k := panda.Min(len(text), s)
-  z := s - k
+	k := panda.Min(len(text), s)
+	z := s - k
 
-  for i := 0; i < z; i++ {
+	for i := 0; i < z; i++ {
 
-    pads += " "
-  }
+		pads += " "
+	}
 
-  return pads + text[:k]
+	return pads + text[:k]
 }
 
 func KStrPadEnd(text string, s int) string {
 
-  var pads string
+	var pads string
 
-  k := panda.Min(len(text), s)
-  z := s - k
+	k := panda.Min(len(text), s)
+	z := s - k
 
-  for i := 0; i < z; i++ {
+	for i := 0; i < z; i++ {
 
-    pads += " "
-  }
+		pads += " "
+	}
 
-  return text[:k] + pads
+	return text[:k] + pads
 }
 
 func KStrFmt(value any) string {
 
-  val := pp.KIndirectValueOf(value)
+	val := pp.KIndirectValueOf(value)
 
-  if val.IsValid() {
+	if val.IsValid() {
 
-    ty := val.Type()
+		ty := val.Type()
 
-    switch ty.Kind() {
-    case reflect.Bool:
+		switch ty.Kind() {
+		case reflect.Bool:
 
-      return strconv.FormatBool(value.(bool))
+			return strconv.FormatBool(value.(bool))
 
-    case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 
-      return strconv.FormatInt(val.Int(), 10)
+			return strconv.FormatInt(val.Int(), 10)
 
-    case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 
-      return strconv.FormatUint(val.Uint(), 10)
+			return strconv.FormatUint(val.Uint(), 10)
 
-    case reflect.Float32, reflect.Float64:
+		case reflect.Float32, reflect.Float64:
 
-      return strconv.FormatFloat(val.Float(), 'G', -1, 32)
+			return strconv.FormatFloat(val.Float(), 'G', -1, 32)
 
-    case reflect.Complex64, reflect.Complex128:
+		case reflect.Complex64, reflect.Complex128:
 
-      return strconv.FormatComplex(val.Complex(), 'G', -1, 64)
+			return strconv.FormatComplex(val.Complex(), 'G', -1, 64)
 
-    case reflect.String:
+		case reflect.String:
 
-      return value.(string)
-    }
-  }
+			return value.(string)
+		}
+	}
 
-  return ""
+	return ""
 }
 
 func KStrRepr(value any) string {
 
-  val := pp.KIndirectValueOf(value)
+	val := pp.KIndirectValueOf(value)
 
-  if val.IsValid() {
+	if val.IsValid() {
 
-    ty := val.Type()
+		ty := val.Type()
 
-    switch ty.Kind() {
-    case reflect.String:
+		switch ty.Kind() {
+		case reflect.String:
 
-      // wrapping with quote
-      return strconv.Quote(value.(string))
-    }
+			// wrapping with quote
+			return strconv.Quote(value.(string))
+		}
 
-    return KStrFmt(value)
-  }
+		return KStrFmt(value)
+	}
 
-  // set zero value
-  return pp.Noop[string]()
+	// set zero value
+	return pp.Noop[string]()
+}
+
+func KStrHasPrefixChar(value string, c string) bool {
+
+	n := len(value)
+
+	if n > 0 {
+
+		return string(value[0]) == c
+	}
+
+	return false
+}
+
+func KStrHasSuffixChar(value string, c string) bool {
+
+	n := len(value)
+
+	if n > 0 {
+
+		return string(value[n-1]) == c
+	}
+
+	return false
 }

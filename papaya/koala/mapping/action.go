@@ -1,534 +1,541 @@
 package mapping
 
 import (
-  "PapayaNet/papaya/koala/pp"
-  "reflect"
-  "strconv"
-  "strings"
+	"PapayaNet/papaya/koala/pp"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
 func KMapGetValue(name string, mapping any) any {
 
-  tokens := strings.Split(name, ".")
+	tokens := strings.Split(name, ".")
 
-  var value any
-  value = mapping
+	var value any
+	value = mapping
 
-  i := 0
-  n := len(tokens)
+	i := 0
+	n := len(tokens)
 
-  if n == 0 {
+	if n == 0 {
 
-    return nil
-  }
+		return nil
+	}
 
-  for {
+	for {
 
-    if value == nil {
+		if value == nil {
 
-      return nil
-    }
+			return nil
+		}
 
-    if n <= i {
+		if n <= i {
 
-      break
-    }
+			break
+		}
 
-    token := tokens[i]
+		token := tokens[i]
 
-    val := pp.KIndirectValueOf(value)
+		val := pp.KIndirectValueOf(value)
 
-    if val.IsValid() {
+		if val.IsValid() {
 
-      ty := val.Type()
+			ty := val.Type()
 
-      switch ty.Kind() {
+			switch ty.Kind() {
 
-      case reflect.Array, reflect.Slice:
+			case reflect.Array, reflect.Slice:
 
-        if index, err := strconv.Atoi(token); err == nil {
+				if index, err := strconv.Atoi(token); err == nil {
 
-          if index < val.Len() {
+					if index < val.Len() {
 
-            v := val.Index(index)
-            value = v.Interface()
-            break
-          }
-        }
+						v := val.Index(index)
+						value = v.Interface()
+						break
+					}
+				}
 
-        value = nil
+				value = nil
 
-        break
+				break
 
-      case reflect.Map:
+			case reflect.Map:
 
-        if ty.Key().Kind() == reflect.String {
+				if ty.Key().Kind() == reflect.String {
 
-          m := false
+					m := false
 
-          mapIter := val.MapRange()
+					mapIter := val.MapRange()
 
-          for mapIter.Next() {
+					for mapIter.Next() {
 
-            key := mapIter.Key().String()
+						key := mapIter.Key().String()
 
-            if token == key {
+						if token == key {
 
-              //value := reflect.Indirect(mapIter.Value())
-              v := mapIter.Value()
-              value = v.Interface()
-              m = true
-              break
-            }
-          }
+							//value := reflect.Indirect(mapIter.Value())
+							v := mapIter.Value()
+							value = v.Interface()
+							m = true
+							break
+						}
+					}
 
-          if !m {
+					if !m {
 
-            value = nil
-          }
-        }
+						value = nil
+					}
+				}
 
-        break
+				break
 
-      case reflect.Struct:
+			case reflect.Struct:
 
-        var m bool
-        var j, k int
-        var vf reflect.Value
-        var tf reflect.StructField
+				var m bool
+				var j, k int
+				var vf reflect.Value
+				var tf reflect.StructField
 
-        m, k = false, val.NumField()
+				m, k = false, val.NumField()
 
-        for j = 0; j < k; j++ {
+				for j = 0; j < k; j++ {
 
-          tf, vf = ty.Field(j), val.Field(j)
+					tf, vf = ty.Field(j), val.Field(j)
 
-          if tf.IsExported() {
+					if tf.IsExported() {
 
-            if vf.IsValid() {
+						if vf.IsValid() {
 
-              if token == tf.Name {
+							if token == tf.Name {
 
-                value = vf.Interface()
-                m = true
-                break
-              }
-            }
-          }
-        }
+								value = vf.Interface()
+								m = true
+								break
+							}
+						}
+					}
+				}
 
-        if !m {
+				if !m {
 
-          value = nil
-        }
+					value = nil
+				}
 
-        break
-      }
-    }
+				break
+			}
+		}
 
-    i++
-  }
+		i++
+	}
 
-  return value
+	return value
 }
 
 func KMapSetValue(name string, data any, mapping any) bool {
 
-  tokens := strings.Split(name, ".")
+	tokens := strings.Split(name, ".")
 
-  value := reflect.ValueOf(mapping)
+	value := reflect.ValueOf(mapping)
 
-  i := 0
-  n := len(tokens)
+	i := 0
+	n := len(tokens)
 
-  if n == 0 {
+	if n == 0 {
 
-    return false
-  }
+		return false
+	}
 
-  // set value as a pointer ? im don't thing so, because can set it without catch pointer
-  // `array`, `slice`, or `map` that combine ptr on inside memory
-  // that get previous and set value
+	// set value as a pointer ? im don't thing so, because can set it without catch pointer
+	// `array`, `slice`, or `map` that combine ptr on inside memory
+	// that get previous and set value
 
-  for {
+	for {
 
-    if !value.IsValid() {
+		if !value.IsValid() {
 
-      return false
-    }
+			return false
+		}
 
-    if n <= i {
+		if n <= i {
 
-      break
-    }
+			break
+		}
 
-    token := tokens[i]
+		token := tokens[i]
 
-    // that have problem, type hide on inside interface and ptr
-    // how to solve, is catch all elems on inside interface and set back in var `value`
-    // a reset type in var `ty`
-    value = pp.KIndirectValueOf(value)
+		// that have problem, type hide on inside interface and ptr
+		// how to solve, is catch all elems on inside interface and set back in var `value`
+		// a reset type in var `ty`
+		value = pp.KIndirectValueOf(value)
 
-    // update type of temporary
+		// update type of temporary
 
-    if value.IsValid() {
+		if value.IsValid() {
 
-      ty := value.Type()
+			ty := value.Type()
 
-      // lookup data on `map`
-      switch value.Kind() {
+			// lookup data on `map`
+			switch value.Kind() {
 
-      case reflect.Array, reflect.Slice:
+			case reflect.Array, reflect.Slice:
 
-        if index, err := strconv.Atoi(token); err == nil {
+				if index, err := strconv.Atoi(token); err == nil {
 
-          if index < value.Len() {
+					if index < value.Len() {
 
-            // get previous, set value
-            if i+1 == n {
+						// get previous, set value
+						if i+1 == n {
 
-              // get previous, to set value on inside `array` or `slice`
-              value.Index(index).Set(reflect.ValueOf(data))
-              return true
-            }
+							// get previous, to set value on inside `array` or `slice`
+							value.Index(index).Set(reflect.ValueOf(data))
+							return true
+						}
 
-            //v := value.Index(index)
-            //value = v
-            value = value.Index(index)
-            break
-          }
+						//v := value.Index(index)
+						//value = v
+						value = value.Index(index)
+						break
+					}
 
-          // index out of bound
-          return false
-        }
+					// index out of bound
+					return false
+				}
 
-        // NaN
-        return false
+				// NaN
+				return false
 
-      case reflect.Map:
-        if ty.Key().Kind() == reflect.String {
+			case reflect.Map:
+				if ty.Key().Kind() == reflect.String {
 
-          m := false
+					m := false
 
-          mapIter := value.MapRange()
+					mapIter := value.MapRange()
 
-          for mapIter.Next() {
+					for mapIter.Next() {
 
-            key := mapIter.Key()
+						key := mapIter.Key()
 
-            if token == key.String() {
+						if token == key.String() {
 
-              // get previous, set value
-              if i+1 == n {
+							// get previous, set value
+							if i+1 == n {
 
-                // get previous, to set value on inside `map`
-                value.SetMapIndex(key, reflect.ValueOf(data))
-                return true
-              }
+								// get previous, to set value on inside `map`
+								value.SetMapIndex(key, reflect.ValueOf(data))
+								return true
+							}
 
-              //v := mapIter.Value()
-              //value = v
-              value = mapIter.Value()
+							//v := mapIter.Value()
+							//value = v
+							value = mapIter.Value()
 
-              m = true
-              break
-            }
-          }
+							m = true
+							break
+						}
+					}
 
-          if !m {
+					if !m {
 
-            return false
-          }
+						return false
+					}
 
-          break
-        }
+					break
+				}
 
-        // bad key
-        return false
+				// bad key
+				return false
 
-      case reflect.Struct:
+			case reflect.Struct:
 
-        var m bool
-        var j, k int
-        var vf reflect.Value
-        var tf reflect.StructField
+				var m bool
+				var j, k int
+				var vf reflect.Value
+				var tf reflect.StructField
 
-        m, k = false, value.NumField()
+				m, k = false, value.NumField()
 
-        for j = 0; j < k; j++ {
+				for j = 0; j < k; j++ {
 
-          tf, vf = ty.Field(j), value.Field(j)
+					tf, vf = ty.Field(j), value.Field(j)
 
-          if tf.IsExported() {
+					if tf.IsExported() {
 
-            if token == tf.Name {
+						if token == tf.Name {
 
-              if i+1 == n {
+							if i+1 == n {
 
-                vf.Set(reflect.ValueOf(data))
-                return true
-              }
+								vf.Set(reflect.ValueOf(data))
+								return true
+							}
 
-              //v := vf
-              //value = v
-              value = vf
+							//v := vf
+							//value = v
+							value = vf
 
-              m = true
-              break
-            }
-          }
-        }
+							m = true
+							break
+						}
+					}
+				}
 
-        if !m {
+				if !m {
 
-          return false
-        }
+					return false
+				}
 
-        break
-      }
-    }
+				break
+			}
+		}
 
-    i++
-  }
+		i++
+	}
 
-  // other than `array`, `slice`, or `map`
-  // can't set value as ptr
-  return false
+	// other than `array`, `slice`, or `map`
+	// can't set value as ptr
+	return false
 }
 
 func KMapDelValue(name string, mapping any) bool {
 
-  tokens := strings.Split(name, ".")
+	tokens := strings.Split(name, ".")
 
-  var value, prev reflect.Value
+	var value, prev reflect.Value
 
-  value = reflect.ValueOf(mapping)
-  prev = reflect.Value{}
+	value = reflect.ValueOf(mapping)
+	prev = reflect.Value{}
 
-  var prevToken string
+	var prevToken string
 
-  var i, n int
-  i, n = 0, len(tokens)
+	var i, n int
+	i, n = 0, len(tokens)
 
-  if n == 0 {
+	if n == 0 {
 
-    return false
-  }
+		return false
+	}
 
-  // set value as a pointer ? im don't thing so, because can set it without catch pointer
-  // `array`, `slice`, or `map` that combine ptr on inside memory
-  // that get previous and set value
+	// set value as a pointer ? im don't thing so, because can set it without catch pointer
+	// `array`, `slice`, or `map` that combine ptr on inside memory
+	// that get previous and set value
 
-  for {
+	for {
 
-    if !value.IsValid() {
+		if !value.IsValid() {
 
-      return false
-    }
+			return false
+		}
 
-    if n <= i {
+		if n <= i {
 
-      break
-    }
+			break
+		}
 
-    token := tokens[i]
+		token := tokens[i]
 
-    // that have problem, type hide on inside interface and ptr
-    // how to solve, is catch all elems on inside interface and set back in var `value`
-    // a reset type in var `ty`
-    value = pp.KIndirectValueOf(value)
+		// that have problem, type hide on inside interface and ptr
+		// how to solve, is catch all elems on inside interface and set back in var `value`
+		// a reset type in var `ty`
+		value = pp.KIndirectValueOf(value)
 
-    if value.IsValid() {
+		if value.IsValid() {
 
-      ty := value.Type()
+			ty := value.Type()
 
-      // lookup data on `map`
-      switch value.Kind() {
+			// lookup data on `map`
+			switch value.Kind() {
 
-      case reflect.Array, reflect.Slice:
+			case reflect.Array, reflect.Slice:
 
-        if index, err := strconv.Atoi(token); err == nil {
+				if index, err := strconv.Atoi(token); err == nil {
 
-          if index < value.Len() {
+					if index < value.Len() {
 
-            // get previous, set value
-            if i+1 == n {
+						// get previous, set value
+						if i+1 == n {
 
-              s := value.Len()
+							s := value.Len()
 
-              // get previous, to set value on inside `array` or `slice`
-              L := value.Slice(0, index)
-              R := value.Slice(index+1, s)
+							// get previous, to set value on inside `array` or `slice`
+							L := value.Slice(0, index)
+							R := value.Slice(index+1, s)
 
-              k := L.Len() + R.Len()
+							//k := L.Len() + R.Len()
 
-              // ERROR: problem
-              data := reflect.MakeSlice(value.Type(), k, k)
+							// ERROR: problem
+							//data := reflect.MakeSlice(ty, k, k)
+							//
+							//// merging
+							//// TODO: out of time, make it fast
+							//for j := 0; j < L.Len(); j++ {
+							//
+							//	data.Index(j).Set(L.Index(j))
+							//}
+							//
+							//for j := 0; j < R.Len(); j++ {
+							//
+							//	data.Index(j + L.Len()).Set(R.Index(j))
+							//}
 
-              // merging
+							// make it fast
+							data := reflect.AppendSlice(L, R)
 
-              for j := 0; j < L.Len(); j++ {
+							// end
 
-                data.Index(j).Set(L.Index(j))
-              }
+							// save on previous value as ref
+							if reflect.ValueOf(prevToken).IsValid() {
 
-              for j := 0; j < R.Len(); j++ {
+								switch prev.Kind() {
 
-                data.Index(j + L.Len()).Set(R.Index(j))
-              }
+								case reflect.Array, reflect.Slice:
 
-              // end
+									if j, e := strconv.Atoi(prevToken); e == nil {
 
-              // save on previous value as ref
-              if reflect.ValueOf(prevToken).IsValid() {
+										prev.Index(j).Set(data)
+										return true
+									}
 
-                switch prev.Kind() {
+									return false
 
-                case reflect.Array, reflect.Slice:
+								case reflect.Map:
 
-                  if j, e := strconv.Atoi(prevToken); e == nil {
+									prev.SetMapIndex(reflect.ValueOf(prevToken), data)
+									break
 
-                    prev.Index(j).Set(data)
-                    return true
-                  }
+								case reflect.Struct:
 
-                  return false
+									prev.FieldByName(prevToken).Set(data)
+									break
+								}
 
-                case reflect.Map:
+								return true
+							}
 
-                  prev.SetMapIndex(reflect.ValueOf(prevToken), data)
-                  break
+							// try save on current elem
+							// panic: reflect: reflect.Value.Set using unaddressable value
+							//value.Set(data)
+							//if reflect.DeepEqual(data, value.Interface()) {
+							//
+							//  return true
+							//}
 
-                case reflect.Struct:
+							return false
+						}
 
-                  prev.FieldByName(prevToken).Set(data)
-                  break
-                }
+						//v := value.Index(index)
+						//prev = value
+						//value = v
+						prev = value
+						value = value.Index(index)
 
-                return true
-              }
+						break
+					}
 
-              // try save on current elem
-              // panic: reflect: reflect.Value.Set using unaddressable value
-              //value.Set(data)
-              //if reflect.DeepEqual(data, value.Interface()) {
-              //
-              //  return true
-              //}
+					// index out of bound
+					return false
+				}
 
-              return false
-            }
+				// NaN
+				return false
 
-            //v := value.Index(index)
-            //prev = value
-            //value = v
-            prev = value
-            value = value.Index(index)
+			case reflect.Map:
 
-            break
-          }
+				if ty.Key().Kind() == reflect.String {
 
-          // index out of bound
-          return false
-        }
+					m := false
 
-        // NaN
-        return false
+					mapIter := value.MapRange()
 
-      case reflect.Map:
+					for mapIter.Next() {
 
-        if ty.Key().Kind() == reflect.String {
+						key := mapIter.Key()
 
-          m := false
+						if token == key.String() {
 
-          mapIter := value.MapRange()
+							// get previous, set value
+							if i+1 == n {
 
-          for mapIter.Next() {
+								// get previous, to delete value on inside `map`
+								value.SetMapIndex(key, reflect.Value{}) // that don't know how it works
+								return true
+							}
 
-            key := mapIter.Key()
+							//v := mapIter.Value()
+							//prev = value
+							//value = v
+							prev = value
+							value = mapIter.Value()
 
-            if token == key.String() {
+							m = true
+							break
+						}
+					}
 
-              // get previous, set value
-              if i+1 == n {
+					if !m {
 
-                // get previous, to delete value on inside `map`
-                value.SetMapIndex(key, reflect.Value{}) // that don't know how it works
-                return true
-              }
+						return false
+					}
 
-              //v := mapIter.Value()
-              //prev = value
-              //value = v
-              prev = value
-              value = mapIter.Value()
+					break
+				}
 
-              m = true
-              break
-            }
-          }
+				// bad key
+				return false
 
-          if !m {
+			case reflect.Struct:
 
-            return false
-          }
+				var m bool
+				var j, k int
+				var vf reflect.Value
+				var tf reflect.StructField
 
-          break
-        }
+				m, k = false, value.NumField()
 
-        // bad key
-        return false
+				for j = 0; j < k; j++ {
 
-      case reflect.Struct:
+					tf, vf = ty.Field(j), value.Field(j)
 
-        var m bool
-        var j, k int
-        var vf reflect.Value
-        var tf reflect.StructField
+					if tf.IsExported() {
 
-        m, k = false, value.NumField()
+						// delete action, require value is valid
+						if vf.IsValid() {
 
-        for j = 0; j < k; j++ {
+							if token == tf.Name {
 
-          tf, vf = ty.Field(j), value.Field(j)
+								if i+1 == n {
 
-          if tf.IsExported() {
+									// make it zero value
+									vf.Set(reflect.Zero(tf.Type))
+									return true
+								}
 
-            if token == tf.Name {
+								//v := vf
+								//prev = value
+								//value = v
+								prev = value
+								value = vf
 
-              if i+1 == n {
+								m = true
+								break
+							}
+						}
+					}
+				}
 
-                // make it zero value
-                vf.Set(reflect.Zero(tf.Type))
-                return true
-              }
+				if !m {
 
-              //v := vf
-              //prev = value
-              //value = v
-              prev = value
-              value = vf
+					return false
+				}
 
-              m = true
-              break
-            }
-          }
-        }
+				break
+			}
+		}
 
-        if !m {
+		prevToken = token
+		i++
+	}
 
-          return false
-        }
-
-        break
-      }
-    }
-
-    prevToken = token
-    i++
-  }
-
-  // other than `array`, `slice`, or `map`
-  // can't set value as ptr
-  return false
+	// other than `array`, `slice`, or `map`
+	// can't set value as ptr
+	return false
 }

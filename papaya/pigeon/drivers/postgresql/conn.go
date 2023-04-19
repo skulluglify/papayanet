@@ -1,10 +1,10 @@
 package postgresql
 
 import (
-	"PapayaNet/papaya/db"
 	"PapayaNet/papaya/koala/environ"
 	"PapayaNet/papaya/koala/kio"
 	"PapayaNet/papaya/koala/pp"
+	"PapayaNet/papaya/pigeon"
 	"errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -74,7 +74,7 @@ func DBConnectionNew(flags int) (*DBConnection, error) {
 
 func (c *DBConnection) Init(flags int) (*gorm.DB, error) {
 
-	if pp.KValidFlag(flags, db.InitLoadEnviron) {
+	if pp.KValidFlag(flags, pigeon.InitLoadEnviron) {
 
 		envLoader := environ.KEnvLoaderNew[*DBConfig]()
 		envLoader.Load(c.DBConfig)

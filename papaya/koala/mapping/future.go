@@ -83,19 +83,27 @@ func KMapBranch(name string, mapping any) any {
 
 							if index, err := strconv.Atoi(k); err == nil {
 
+								n := v.Len()
+
 								mm := &KMap{}
-								if index < v.Len() {
+								if index < n {
 
 									v.Index(index).Set(reflect.ValueOf(mm))
 									break
 								}
 
-								// try
-								if o, ok := data.([]any); ok {
+								// append
+								s := reflect.AppendSlice(v, reflect.ValueOf(mm))
 
-									o = append(o, mm)
-									KMapSetValue(prevKey, mapping, o)
-								}
+								// write
+								KMapSetValue(prevKey, s.Interface(), mapping)
+
+								// try
+								//if o, ok := data.([]any); ok {
+								//
+								//	o = append(o, mm)
+								//	KMapSetValue(prevKey, o, mapping)
+								//}
 							}
 
 							break
@@ -104,7 +112,8 @@ func KMapBranch(name string, mapping any) any {
 
 				}
 
-				panic("not stable yet")
+				// TODO: testing it
+				panic("not testing yet")
 
 			case reflect.Map:
 				if ty.Key().Kind() == reflect.String {
@@ -186,6 +195,12 @@ func KMapPut(name string, data any, mapping any) bool {
 
 				// hacked, put new assign in a map object
 				switch ty.Kind() {
+				case reflect.Array, reflect.Slice:
+
+					break
+
+					// not implemented yet
+
 				case reflect.Map:
 
 					if ty.Key().Kind() == reflect.String {

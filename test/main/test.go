@@ -4,9 +4,8 @@ import (
 	"PapayaNet/papaya/koala"
 	"PapayaNet/papaya/koala/collection"
 	"PapayaNet/papaya/koala/mapping"
-	"fmt"
+	"PapayaNet/papaya/koala/tools/posix"
 	"math"
-	"net/url"
 )
 
 func main() {
@@ -104,20 +103,13 @@ func main() {
 	console.Log("--- json ---")
 	console.Log(data.JSON())
 
-	//postgres://gorm:gorm@localhost:9920/gorm?sslmode=disable&TimeZone=Asia/Shanghai
+	p := posix.KPathNew("/")
+	p.JoinStr("/foo", "/bar/", "ext", "", "")
+	p.Join(posix.KPathNew("document.txt"))
 
-	DSN := url.URL{
-		Scheme:   "postgres",
-		User:     url.UserPassword("postgres", "postgres 1234"),
-		Host:     "localhost:8080",
-		Path:     "gorm",
-		RawQuery: "sslmode=disable&TimeZone=Asia/Shanghai",
-	}
+	console.Log(p)
 
-	fmt.Println(DSN.String())
-
-	values := url.Values{}
-	values.Set("host", "/var/run/postgresql")
-
-	fmt.Println(values.Encode())
+	console.Log(p.Base())
+	console.Log(p.Pop())
+	console.Log(p)
 }

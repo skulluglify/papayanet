@@ -245,3 +245,22 @@ func KMapValues(mapping any) []any {
 
 	return values
 }
+
+// try casting into KMap
+
+func KMapCast(mapping any) KMapImpl {
+
+	// catch from interface or pointer
+	val := pp.KIndirectValueOf(mapping)
+
+	// valid value is not null
+	if val.IsValid() {
+
+		if mm, ok := val.Interface().(KMap); ok {
+
+			return &mm
+		}
+	}
+
+	return nil
+}

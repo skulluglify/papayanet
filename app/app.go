@@ -3,17 +3,26 @@ package app
 import (
 	"PapayaNet/app/controllers"
 	"PapayaNet/papaya"
-	"PapayaNet/papaya/swag"
+	"PapayaNet/papaya/bunny/swag"
 )
 
 func App(pn papaya.NetImpl) error {
 
-	swagInfo := swag.MakeSwagInfo("Example API", "Example API for documentation")
-	swagger := pn.MakeSwagger(swagInfo)
+	swagger := pn.MakeSwagger(&swag.SwagInfo{
+		Title:       "Example API",
+		Version:     "1.0.0",
+		Description: "Example API for documentation",
+	})
 
-	router := swagger.Router()
+	mainGroup := swagger.Group("/api/v1", "Schema")
+	userGroup := mainGroup.Group("/users", "Authentication")
 
-	controllers.User(router)
+	controllers.UserController(userGroup.Router())
 
-	return pn.Serve("127.0.0.1", 8000)
+	if err := swagger.Start(); err != nil {
+		return err
+	}
+
+	//return pn.Serve("127.0.0.1", 8000)
+	return nil
 }

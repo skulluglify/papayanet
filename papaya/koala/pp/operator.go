@@ -1,84 +1,84 @@
 package pp
 
 import (
-  "reflect"
+	"reflect"
 )
 
 // Method for determine Coalescing Operator
 
 func KCO[T any](values ...T) T {
 
-  // catch valid value
-  for _, value := range values {
+	// catch valid value
+	for _, value := range values {
 
-    val := KIndirectValueOf(value)
+		val := KIndirectValueOf(value)
 
-    // `nil` has been handled it
-    if val.IsValid() {
+		// `nil` has been handled it
+		if val.IsValid() {
 
-      ty := val.Type()
-      switch ty.Kind() {
-      case reflect.Bool:
+			ty := val.Type()
+			switch ty.Kind() {
+			case reflect.Bool:
 
-        if !val.Bool() {
+				if !val.Bool() {
 
-          continue
-        }
+					continue
+				}
 
-        break
+				break
 
-      case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 
-        if val.Int() == 0 {
+				if val.Int() == 0 {
 
-          continue
-        }
+					continue
+				}
 
-        break
+				break
 
-      case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 
-        if val.Uint() == 0 {
+				if val.Uint() == 0 {
 
-          continue
-        }
+					continue
+				}
 
-        break
+				break
 
-      case reflect.Float32, reflect.Float64:
+			case reflect.Float32, reflect.Float64:
 
-        if val.Float() == 0.0 {
+				if val.Float() == 0.0 {
 
-          continue
-        }
+					continue
+				}
 
-        break
+				break
 
-      case reflect.Complex64, reflect.Complex128:
+			case reflect.Complex64, reflect.Complex128:
 
-        if val.Complex() == 0 {
+				if val.Complex() == 0 {
 
-          continue
-        }
+					continue
+				}
 
-        break
+				break
 
-      case reflect.String:
+			case reflect.String:
 
-        if val.String() == "" {
+				if val.String() == "" {
 
-          continue
-        }
+					continue
+				}
 
-        break
-      }
+				break
+			}
 
-      return value
-    }
-  }
+			return value
+		}
+	}
 
-  // zero value, as a default value
-  return Noop[T]()
+	// zero value, as a default value
+	return Noop[T]()
 }
 
 // auto type defined by name
@@ -89,67 +89,67 @@ var KCOAny = KCO[any]
 
 func KCOStr(values ...string) string {
 
-  for _, value := range values {
+	for _, value := range values {
 
-    if value != "" {
+		if value != "" {
 
-      return value
-    }
-  }
+			return value
+		}
+	}
 
-  return Noop[string]()
+	return Noop[string]()
 }
 
 func KCOBool(values ...bool) bool {
 
-  for _, value := range values {
+	for _, value := range values {
 
-    if value {
+		if value {
 
-      return value
-    }
-  }
+			return value
+		}
+	}
 
-  return Noop[bool]()
+	return Noop[bool]()
 }
 
 func KCOByte(values ...byte) byte {
 
-  for _, value := range values {
+	for _, value := range values {
 
-    if value != 0 {
+		if value != 0 {
 
-      return value
-    }
-  }
+			return value
+		}
+	}
 
-  return Noop[byte]()
+	return Noop[byte]()
 }
 
 func KCOInt(values ...int) int {
 
-  for _, value := range values {
+	for _, value := range values {
 
-    if value != 0 {
+		if value != 0 {
 
-      return value
-    }
-  }
+			return value
+		}
+	}
 
-  return Noop[int]()
+	return Noop[int]()
 }
 
 func KCOUint(values ...uint) uint {
 
-  for _, value := range values {
+	for _, value := range values {
 
-    if value != 0 {
+		if value != 0 {
 
-      return value
-    }
-  }
+			return value
+		}
+	}
 
-  return Noop[uint]()
+	return Noop[uint]()
 }
 
 // ---
@@ -158,5 +158,5 @@ func KCOUint(values ...uint) uint {
 
 func KValidFlag(flags int, flag int) bool {
 
-  return flags|flag == 1
+	return flags|flag != 0 // or flag == 1
 }

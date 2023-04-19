@@ -1,104 +1,123 @@
 package main
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/collection"
-  "PapayaNet/papaya/koala/mapping"
-  "math"
+	"PapayaNet/papaya/koala"
+	"PapayaNet/papaya/koala/collection"
+	"PapayaNet/papaya/koala/mapping"
+	"fmt"
+	"math"
+	"net/url"
 )
 
 func main() {
 
-  var i uint
-  console := koala.KConsoleNew()
-  console.Log("KList testing ...")
+	var i uint
+	console := koala.KConsoleNew()
+	console.Log("KList testing ...")
 
-  list := collection.KListNewR[int]([]int{12, 24, 36, 48, 60, 72, 84, 96, 108})
+	list := collection.KListNewR[int]([]int{12, 24, 36, 48, 60, 72, 84, 96, 108})
 
-  for i = 0; i < list.Len(); i++ {
+	for i = 0; i < list.Len(); i++ {
 
-    console.Log(list.Get(i))
-  }
+		console.Log(list.Get(i))
+	}
 
-  console.Warn("splice ...")
+	console.Warn("splice ...")
 
-  // TODO: fix problem --
-  // TODO: initial val.Type() after val.IsValid() ++
-  removes := list.Splice(1, 1, 72, 80)
+	// TODO: fix problem --
+	// TODO: initial val.Type() after val.IsValid() ++
+	removes := list.Splice(1, 1, 72, 80)
 
-  for i = 0; i < removes.Len(); i++ {
+	for i = 0; i < removes.Len(); i++ {
 
-    console.Log(removes.Get(i))
-  }
+		console.Log(removes.Get(i))
+	}
 
-  console.Warn("look ...")
-  console.Warn(list.Len())
+	console.Warn("look ...")
+	console.Warn(list.Len())
 
-  for i = 0; i < list.Len(); i++ {
+	for i = 0; i < list.Len(); i++ {
 
-    console.Log(list.Get(i))
-  }
+		console.Log(list.Get(i))
+	}
 
-  type Group struct {
-    Message string
-  }
+	type Group struct {
+		Message string
+	}
 
-  data := &mapping.KMap{
-    "title":       "Koala Mapping",
-    "shortname":   "KMap",
-    "description": "Koala Mapping for defined new Object",
-    "docs": &mapping.KMap{
-      "lesson1": []string{
-        "make it possible with pointer or references",
-        "deeper collection of enums in map object",
-        "like JSON",
-      },
-    },
-    "premises": []mapping.KMap{
-      {
-        "read":  "wait",
-        "write": "wait",
-      },
-    },
-    "group": Group{
-      Message: "this is group for map Object",
-    },
-  }
+	data := &mapping.KMap{
+		"title":       "Koala Mapping",
+		"shortname":   "KMap",
+		"description": "Koala Mapping for defined new Object",
+		"docs": &mapping.KMap{
+			"lesson1": []string{
+				"make it possible with pointer or references",
+				"deeper collection of enums in map object",
+				"like JSON",
+			},
+		},
+		"premises": []mapping.KMap{
+			{
+				"read":  "wait",
+				"write": "wait",
+			},
+		},
+		"group": Group{
+			Message: "this is group for map Object",
+		},
+	}
 
-  for _, enum := range data.Tree().Enums() {
+	for _, enum := range data.Tree().Enums() {
 
-    k, v := enum.Tuple()
-    console.Log(k, v)
-  }
+		k, v := enum.Tuple()
+		console.Log(k, v)
+	}
 
-  for _, k := range data.Tree().Keys() {
+	for _, k := range data.Tree().Keys() {
 
-    console.Log(k)
-    console.Log(data.Get(k))
-  }
+		console.Log(k)
+		console.Log(data.Get(k))
+	}
 
-  console.Log("--- iter ---")
+	console.Log("--- iter ---")
 
-  iter := data.Tree().Iterable()
-  for next := iter.Next(); next.HasNext(); next = next.Next() {
+	iter := data.Tree().Iterable()
+	for next := iter.Next(); next.HasNext(); next = next.Next() {
 
-    k, v := next.Enum().Tuple()
+		k, v := next.Enum().Tuple()
 
-    console.Log(k, v)
-  }
+		console.Log(k, v)
+	}
 
-  // path, prefix, suffix
-  // Index
-  // Get, Set, Del, Put
+	// path, prefix, suffix
+	// Index
+	// Get, Set, Del, Put
 
-  console.Log(data.Put("math", math.Pi))
-  console.Log(data.Put("premises.0.read", "ready"))
-  console.Log(data.Put("premises.0.shared", nil))
+	console.Log(data.Put("math", math.Pi))
+	console.Log(data.Put("premises.0.read", "ready"))
+	console.Log(data.Put("premises.0.shared", nil))
 
-  console.Log(data.Put("system.dev.name", "ubuntu"))
+	console.Log(data.Put("system.dev.name", "ubuntu"))
 
-  data.Branch("system.dev.freedesktop.x11.cosmos")
+	data.Branch("system.dev.freedesktop.x11.cosmos")
 
-  console.Log("--- json ---")
-  console.Log(data.JSON())
+	console.Log("--- json ---")
+	console.Log(data.JSON())
+
+	//postgres://gorm:gorm@localhost:9920/gorm?sslmode=disable&TimeZone=Asia/Shanghai
+
+	DSN := url.URL{
+		Scheme:   "postgres",
+		User:     url.UserPassword("postgres", "postgres 1234"),
+		Host:     "localhost:8080",
+		Path:     "gorm",
+		RawQuery: "sslmode=disable&TimeZone=Asia/Shanghai",
+	}
+
+	fmt.Println(DSN.String())
+
+	values := url.Values{}
+	values.Set("host", "/var/run/postgresql")
+
+	fmt.Println(values.Encode())
 }

@@ -1,153 +1,245 @@
 package postgresql
 
 import (
-  "PapayaNet/papaya/db"
-  "PapayaNet/papaya/koala/environ"
-  "PapayaNet/papaya/koala/kio"
-  "PapayaNet/papaya/koala/pp"
-  "errors"
-  "gorm.io/driver/postgres"
-  "gorm.io/gorm"
-  "net/url"
-  "strconv"
+	"PapayaNet/papaya/db"
+	"PapayaNet/papaya/koala/environ"
+	"PapayaNet/papaya/koala/kio"
+	"PapayaNet/papaya/koala/pp"
+	"errors"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"math"
+	"net/url"
+	"strconv"
+	"strings"
 )
 
+// Ref: https://www.postgresql.org/docs/current/libpq-connect.html
+// Ref: https://www.postgresql.org/docs/15/runtime-config-client.html
+// Ref: https://www.prisma.io/docs/concepts/database-connectors/postgresql
+
+// TODO: postgresql not implemented connection by socket
+
 type DBConfig struct {
-  Host     string `env:"DB_HOST"`
-  Port     int    `env:"DB_PORT"`
-  UnixSock string `env:"DB_UNIX_SOCK"`
-  Username string `env:"DB_USERNAME"`
-  Password string `env:"DB_PASSWORD"`
-  PassFile string `env:"DB_PASSWORD_FILE"`
-  TimeZone string `env:"DB_TIMEZONE"`
-  Charset  string `env:"DB_CHARSET"`
-  Secure   bool   `env:"DB_SECURE"`
-  Name     string `env:"DB_NAME"`
+
+	// general purpose
+	Host     string `env:"DB_HOST"`
+	Port     int    `env:"DB_PORT"`
+	UnixSock string `env:"DB_UNIX_SOCK"`
+	Username string `env:"DB_USERNAME"`
+	Password string `env:"DB_PASSWORD"`
+	PassFile string `env:"DB_PASSWORD_FILE"`
+	TimeZone string `env:"DB_TIMEZONE"`
+	Charset  string `env:"DB_CHARSET"`
+	Secure   bool   `env:"DB_SECURE"`
+	Name     string `env:"DB_NAME"`
+
+	// postgresql only
+	PgConnectTimeout  int    `env:"PG_CONNECT_TIMEOUT"`
+	PgSSLMode         string `env:"PG_SSL_MODE"`
+	PgSSLCert         string `env:"PG_SSL_CERT"`
+	PgSSLPassword     string `env:"PG_SSL_PASSWORD"`
+	PgApplicationName string `env:"PG_APPLICATION_NAME"`
+	PgOptions         string `env:"PG_OPTIONS"`
+	PgClientEncoding  string `env:"PG_CLIENT_ENCODING"`
+	PgTimeZone        string `env:"PG_TIMEZONE"`
 }
 
 type DBConnection struct {
-  *gorm.Config
-  *gorm.DB
-  *DBConfig
+	*gorm.Config
+	*gorm.DB
+	*DBConfig
 }
 
 type DBConfigImpl interface {
-  Init(flags int) (*gorm.DB, error)
-  IsUnixSock() bool
-  String() string
-  Close() error
+	Init(flags int) (*gorm.DB, error)
+	IsUnixSock() bool
+	RawQuery() string
+	String() string
+	Close() error
 }
 
 func DBConnectionNew(flags int) (*DBConnection, error) {
 
-  conn := &DBConnection{
-    Config: &gorm.Config{},
-    DBConfig: &DBConfig{
-      Port: 5432,
-    },
-  }
+	conn := &DBConnection{
+		Config: &gorm.Config{},
+		DBConfig: &DBConfig{
+			Port: 5432,
+		},
+	}
 
-  _, err := conn.Init(flags)
-  return conn, err
+	_, err := conn.Init(flags)
+	return conn, err
 }
 
 func (c *DBConnection) Init(flags int) (*gorm.DB, error) {
 
-  if pp.KValidFlag(flags, db.InitLoadEnviron) {
+	if pp.KValidFlag(flags, db.InitLoadEnviron) {
 
-    envLoader := environ.KEnvLoaderNew[*DBConfig]()
-    envLoader.Load(c.DBConfig)
-  }
+		envLoader := environ.KEnvLoaderNew[*DBConfig]()
+		envLoader.Load(c.DBConfig)
+	}
 
-  DSN := c.String()
+	if math.MaxUint16 < c.Port {
 
-  DB, err := gorm.Open(postgres.Open(DSN), c)
+		panic("var `port` has been configured incorrectly")
+	}
 
-  if err != nil {
+	DSN := c.String()
 
-    return nil, err
-  }
+	DB, err := gorm.Open(postgres.Open(DSN), c)
 
-  c.DB = DB
-  return DB, nil
+	if err != nil {
+
+		return nil, err
+	}
+
+	c.DB = DB
+	return DB, nil
 }
 
 func (c *DBConnection) IsUnixSock() bool {
 
-  return kio.KFileNew(c.UnixSock).IsExists()
+	// that may problem, bcs postgresql not use literally sock file to connect them
+	return kio.KFileNew(c.UnixSock).IsSocket()
+}
+
+func (c *DBConnection) RawQuery() string {
+
+	values := url.Values{}
+	connectTimeout := 5
+	sslmode := "prefer" // disable|prefer|require
+	sslcert := ""
+	sslpassword := ""
+	applicationName := ""
+	options := ""
+	clientEncoding := "utf8"
+	timeZone := "UTC"
+
+	// general purpose
+	if c.Secure {
+
+		sslmode = "require"
+	}
+
+	if c.Charset != "" {
+
+		clientEncoding = c.Charset
+	}
+
+	if c.TimeZone != "" {
+
+		timeZone = c.TimeZone
+	}
+
+	// postgresql only
+
+	if c.PgConnectTimeout != 0 {
+		connectTimeout = c.PgConnectTimeout
+	}
+
+	if c.PgSSLMode != "" {
+		sslmode = c.PgSSLMode
+	}
+
+	if c.PgSSLCert != "" {
+		sslcert = c.PgSSLCert
+	}
+
+	if c.PgSSLPassword != "" {
+		sslpassword = c.PgSSLPassword
+	}
+
+	if c.PgApplicationName != "" {
+		applicationName = c.PgApplicationName
+	}
+
+	if c.PgOptions != "" {
+		options = c.PgOptions
+	}
+
+	if c.PgClientEncoding != "" {
+		clientEncoding = c.PgClientEncoding
+	}
+
+	if c.PgTimeZone != "" {
+		timeZone = c.PgTimeZone
+	}
+
+	values.Add("connect_timeout", strconv.Itoa(connectTimeout))
+	values.Add("sslmode", sslmode)
+	values.Add("sslcert", sslcert)
+	values.Add("sslpassword", sslpassword)
+	values.Add("application_name", applicationName)
+	values.Add("options", options)
+	values.Add("client_encoding", clientEncoding)
+	values.Add("TimeZone", timeZone)
+
+	return values.Encode()
 }
 
 func (c *DBConnection) String() string {
 
-  var res string
+	//// trim all strings
+	//c.Host = strings.Trim(c.Host, " ")
+	//c.UnixSock = strings.Trim(c.UnixSock, " ")
+	//c.Username = strings.Trim(c.Username, " ")
+	//c.Password = strings.Trim(c.Password, " ")
+	//c.PassFile = strings.Trim(c.PassFile, " ")
+	//c.TimeZone = strings.Trim(c.TimeZone, " ")
+	//c.Charset = strings.Trim(c.Charset, " ")
+	//c.Name = strings.Trim(c.Name, " ")
 
-  if kio.KFileNew(c.UnixSock).IsExists() {
+	// set default value
+	if c.Host != "" {
 
-    res += "host="
-    res += c.UnixSock
-    res += " "
+		c.Host = "localhost"
+	}
 
-  } else {
+	// replace var `port` with var `host`
+	if c.Port != 0 {
 
-    res += "host="
-    res += pp.KCOStr(c.Host, "127.0.0.1")
-    res += " "
+		if !strings.Contains(c.Host, ":") {
 
-    res += "port="
-    res += pp.KCOStr(strconv.Itoa(c.Port), "5432")
-    res += " "
-  }
+			c.Host += ":" + strconv.Itoa(c.Port)
+		}
+	}
 
-  res += "user="
-  res += pp.KCOStr(c.Username, "postgres")
-  res += " "
+	// read pass file as var `password`
+	if c.Password == "" {
 
-  if c.Password == "" {
+		f := kio.KFileNew(c.PassFile)
 
-    f := kio.KFileNew(c.PassFile)
+		if f.IsExist() {
 
-    if f.IsExists() {
+			c.Password = f.Cat()
+		}
+	}
 
-      c.Password = f.Cat()
-    }
-  }
+	DSN := &url.URL{
+		Scheme:   "postgres",
+		User:     url.UserPassword(c.Username, c.Password),
+		Host:     c.Host,
+		Path:     c.Name,
+		RawQuery: c.RawQuery(),
+	}
 
-  res += "password="
-  res += url.QueryEscape(c.Password)
-  res += " "
-
-  res += "dbname="
-  res += pp.KCOStr(c.Name, "postgres")
-  res += " "
-
-  res += "client_encoding="
-  res += pp.KCOStr(c.Charset, "utf8")
-  res += " "
-
-  res += "sslmode="
-  res += pp.KISStr(c.Secure, "enable", "disable")
-  res += " "
-
-  res += "TimeZone="
-  res += pp.KCOStr(c.TimeZone, "UTC")
-  res += " "
-
-  return res
+	return DSN.String()
 }
 
 func (c *DBConnection) Close() error {
 
-  if c.DB != nil {
+	if c.DB != nil {
 
-    DB, err := c.DB.DB()
-    if err != nil {
+		DB, err := c.DB.DB()
+		if err != nil {
 
-      return err
-    }
-    err = DB.Close()
-    c.DB = nil
-    return err
-  }
+			return err
+		}
+		err = DB.Close()
+		c.DB = nil
+		return err
+	}
 
-  return errors.New("database has not been initialized")
+	return errors.New("database has not been initialized")
 }

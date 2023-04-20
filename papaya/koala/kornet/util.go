@@ -12,9 +12,9 @@ func KRequestGetURL(req *http.Request) url.URL {
 
   URL := url.URL{
     User:     req.URL.User,
-    Scheme:   pp.KCOStr(req.URL.Scheme, "http"),
-    Host:     pp.KCOStr(req.URL.Host, "localhost"),
-    Path:     pp.KCOStr(req.URL.Path, "/"),
+    Scheme:   pp.QStr(req.URL.Scheme, "http"),
+    Host:     pp.QStr(req.URL.Host, "localhost"),
+    Path:     pp.QStr(req.URL.Path, "/"),
     RawQuery: req.URL.RawQuery,
   }
 

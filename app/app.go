@@ -23,6 +23,8 @@ func App(pn papaya.NetImpl) error {
 		return err
 	}
 
-	//return pn.Serve("127.0.0.1", 8000)
-	return nil
+	swagger.Swagger()
+
+	return pn.Serve("127.0.0.1", 8000)
+	// return nil
 }

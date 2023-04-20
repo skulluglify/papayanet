@@ -1,266 +1,266 @@
 package mapping
 
 import (
-	"PapayaNet/papaya/koala"
-	"PapayaNet/papaya/koala/pp"
-	"reflect"
-	"strconv"
+  "PapayaNet/papaya/koala"
+  "PapayaNet/papaya/koala/pp"
+  "reflect"
+  "strconv"
 )
 
 func KMapEnums(mapping any) koala.KEnums[string, any] {
 
-	enums := koala.KEnumsNew[string, any](0)
+  enums := koala.KEnumsNew[string, any](0)
 
-	val := pp.KIndirectValueOf(mapping)
+  val := pp.KIndirectValueOf(mapping)
 
-	if val.IsValid() {
+  if val.IsValid() {
 
-		ty := val.Type()
+    ty := val.Type()
 
-		switch ty.Kind() {
-		case reflect.Array, reflect.Slice:
+    switch ty.Kind() {
+    case reflect.Array, reflect.Slice:
 
-			for i := 0; i < val.Len(); i++ {
+      for i := 0; i < val.Len(); i++ {
 
-				k, v := strconv.Itoa(i), val.Index(i).Interface()
-				enum := koala.KEnumNew[string, any](k, v)
-				enums = append(enums, enum)
-			}
+        k, v := strconv.Itoa(i), val.Index(i).Interface()
+        enum := koala.KEnumNew[string, any](k, v)
+        enums = append(enums, enum)
+      }
 
-			break
+      break
 
-		case reflect.Map:
+    case reflect.Map:
 
-			if ty.Key().Kind() == reflect.String {
+      if ty.Key().Kind() == reflect.String {
 
-				mapIter := val.MapRange()
+        mapIter := val.MapRange()
 
-				for mapIter.Next() {
+        for mapIter.Next() {
 
-					k, v := mapIter.Key().String(), mapIter.Value().Interface()
-					enum := koala.KEnumNew[string, any](k, v)
-					enums = append(enums, enum)
-				}
-			}
+          k, v := mapIter.Key().String(), mapIter.Value().Interface()
+          enum := koala.KEnumNew[string, any](k, v)
+          enums = append(enums, enum)
+        }
+      }
 
-			break
-		case reflect.Struct:
+      break
+    case reflect.Struct:
 
-			// TODO: not implemented yet
-			var i, n int
-			var vf reflect.Value
-			var tf reflect.StructField
+      // TODO: not implemented yet
+      var i, n int
+      var vf reflect.Value
+      var tf reflect.StructField
 
-			n = val.NumField()
+      n = val.NumField()
 
-			for i = 0; i < n; i++ {
+      for i = 0; i < n; i++ {
 
-				tf, vf = ty.Field(i), val.Field(i)
+        tf, vf = ty.Field(i), val.Field(i)
 
-				if tf.IsExported() {
+        if tf.IsExported() {
 
-					if vf.IsValid() {
+          if vf.IsValid() {
 
-						k, v := tf.Name, vf.Interface()
-						enum := koala.KEnumNew[string, any](k, v)
-						enums = append(enums, enum)
-					}
-				}
-			}
+            k, v := tf.Name, vf.Interface()
+            enum := koala.KEnumNew[string, any](k, v)
+            enums = append(enums, enum)
+          }
+        }
+      }
 
-			break
-		}
-	}
+      break
+    }
+  }
 
-	return enums
+  return enums
 }
 
 func KMapTreeEnums(mapping any) koala.KEnums[string, any] {
 
-	enums := koala.KEnumsNew[string, any](0)
+  enums := koala.KEnumsNew[string, any](0)
 
-	for _, first := range KMapEnums(mapping) {
+  for _, first := range KMapEnums(mapping) {
 
-		k, v := first.Tuple()
+    k, v := first.Tuple()
 
-		enum := koala.KEnumNew[string, any](k, v)
-		enums = append(enums, enum)
+    enum := koala.KEnumNew[string, any](k, v)
+    enums = append(enums, enum)
 
-		for _, second := range KMapTreeEnums(v) {
+    for _, second := range KMapTreeEnums(v) {
 
-			kk, vv := second.Tuple()
-			enum := koala.KEnumNew[string, any](k+"."+kk, vv)
-			enums = append(enums, enum)
-		}
-	}
+      kk, vv := second.Tuple()
+      enum := koala.KEnumNew[string, any](k+"."+kk, vv)
+      enums = append(enums, enum)
+    }
+  }
 
-	return enums
+  return enums
 }
 
 func KMapKeys(mapping any) []string {
 
-	tokens := make([]string, 0)
+  tokens := make([]string, 0)
 
-	val := pp.KIndirectValueOf(mapping)
+  val := pp.KIndirectValueOf(mapping)
 
-	if val.IsValid() {
+  if val.IsValid() {
 
-		ty := val.Type()
+    ty := val.Type()
 
-		switch ty.Kind() {
-		case reflect.Array, reflect.Slice:
+    switch ty.Kind() {
+    case reflect.Array, reflect.Slice:
 
-			for i := 0; i < val.Len(); i++ {
+      for i := 0; i < val.Len(); i++ {
 
-				k := strconv.Itoa(i)
-				tokens = append(tokens, k)
-			}
+        k := strconv.Itoa(i)
+        tokens = append(tokens, k)
+      }
 
-			break
+      break
 
-		case reflect.Map:
+    case reflect.Map:
 
-			if ty.Key().Kind() == reflect.String {
+      if ty.Key().Kind() == reflect.String {
 
-				mapIter := val.MapRange()
+        mapIter := val.MapRange()
 
-				for mapIter.Next() {
+        for mapIter.Next() {
 
-					k := mapIter.Key().String()
-					tokens = append(tokens, k)
-				}
-			}
+          k := mapIter.Key().String()
+          tokens = append(tokens, k)
+        }
+      }
 
-			break
-		case reflect.Struct:
+      break
+    case reflect.Struct:
 
-			// TODO: not implemented yet
-			var i, n int
-			var vf reflect.Value
-			var tf reflect.StructField
+      // TODO: not implemented yet
+      var i, n int
+      var vf reflect.Value
+      var tf reflect.StructField
 
-			n = val.NumField()
+      n = val.NumField()
 
-			for i = 0; i < n; i++ {
+      for i = 0; i < n; i++ {
 
-				tf, vf = ty.Field(i), val.Field(i)
+        tf, vf = ty.Field(i), val.Field(i)
 
-				if tf.IsExported() {
+        if tf.IsExported() {
 
-					if vf.IsValid() {
+          if vf.IsValid() {
 
-						k := tf.Name
-						tokens = append(tokens, k)
-					}
-				}
-			}
+            k := tf.Name
+            tokens = append(tokens, k)
+          }
+        }
+      }
 
-			break
-		}
-	}
+      break
+    }
+  }
 
-	return tokens
+  return tokens
 }
 
 func KMapTreeKeys(mapping any) []string {
 
-	tokens := make([]string, 0)
+  tokens := make([]string, 0)
 
-	for _, enum := range KMapEnums(mapping) {
+  for _, enum := range KMapEnums(mapping) {
 
-		k, v := enum.Tuple()
+    k, v := enum.Tuple()
 
-		tokens = append(tokens, k)
+    tokens = append(tokens, k)
 
-		for _, kk := range KMapTreeKeys(v) {
+    for _, kk := range KMapTreeKeys(v) {
 
-			tokens = append(tokens, k+"."+kk)
-		}
-	}
+      tokens = append(tokens, k+"."+kk)
+    }
+  }
 
-	return tokens
+  return tokens
 }
 
 func KMapValues(mapping any) []any {
 
-	values := make([]any, 0)
+  values := make([]any, 0)
 
-	val := pp.KIndirectValueOf(mapping)
+  val := pp.KIndirectValueOf(mapping)
 
-	if val.IsValid() {
+  if val.IsValid() {
 
-		ty := val.Type()
+    ty := val.Type()
 
-		switch ty.Kind() {
-		case reflect.Array, reflect.Slice:
+    switch ty.Kind() {
+    case reflect.Array, reflect.Slice:
 
-			for i := 0; i < val.Len(); i++ {
+      for i := 0; i < val.Len(); i++ {
 
-				v := val.Index(i)
-				values = append(values, v)
-			}
+        v := val.Index(i)
+        values = append(values, v)
+      }
 
-			break
+      break
 
-		case reflect.Map:
+    case reflect.Map:
 
-			if ty.Key().Kind() == reflect.String {
+      if ty.Key().Kind() == reflect.String {
 
-				mapIter := val.MapRange()
+        mapIter := val.MapRange()
 
-				for mapIter.Next() {
+        for mapIter.Next() {
 
-					v := mapIter.Value().Interface()
-					values = append(values, v)
-				}
-			}
+          v := mapIter.Value().Interface()
+          values = append(values, v)
+        }
+      }
 
-			break
-		case reflect.Struct:
+      break
+    case reflect.Struct:
 
-			// TODO: not implemented yet
-			var i, n int
-			var vf reflect.Value
-			var tf reflect.StructField
+      // TODO: not implemented yet
+      var i, n int
+      var vf reflect.Value
+      var tf reflect.StructField
 
-			n = val.NumField()
+      n = val.NumField()
 
-			for i = 0; i < n; i++ {
+      for i = 0; i < n; i++ {
 
-				tf, vf = ty.Field(i), val.Field(i)
+        tf, vf = ty.Field(i), val.Field(i)
 
-				if tf.IsExported() {
+        if tf.IsExported() {
 
-					if vf.IsValid() {
+          if vf.IsValid() {
 
-						v := vf.Interface()
-						values = append(values, v)
-					}
-				}
-			}
+            v := vf.Interface()
+            values = append(values, v)
+          }
+        }
+      }
 
-			break
-		}
-	}
+      break
+    }
+  }
 
-	return values
+  return values
 }
 
 // try casting into KMap
 
 func KMapCast(mapping any) KMapImpl {
 
-	// catch from interface or pointer
-	val := pp.KIndirectValueOf(mapping)
+  // catch from interface or pointer
+  val := pp.KIndirectValueOf(mapping)
 
-	// valid value is not null
-	if val.IsValid() {
+  // valid value is not null
+  if val.IsValid() {
 
-		if mm, ok := val.Interface().(KMap); ok {
+    if mm, ok := val.Interface().(KMap); ok {
 
-			return &mm
-		}
-	}
+      return &mm
+    }
+  }
 
-	return nil
+  return nil
 }

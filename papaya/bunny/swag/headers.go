@@ -1,0 +1,80 @@
+package swag
+
+import (
+  "PapayaNet/papaya/koala"
+  m "PapayaNet/papaya/koala/mapping"
+  "PapayaNet/papaya/koala/pp"
+  "reflect"
+)
+
+// once set char be known required or not
+
+func SwagHeaderRequired(h string) (bool, string) {
+
+  n := len(h)
+
+  if koala.KStrHasPrefixChar(h, "?") {
+
+    return false, h[1:]
+  }
+
+  if koala.KStrHasSuffixChar(h, "?") {
+
+    return false, h[:n-1]
+  }
+
+  if koala.KStrHasPrefixChar(h, "!") {
+
+    return true, h[1:]
+  }
+
+  if koala.KStrHasSuffixChar(h, "!") {
+
+    return true, h[:n-1]
+  }
+
+  // default, required
+  return true, h
+}
+
+func SwagHeadersFormatter(mapping any) []m.KMapImpl {
+
+  res := make([]m.KMapImpl, 0)
+  val := pp.KIndirectValueOf(mapping)
+
+  if val.IsValid() {
+
+    ty := val.Type()
+
+    switch ty.Kind() {
+    case reflect.Map:
+
+      if ty == reflect.TypeOf(m.KMap{}) {
+
+        sample := val.Interface()
+        if mm := m.KMapCast(sample); mm != nil {
+
+          for _, enum := range mm.Enums() {
+
+            k, v := enum.Tuple()
+
+            required, name := SwagHeaderRequired(k)
+
+            header := &m.KMap{
+              "in":       "header",
+              "name":     name,
+              "required": required,
+              "schema":   SwagContentFormatter(v),
+            }
+
+            res = append(res, header)
+          }
+        }
+      }
+
+      break
+    }
+  }
+
+  return res
+}

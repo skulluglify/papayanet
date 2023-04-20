@@ -1,0 +1,134 @@
+package swag
+
+import (
+  m "PapayaNet/papaya/koala/mapping"
+  "strings"
+)
+
+// convert expect into openapi format
+
+// boolean
+// number
+// string
+// array
+// object
+// null
+
+func SwagUniversalBoolean() m.KMapImpl {
+
+  return &m.KMap{
+    "type": "boolean",
+  }
+}
+
+func SwagUniversalNumber() m.KMapImpl {
+
+  return &m.KMap{
+    "type": "number",
+  }
+}
+
+func SwagUniversalString() m.KMapImpl {
+
+  return &m.KMap{
+    "type": "string",
+  }
+}
+
+func SwagUniversalNull() m.KMapImpl {
+
+  return &m.KMap{
+    "type": "null",
+  }
+}
+
+func SwagUniversalArray(t m.KMapImpl) m.KMapImpl {
+
+  return &m.KMap{
+    "type":  "array",
+    "items": t,
+  }
+}
+
+func SwagUniversalObject(t m.KMapImpl) m.KMapImpl {
+
+  return &m.KMap{
+    "type":       "object",
+    "properties": t,
+  }
+}
+
+func SwagUniversalType(t string, v m.KMapImpl) m.KMapImpl {
+
+  var cTy m.KMapImpl
+
+  switch t {
+  case "bool", "boolean":
+
+    cTy = SwagUniversalBoolean()
+    break
+
+  case "int", "int8", "int16", "int32", "int64",
+    "uint", "uint8", "uint16", "uint32", "uint64",
+    "float", "float32", "float64",
+    "complex", "complex64", "complex128",
+    "integer", "decimal", "number", "byte": // byte as uint8
+
+    cTy = SwagUniversalNumber()
+    break
+
+  case "str", "text", "string":
+
+    cTy = SwagUniversalString()
+    break
+
+  case "array", "slice": // [] as slice
+
+    if v != nil {
+
+      cTy = SwagUniversalArray(v)
+    }
+    break
+
+  case "map", "object":
+
+    if v != nil {
+
+      cTy = SwagUniversalObject(v)
+    }
+    break
+
+  default:
+
+    cTy = SwagUniversalNull()
+    break
+  }
+
+  return cTy
+}
+
+// array, slice cases
+// can be map, array, or slice again
+
+func SwagUniversalNormType(t string) string {
+
+  // map.+? is map
+  if strings.HasSuffix(t, "map") {
+
+    return "map"
+  }
+
+  // [].+? is slice
+  if strings.HasSuffix(t, "[]") {
+
+    return "slice"
+  }
+
+  // [.+? is array
+  if strings.HasSuffix(t, "[") {
+
+    return "array"
+  }
+
+  return t // as null
+}

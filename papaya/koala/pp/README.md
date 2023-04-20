@@ -13,7 +13,7 @@ temp = a ? b : c
 ```
 
 ```go
-temp := KISAny(a, b, c)
+temp := pp.LAny(a, b, c)
 ```
 
 ```go
@@ -22,5 +22,24 @@ if c {
     temp = b
 } else {
     temp = c
+}
+```
+
+### *Coalescing Operator*
+
+```js
+temp = a ?? b
+```
+
+```go
+temp := pp.QAny(a, b)
+```
+
+```go
+var temp any
+if a != nil {
+    temp = a
+} else {
+    temp = b
 }
 ```

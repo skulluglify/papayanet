@@ -13,44 +13,54 @@ type Say struct {
 
 func UserController(router swag.SwagRouterImpl) {
 
-	router.Get("",
+	router.Get("/:id",
 		&m.KMap{
 			"permit":      true,
 			"description": "Catch All Users",
-			"params": &m.KMap{
-				"q": "string",
-			},
-			"headers": &m.KMap{
-				"auth": "string",
-			},
 			"request": &m.KMap{
-				"application/json": &m.KMap{
-					"description": "OK",
-					"schema": &m.KMap{
-						"name": "string",
-						"info": &m.KMap{
-							"r": []bool{},
-							"metadata": []m.KMap{
-								{
-									"name": "string",
-								},
+				"params": &m.KMap{
+					"#id": "number",
+					"q":   "string",
+				},
+				"headers": &m.KMap{
+					"auth": "string",
+				},
+			},
+			"responses": swag.OkJSON(Say{}),
+		},
+		func(ctx *swag.SwagContext) error {
+
+			ctx.Status(http.StatusOK)
+			return ctx.JSON(Say{200, "OK"})
+		})
+
+	router.Post("/:id",
+		&m.KMap{
+			"permit":      true,
+			"description": "Catch All Users",
+			"request": &m.KMap{
+				"params": &m.KMap{
+					"#id": "number",
+					"q":   "string",
+				},
+				"headers": &m.KMap{
+					"auth": "string",
+				},
+				"body": swag.JSON(&m.KMap{
+					"name": "string",
+					"info": &m.KMap{
+						"r": []bool{},
+						"metadata": []m.KMap{
+							{
+								"name": "string",
 							},
-							"v":   "number",
-							"say": &Say{},
 						},
+						"v":   "number",
+						"say": &Say{},
 					},
-				},
+				}),
 			},
-			"responses": &m.KMap{
-				"200": &m.KMap{
-					"application/json": &m.KMap{
-						"description": "OK",
-						"schema": &m.KMap{
-							"message": "string",
-						},
-					},
-				},
-			},
+			"responses": swag.OkJSON(Say{}),
 		},
 		func(ctx *swag.SwagContext) error {
 

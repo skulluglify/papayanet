@@ -26,7 +26,7 @@ func KMapEncodeJSON(mapping any) string {
 
         v := val.Index(i).Interface()
 
-        temp := pp.KCOStr(koala.KStrRepr(v), KMapEncodeJSON(v))
+        temp := pp.QStr(koala.KStrRepr(v), KMapEncodeJSON(v))
 
         if i+1 < n {
 
@@ -51,7 +51,7 @@ func KMapEncodeJSON(mapping any) string {
 
         k, v := enum.Tuple()
 
-        temp := pp.KCOStr(koala.KStrRepr(v), KMapEncodeJSON(v))
+        temp := pp.QStr(koala.KStrRepr(v), KMapEncodeJSON(v))
 
         token := strconv.Quote(k) + ":" + temp
 

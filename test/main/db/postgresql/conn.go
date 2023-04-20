@@ -7,9 +7,9 @@ import (
 
 func main() {
 
-	conn, err := postgresql.DBConnectionNew(pigeon.InitLoadEnviron)
-	if err == nil {
-		err = conn.Close()
-	}
-	log.Fatal(err)
+  conn, err := postgresql.DBConnectionNew(pigeon.InitLoadEnviron)
+  if err == nil {
+    err = conn.Close()
+  }
+  log.Fatal(err)
 }

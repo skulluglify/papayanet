@@ -1,2 +1,5 @@
 # Swag doc
-## built-in for Echo v4
+## using OpenAPI 3.0
+
+- SwaggerUI compatible
+- Redoc not - compatible

@@ -2,7 +2,7 @@ package pp
 
 // Method for Inline Statement
 
-func KIS[T any](check bool, good T, bad T) T {
+func L[T any](check bool, good T, bad T) T {
 
   if check {
 
@@ -14,9 +14,9 @@ func KIS[T any](check bool, good T, bad T) T {
 
 // auto type defined by name
 
-var KISAny = KIS[any]
-var KISStr = KIS[string]
-var KISBool = KIS[bool]
-var KISByte = KIS[byte]
-var KISInt = KIS[int]
-var KISUint = KIS[uint]
+var LAny = L[any]
+var LStr = L[string]
+var LBool = L[bool]
+var LByte = L[byte]
+var LInt = L[int]
+var LUint = L[uint]

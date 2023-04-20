@@ -1,144 +1,144 @@
 package mapping
 
 import (
-	"PapayaNet/papaya/koala"
-	"PapayaNet/papaya/koala/gen"
+  "PapayaNet/papaya/koala"
+  "PapayaNet/papaya/koala/gen"
 )
 
 // typed KMap with a commonly built-in type
 
 type KMap map[string]any
 type KMapImpl interface {
-	Iterable() gen.KMapIterationImpl
-	Enums() koala.KEnums[string, any]
-	Keys() []string
-	Values() []any
-	Get(name string) any
-	Set(name string, data any) bool
-	Del(name string) bool
-	Branch(name string) any
-	Put(name string, data any) bool
-	JSON() string
-	Tree() KMapTreeImpl
+  Iterable() gen.KMapIterationImpl
+  Enums() koala.KEnums[string, any]
+  Keys() []string
+  Values() []any
+  Get(name string) any
+  Set(name string, data any) bool
+  Del(name string) bool
+  Branch(name string) any
+  Put(name string, data any) bool
+  JSON() string
+  Tree() KMapTreeImpl
 }
 
 type KMapTree KMap
 type KMapTreeImpl interface {
-	Iterable() gen.KMapIterationImpl
-	Enums() koala.KEnums[string, any]
-	Keys() []string
-	Get(name string) any
-	Set(name string, data any) bool
-	Del(name string) bool
-	Branch(name string) any
-	Put(name string, data any) bool
-	JSON() string
-	Inline() KMapImpl
+  Iterable() gen.KMapIterationImpl
+  Enums() koala.KEnums[string, any]
+  Keys() []string
+  Get(name string) any
+  Set(name string, data any) bool
+  Del(name string) bool
+  Branch(name string) any
+  Put(name string, data any) bool
+  JSON() string
+  Inline() KMapImpl
 }
 
 func (m *KMap) Iterable() gen.KMapIterationImpl {
 
-	return gen.KMapIterable(m)
+  return gen.KMapIterable(m)
 }
 
 func (m *KMap) Enums() koala.KEnums[string, any] {
 
-	return KMapEnums(m)
+  return KMapEnums(m)
 }
 
 func (m *KMap) Keys() []string {
 
-	return KMapKeys(m)
+  return KMapKeys(m)
 }
 
 func (m *KMap) Values() []any {
 
-	return KMapValues(m)
+  return KMapValues(m)
 }
 
 func (m *KMap) Get(name string) any {
 
-	return KMapGetValue(name, m)
+  return KMapGetValue(name, m)
 }
 
 func (m *KMap) Set(name string, data any) bool {
 
-	return KMapSetValue(name, data, m)
+  return KMapSetValue(name, data, m)
 }
 
 func (m *KMap) Del(name string) bool {
 
-	return KMapDelValue(name, m)
+  return KMapDelValue(name, m)
 }
 
 func (m *KMap) Branch(name string) any {
 
-	return KMapBranch(name, m)
+  return KMapBranch(name, m)
 }
 
 func (m *KMap) Put(name string, data any) bool {
 
-	return KMapPut(name, data, m)
+  return KMapPut(name, data, m)
 }
 
 func (m *KMap) JSON() string {
 
-	return KMapEncodeJSON(m)
+  return KMapEncodeJSON(m)
 }
 
 func (m *KMap) Tree() KMapTreeImpl {
 
-	tree := KMapTree(*m)
-	return &tree
+  tree := KMapTree(*m)
+  return &tree
 }
 
 func (m *KMapTree) Iterable() gen.KMapIterationImpl {
 
-	return gen.KMapTreeIterable(m)
+  return gen.KMapTreeIterable(m)
 }
 
 func (m *KMapTree) Enums() koala.KEnums[string, any] {
 
-	return KMapTreeEnums(m)
+  return KMapTreeEnums(m)
 }
 
 func (m *KMapTree) Keys() []string {
 
-	return KMapTreeKeys(m)
+  return KMapTreeKeys(m)
 }
 
 func (m *KMapTree) Get(name string) any {
 
-	return KMapGetValue(name, m)
+  return KMapGetValue(name, m)
 }
 
 func (m *KMapTree) Set(name string, data any) bool {
 
-	return KMapSetValue(name, data, m)
+  return KMapSetValue(name, data, m)
 }
 
 func (m *KMapTree) Del(name string) bool {
 
-	return KMapDelValue(name, m)
+  return KMapDelValue(name, m)
 }
 
 func (m *KMapTree) Branch(name string) any {
 
-	return KMapBranch(name, m)
+  return KMapBranch(name, m)
 }
 
 func (m *KMapTree) Put(name string, data any) bool {
 
-	return KMapPut(name, data, m)
+  return KMapPut(name, data, m)
 }
 
 func (m *KMapTree) JSON() string {
 
-	return KMapEncodeJSON(m)
+  return KMapEncodeJSON(m)
 }
 
 func (m *KMapTree) Inline() KMapImpl {
 
-	inline := KMap(*m)
-	return &inline
+  inline := KMap(*m)
+  return &inline
 }

@@ -1,217 +1,223 @@
 package posix
 
 import (
-	"PapayaNet/papaya/koala"
+  "PapayaNet/papaya/koala"
 )
 
 type KPath struct {
-	path string
+  path string
 }
 
 type KPathImpl interface {
-	Init(name string)
-	String() string
-	DirStr() string
-	Dir() KPathImpl
-	BaseStr() string
-	Base() KPathImpl
-	PopStr() string
-	Pop() KPathImpl
-	JoinStr(names ...string) string
-	Join(paths ...KPathImpl) KPathImpl
+  Init(name string)
+  String() string
+  DirStr() string
+  Dir() KPathImpl
+  BaseStr() string
+  Base() KPathImpl
+  PopStr() string
+  Pop() KPathImpl
+  JoinStr(names ...string) string
+  Join(paths ...KPathImpl) KPathImpl
+  Copy() KPathImpl
 }
 
 func KPathNew(name string) KPathImpl {
 
-	p := &KPath{}
-	p.Init(name)
+  p := &KPath{}
+  p.Init(name)
 
-	return p
+  return p
 }
 
 func (p *KPath) Init(name string) {
 
-	// normalize
+  // normalize
 
-	// use `path.Split`
+  // use `path.Split`
 
-	// --- end
+  // --- end
 
-	p.path = name
+  p.path = name
 }
 
 func (p *KPath) String() string {
 
-	return p.path
+  return p.path
 }
 
 func (p *KPath) DirStr() string {
 
-	// prefix
-	var i, j, n int
+  // prefix
+  var i, j, n int
 
-	data := []byte(p.path)
+  data := []byte(p.path)
 
-	n = len(data)
+  n = len(data)
 
-	for i = 0; i < n; i++ {
+  for i = 0; i < n; i++ {
 
-		j = n - i - 1
+    j = n - i - 1
 
-		// \/ is 47
-		if data[j] != 47 {
+    // \/ is 47
+    if data[j] != 47 {
 
-			continue
-		}
+      continue
+    }
 
-		break
-	}
+    break
+  }
 
-	return string(data[:j])
+  return string(data[:j])
 }
 
 func (p *KPath) Dir() KPathImpl {
 
-	return KPathNew(p.DirStr())
+  return KPathNew(p.DirStr())
 }
 
 func (p *KPath) BaseStr() string {
 
-	// suffix
-	var i, j, n int
-	var suffix string
+  // suffix
+  var i, j, n int
+  var suffix string
 
-	data := []byte(p.path)
+  data := []byte(p.path)
 
-	n = len(data)
+  n = len(data)
 
-	for i = 0; i < n; i++ {
+  for i = 0; i < n; i++ {
 
-		j = n - i - 1
+    j = n - i - 1
 
-		// waste 1 time for iteration
-		// but that look good for me
+    // waste 1 time for iteration
+    // but that look good for me
 
-		// \/ is 47
-		if data[j] != 47 {
+    // \/ is 47
+    if data[j] != 47 {
 
-			suffix = string(data[j]) + suffix
-			continue
-		}
+      suffix = string(data[j]) + suffix
+      continue
+    }
 
-		break
-	}
+    break
+  }
 
-	return suffix
+  return suffix
 }
 
 func (p *KPath) Base() KPathImpl {
 
-	return KPathNew(p.BaseStr())
+  return KPathNew(p.BaseStr())
 }
 
 func (p *KPath) PopStr() string {
 
-	// prefix and suffix
-	var i, j, n int
-	var suffix string
+  // prefix and suffix
+  var i, j, n int
+  var suffix string
 
-	data := []byte(p.path)
+  data := []byte(p.path)
 
-	n = len(data)
+  n = len(data)
 
-	for i = 0; i < n; i++ {
+  for i = 0; i < n; i++ {
 
-		j = n - i - 1
+    j = n - i - 1
 
-		// \/ is 47
-		if data[j] != 47 {
+    // \/ is 47
+    if data[j] != 47 {
 
-			suffix = string(data[j]) + suffix
-			continue
-		}
+      suffix = string(data[j]) + suffix
+      continue
+    }
 
-		break
-	}
+    break
+  }
 
-	// keep prefix in current session
-	p.path = string(data[:j])
+  // keep prefix in current session
+  p.path = string(data[:j])
 
-	// return
-	return suffix
+  // return
+  return suffix
 }
 
 func (p *KPath) Pop() KPathImpl {
 
-	return KPathNew(p.PopStr())
+  return KPathNew(p.PopStr())
 }
 
 func (p *KPath) JoinStr(names ...string) string {
 
-	var i, n int
-	var name string
+  var i, n int
+  var name string
 
-	n = len(names)
+  n = len(names)
 
-	for i = 0; i < n; i++ {
+  for i = 0; i < n; i++ {
 
-		name = names[i]
+    name = names[i]
 
-		// prefix `name`
-		if koala.KStrHasPrefixChar(name, "/") {
+    // prefix `name`
+    if koala.KStrHasPrefixChar(name, "/") {
 
-			name = name[1:]
-		}
+      name = name[1:]
+    }
 
-		// suffix `name`
-		if koala.KStrHasSuffixChar(name, "/") {
+    // suffix `name`
+    if koala.KStrHasSuffixChar(name, "/") {
 
-			name = name[:len(name)-1]
-		}
+      name = name[:len(name)-1]
+    }
 
-		// suffix p.path
-		if koala.KStrHasSuffixChar(p.path, "/") {
+    // suffix p.path
+    if koala.KStrHasSuffixChar(p.path, "/") {
 
-			p.path = p.path[:len(p.path)-1]
-		}
+      p.path = p.path[:len(p.path)-1]
+    }
 
-		p.path += "/" + name
-	}
+    p.path += "/" + name
+  }
 
-	return p.path
+  return p.path
 }
 
 func (p *KPath) Join(paths ...KPathImpl) KPathImpl {
 
-	var i, n int
-	var name string
+  var i, n int
+  var name string
 
-	n = len(paths)
+  n = len(paths)
 
-	for i = 0; i < n; i++ {
+  for i = 0; i < n; i++ {
 
-		name = paths[i].String()
+    name = paths[i].String()
 
-		// prefix `name`
-		if koala.KStrHasPrefixChar(name, "/") {
+    // prefix `name`
+    if koala.KStrHasPrefixChar(name, "/") {
 
-			name = name[1:]
-		}
+      name = name[1:]
+    }
 
-		// suffix `name`
-		if koala.KStrHasSuffixChar(name, "/") {
+    // suffix `name`
+    if koala.KStrHasSuffixChar(name, "/") {
 
-			name = name[:len(name)-1]
-		}
+      name = name[:len(name)-1]
+    }
 
-		// suffix p.path
-		if koala.KStrHasSuffixChar(p.path, "/") {
+    // suffix p.path
+    if koala.KStrHasSuffixChar(p.path, "/") {
 
-			p.path = p.path[:len(p.path)-1]
-		}
+      p.path = p.path[:len(p.path)-1]
+    }
 
-		p.path += "/" + name
-	}
+    p.path += "/" + name
+  }
 
-	return KPathNew(p.path)
+  return KPathNew(p.path)
+}
+
+func (p *KPath) Copy() KPathImpl {
+
+  return KPathNew(p.path)
 }

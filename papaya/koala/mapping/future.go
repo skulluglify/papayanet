@@ -1,10 +1,10 @@
 package mapping
 
 import (
-	"PapayaNet/papaya/koala/pp"
-	"reflect"
-	"strconv"
-	"strings"
+  "PapayaNet/papaya/koala/pp"
+  "reflect"
+  "strconv"
+  "strings"
 )
 
 // TODO: Branch, and Put, not stable yet
@@ -12,213 +12,213 @@ import (
 
 func KMapBranch(name string, mapping any) any {
 
-	val := reflect.ValueOf(mapping)
-	tokens := strings.Split(name, ".")
+  val := reflect.ValueOf(mapping)
+  tokens := strings.Split(name, ".")
 
-	if val.IsValid() {
+  if val.IsValid() {
 
-		var currKey, prevKey string
+    var currKey, prevKey string
 
-		for i, k := range tokens {
+    for i, k := range tokens {
 
-			// new `val` is invalid
-			if !val.IsValid() {
+      // new `val` is invalid
+      if !val.IsValid() {
 
-				break
-			}
+        break
+      }
 
-			if i == 0 {
+      if i == 0 {
 
-				currKey = k
+        currKey = k
 
-			} else {
+      } else {
 
-				currKey += "." + k
-			}
+        currKey += "." + k
+      }
 
-			val = pp.KIndirectValueOf(val)
-			ty := val.Type()
+      val = pp.KIndirectValueOf(val)
+      ty := val.Type()
 
-			// search
+      // search
 
-			m := KMapGetValue(k, val.Interface())
+      m := KMapGetValue(k, val.Interface())
 
-			// replace
+      // replace
 
-			if m != nil {
+      if m != nil {
 
-				val = reflect.ValueOf(m)
-				prevKey = currKey
-				continue
-			}
+        val = reflect.ValueOf(m)
+        prevKey = currKey
+        continue
+      }
 
-			// some good point for a set array like slicing, or append
-			// create & set on previous existing
-			//if prevKey != "" {
-			//
-			//	mm := &KMap{}
-			//	if KMapSetValue(prevKey, mm, val.Interface()) {
-			//
-			//		val = reflect.ValueOf(mm)
-			//		prevKey = currKey
-			//		continue
-			//	}
-			//
-			//}
+      // some good point for a set array like slicing, or append
+      // create & set on previous existing
+      //if prevKey != "" {
+      //
+      //  mm := &KMap{}
+      //  if KMapSetValue(prevKey, mm, val.Interface()) {
+      //
+      //    val = reflect.ValueOf(mm)
+      //    prevKey = currKey
+      //    continue
+      //  }
+      //
+      //}
 
-			// var `k` may KMap or List, whatever, not implemented yet
+      // var `k` may KMap or List, whatever, not implemented yet
 
-			// hacked, put new assign in a map object
-			switch ty.Kind() {
-			case reflect.Array, reflect.Slice:
+      // hacked, put new assign in a map object
+      switch ty.Kind() {
+      case reflect.Array, reflect.Slice:
 
-				if data := KMapGetValue(prevKey, mapping); data != nil {
+        if data := KMapGetValue(prevKey, mapping); data != nil {
 
-					v := pp.KIndirectValueOf(data)
+          v := pp.KIndirectValueOf(data)
 
-					if v.IsValid() {
+          if v.IsValid() {
 
-						switch v.Type().Kind() {
-						case reflect.Array, reflect.Slice:
+            switch v.Type().Kind() {
+            case reflect.Array, reflect.Slice:
 
-							if index, err := strconv.Atoi(k); err == nil {
+              if index, err := strconv.Atoi(k); err == nil {
 
-								n := v.Len()
+                n := v.Len()
 
-								mm := &KMap{}
-								if index < n {
+                mm := &KMap{}
+                if index < n {
 
-									v.Index(index).Set(reflect.ValueOf(mm))
-									break
-								}
+                  v.Index(index).Set(reflect.ValueOf(mm))
+                  break
+                }
 
-								// append
-								s := reflect.AppendSlice(v, reflect.ValueOf(mm))
+                // append
+                s := reflect.AppendSlice(v, reflect.ValueOf(mm))
 
-								// write
-								KMapSetValue(prevKey, s.Interface(), mapping)
+                // write
+                KMapSetValue(prevKey, s.Interface(), mapping)
 
-								// try
-								//if o, ok := data.([]any); ok {
-								//
-								//	o = append(o, mm)
-								//	KMapSetValue(prevKey, o, mapping)
-								//}
-							}
+                // try
+                //if o, ok := data.([]any); ok {
+                //
+                //  o = append(o, mm)
+                //  KMapSetValue(prevKey, o, mapping)
+                //}
+              }
 
-							break
-						}
-					}
+              break
+            }
+          }
 
-				}
+        }
 
-				// TODO: testing it
-				panic("not testing yet")
+        // TODO: testing it
+        panic("not testing yet")
 
-			case reflect.Map:
-				if ty.Key().Kind() == reflect.String {
+      case reflect.Map:
+        if ty.Key().Kind() == reflect.String {
 
-					if ty == reflect.TypeOf(KMap{}) {
+          if ty == reflect.TypeOf(KMap{}) {
 
-						mm := &KMap{}
-						v := val.Interface()
-						o := map[string]any(v.(KMap))
-						o[k] = mm
+            mm := &KMap{}
+            v := val.Interface()
+            o := map[string]any(v.(KMap))
+            o[k] = mm
 
-						val = reflect.ValueOf(mm)
-						prevKey = currKey
-						continue
-					}
-				}
+            val = reflect.ValueOf(mm)
+            prevKey = currKey
+            continue
+          }
+        }
 
-				break
+        break
 
-				// skipping `struct`
+        // skipping `struct`
 
-			default: // no assignable
+      default: // no assignable
 
-				return nil
-			}
+        return nil
+      }
 
-			prevKey = currKey
-		}
+      prevKey = currKey
+    }
 
-		// void keep
-		func(_ string) {}(prevKey)
+    // void keep
+    func(_ string) {}(prevKey)
 
-		// passing, that right or not, on mystery
-		return val
-	}
+    // passing, that right or not, on mystery
+    return val
+  }
 
-	return nil
+  return nil
 }
 
 func KMapPut(name string, data any, mapping any) bool {
 
-	val := pp.KIndirectValueOf(mapping)
+  val := pp.KIndirectValueOf(mapping)
 
-	if val.IsValid() {
+  if val.IsValid() {
 
-		ty := val.Type()
+    ty := val.Type()
 
-		if !KMapSetValue(name, data, mapping) {
+    if !KMapSetValue(name, data, mapping) {
 
-			var prefix, suffix string
-			tokens := strings.Split(name, ".")
-			n := len(tokens)
+      var prefix, suffix string
+      tokens := strings.Split(name, ".")
+      n := len(tokens)
 
-			if n > 0 {
+      if n > 0 {
 
-				if n > 1 {
+        if n > 1 {
 
-					prefix = strings.Join(tokens[:n-1], ".")
-					suffix = tokens[n-1]
+          prefix = strings.Join(tokens[:n-1], ".")
+          suffix = tokens[n-1]
 
-				} else {
+        } else {
 
-					prefix = tokens[0]
-				}
-			}
+          prefix = tokens[0]
+        }
+      }
 
-			if prefix != "" {
+      if prefix != "" {
 
-				if suffix != "" {
+        if suffix != "" {
 
-					// check and build new branch
-					if m := KMapBranch(prefix, mapping); m != nil {
+          // check and build new branch
+          if m := KMapBranch(prefix, mapping); m != nil {
 
-						return KMapPut(suffix, data, m)
-					}
+            return KMapPut(suffix, data, m)
+          }
 
-					return false
-				}
+          return false
+        }
 
-				// hacked, put new assign in a map object
-				switch ty.Kind() {
-				case reflect.Array, reflect.Slice:
+        // hacked, put new assign in a map object
+        switch ty.Kind() {
+        case reflect.Array, reflect.Slice:
 
-					break
+          break
 
-					// not implemented yet
+          // not implemented yet
 
-				case reflect.Map:
+        case reflect.Map:
 
-					if ty.Key().Kind() == reflect.String {
+          if ty.Key().Kind() == reflect.String {
 
-						if ty == reflect.TypeOf(KMap{}) {
+            if ty == reflect.TypeOf(KMap{}) {
 
-							v := val.Interface()
-							mm := map[string]any(v.(KMap))
-							mm[prefix] = data
-							return true
-						}
-					}
-				}
-			}
+              v := val.Interface()
+              mm := map[string]any(v.(KMap))
+              mm[prefix] = data
+              return true
+            }
+          }
+        }
+      }
 
-			return false
-		}
-	}
+      return false
+    }
+  }
 
-	return true
+  return true
 }

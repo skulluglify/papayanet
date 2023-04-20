@@ -11,7 +11,6 @@ func main() {
 	fmt.Println("Papaya Net v1.0 testing ...")
 
 	pn := papaya.NetNew()
-	pn.Init()
 
 	if err := app.App(pn); err != nil {
 

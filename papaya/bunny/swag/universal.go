@@ -2,6 +2,8 @@ package swag
 
 import (
   m "PapayaNet/papaya/koala/mapping"
+  "PapayaNet/papaya/koala/pp"
+  "reflect"
   "strings"
 )
 
@@ -58,6 +60,42 @@ func SwagUniversalObject(t m.KMapImpl) m.KMapImpl {
   }
 }
 
+func SwagUniversalReType(v any) string {
+
+  val := pp.KIndirectValueOf(v)
+
+  if val.IsValid() {
+
+    ty := val.Type()
+
+    switch ty.Kind() {
+
+    case reflect.Bool:
+      return "bool"
+
+    case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+      reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+      reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
+
+      return "number"
+
+    case reflect.Array, reflect.Slice:
+
+      return "array"
+
+    case reflect.Map, reflect.Struct:
+
+      return "object"
+
+    case reflect.String:
+      
+      return pp.QStr(m.KValueToString(SwagUniversalType(val.String(), nil).Get("type")), "string")
+    }
+  }
+
+  return "null"
+}
+
 func SwagUniversalType(t string, v m.KMapImpl) m.KMapImpl {
 
   var cTy m.KMapImpl
@@ -100,6 +138,7 @@ func SwagUniversalType(t string, v m.KMapImpl) m.KMapImpl {
 
   default:
 
+    //case "nil", "null":
     cTy = SwagUniversalNull()
     break
   }

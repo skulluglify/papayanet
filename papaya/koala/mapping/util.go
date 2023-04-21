@@ -49,6 +49,7 @@ func KMapEnums(mapping any) koala.KEnums[string, any] {
       // TODO: not implemented yet
       var i, n int
       var vf reflect.Value
+      var tags reflect.StructTag
       var tf reflect.StructField
 
       n = val.NumField()
@@ -56,13 +57,15 @@ func KMapEnums(mapping any) koala.KEnums[string, any] {
       for i = 0; i < n; i++ {
 
         tf, vf = ty.Field(i), val.Field(i)
+        tags = tf.Tag
 
         if tf.IsExported() {
 
           if vf.IsValid() {
 
             k, v := tf.Name, vf.Interface()
-            enum := koala.KEnumNew[string, any](k, v)
+            t := pp.QStr(tags.Get("tag"), tags.Get("json"))
+            enum := koala.KEnumNew[string, any](pp.QStr(t, k), v)
             enums = append(enums, enum)
           }
         }
@@ -97,7 +100,7 @@ func KMapTreeEnums(mapping any) koala.KEnums[string, any] {
   return enums
 }
 
-func KMapKeys(mapping any) []string {
+func KMapKeys(mapping any) Keys {
 
   tokens := make([]string, 0)
 
@@ -137,6 +140,7 @@ func KMapKeys(mapping any) []string {
       // TODO: not implemented yet
       var i, n int
       var vf reflect.Value
+      var tags reflect.StructTag
       var tf reflect.StructField
 
       n = val.NumField()
@@ -144,13 +148,15 @@ func KMapKeys(mapping any) []string {
       for i = 0; i < n; i++ {
 
         tf, vf = ty.Field(i), val.Field(i)
+        tags = tf.Tag
 
         if tf.IsExported() {
 
           if vf.IsValid() {
 
             k := tf.Name
-            tokens = append(tokens, k)
+            t := pp.QStr(tags.Get("tag"), tags.Get("json"))
+            tokens = append(tokens, pp.QStr(t, k))
           }
         }
       }

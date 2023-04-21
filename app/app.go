@@ -4,6 +4,7 @@ import (
 	"PapayaNet/app/controllers"
 	"PapayaNet/papaya"
 	"PapayaNet/papaya/bunny/swag"
+	m "PapayaNet/papaya/koala/mapping"
 )
 
 func App(pn papaya.NetImpl) error {
@@ -12,6 +13,17 @@ func App(pn papaya.NetImpl) error {
 		Title:       "Example API",
 		Version:     "1.0.0",
 		Description: "Example API for documentation",
+	})
+
+	swagger.AddTask("request.task", func(ctx *swag.SwagContext) error {
+
+		ctx.Closed = true
+
+		pn.Logger().Log("need request.task", ctx.Event())
+
+		return ctx.JSON(m.KMap{
+			"message": "task running",
+		})
 	})
 
 	mainGroup := swagger.Group("/api/v1", "Schema")
@@ -23,8 +35,5 @@ func App(pn papaya.NetImpl) error {
 		return err
 	}
 
-	swagger.Swagger()
-
 	return pn.Serve("127.0.0.1", 8000)
-	// return nil
 }

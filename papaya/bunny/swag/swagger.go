@@ -5,7 +5,8 @@ import (
   "PapayaNet/papaya/koala/collection"
   m "PapayaNet/papaya/koala/mapping"
   "PapayaNet/papaya/koala/tools/posix"
-  "strconv"
+  "fmt"
+  "net/http"
   "strings"
 
   "github.com/gofiber/fiber/v2"
@@ -20,13 +21,15 @@ const (
 
 type Swag struct {
   *fiber.App
+  SwagTasksQueueImpl
   version  koala.KVersionImpl
   info     *SwagInfo
   tag      string
   tags     []m.KMapImpl
   paths    m.KMapImpl
   root     posix.KPathImpl
-  composes collection.KListImpl[SwagComposeImpl] // can be push item without passing re-value
+  composes collection.KListImpl[SwagComposeImpl]
+  renderer SwagRendererImpl
 }
 
 type SwagImpl interface {
@@ -36,8 +39,8 @@ type SwagImpl interface {
   Router() SwagRouterImpl                      // alias as a Group('/')
   AddTag(tag string)
   AddPath(path string, method string, expect *SwagExpect)
+  AddTask(name string, handler SwagRouteHandler)
   Start() error
-  Swagger()
 }
 
 func MakeSwag(app *fiber.App, info *SwagInfo) SwagImpl {
@@ -51,6 +54,8 @@ func MakeSwag(app *fiber.App, info *SwagInfo) SwagImpl {
 func (swag *Swag) Init(app *fiber.App, info *SwagInfo) {
 
   swag.App = app
+  swag.SwagTasksQueueImpl = SwagTasksQueueNew()
+
   swag.info = info
 
   swag.version = koala.KVersionNew(
@@ -66,6 +71,8 @@ func (swag *Swag) Init(app *fiber.App, info *SwagInfo) {
 
   swag.root = posix.KPathNew("/")
   swag.composes = MakeSwagComposes()
+
+  swag.renderer = SwagRendererNew("/api/v3/openapi.json", app)
 }
 
 func (swag *Swag) Version() koala.KVersionImpl {
@@ -88,34 +95,6 @@ func (swag *Swag) Router() SwagRouterImpl {
   group.Bind(swag.composes)
 
   return group.Router()
-}
-
-func (swag *Swag) Swagger() {
-
-  data := &m.KMap{
-    "openapi": swag.version.String(),
-    "info": &m.KMap{
-      "title":       swag.info.Title,
-      "description": swag.info.Description,
-      "version":     swag.info.Version,
-    },
-    "tags":  swag.tags,
-    "paths": swag.paths,
-  }
-
-  // cache on temporary
-  temp := []byte(data.JSON())
-
-  swag.Get("/api/v3/openapi.json", func(ctx *fiber.Ctx) error {
-
-    ctx.Set("Content-Type", "application/json")
-    ctx.Set("Content-Length", strconv.Itoa(len(temp)))
-
-    return ctx.Send(temp)
-  })
-
-  swag.Get("/swag", SwagTemplateHandler)
-  swag.Get("/redoc", SwagRedocTemplateHandler)
 }
 
 func (swag *Swag) AddTag(tag string) {
@@ -169,14 +148,20 @@ func (swag *Swag) AddPath(path string, method string, expect *SwagExpect) {
   }
 }
 
+func (swag *Swag) AddTask(name string, handler SwagRouteHandler) {
+
+  swag.SwagTasksQueueImpl.AddTask(name, handler)
+}
+
 func (swag *Swag) Start() error {
 
   if err := swag.composes.ForEach(func(i uint, value SwagComposeImpl) error {
 
     method := value.Method()
+    exp := value.Expect()
     tag := value.Tag()
     path := value.Path()
-    expect := SwagExpectEvaluation(value.Expect(), []string{tag})
+    expect := SwagExpectEvaluation(exp, []string{tag})
 
     authToken := expect.AuthToken
     requestValidation := expect.RequestValidation
@@ -188,9 +173,35 @@ func (swag *Swag) Start() error {
       // auth token
       // request validation
 
-      return value.Handler(&SwagContext{
-        Ctx: ctx,
-      })
+      if requestValidation {
+
+        validator := SwagRequestValidatorNew(exp, ctx)
+        req, err := validator.Validation()
+
+        if err != nil {
+
+          return ctx.Status(http.StatusBadGateway).JSON(&m.KMap{
+            "message": err.Error(),
+            "error":   true,
+          })
+        }
+
+        fmt.Println(req.Query)
+      }
+
+      stopped, err := swag.SwagTasksQueueImpl.Start(exp, ctx)
+
+      if err != nil {
+
+        return err
+      }
+
+      if stopped {
+
+        return nil
+      }
+
+      return value.Handler(MakeSwagContext(ctx, false))
     })
 
     swag.AddTag(tag)
@@ -203,5 +214,5 @@ func (swag *Swag) Start() error {
     return err
   }
 
-  return nil
+  return swag.renderer.Render(swag.version, swag.info, swag.tags, swag.paths)
 }

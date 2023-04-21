@@ -1,3 +1,3 @@
 package swag
 
-type SwagHandler func(ctx *SwagContext) error
+type SwagRouteHandler func(ctx *SwagContext) error

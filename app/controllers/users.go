@@ -18,9 +18,10 @@ func UserController(router swag.SwagRouterImpl) {
 			"permit":      true,
 			"description": "Catch All Users",
 			"request": &m.KMap{
+				"task": true,
 				"params": &m.KMap{
 					"#id": "number",
-					"q":   "string",
+					"q":   "number",
 				},
 				"headers": &m.KMap{
 					"auth": "string",

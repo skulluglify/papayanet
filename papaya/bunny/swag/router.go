@@ -16,14 +16,14 @@ type SwagRouter struct {
 type SwagRouterImpl interface {
   Init(group SwagGroupImpl)
   Group(path string, tag string) SwagGroupImpl
-  Get(path string, expect *mapping.KMap, handler SwagHandler)
-  Head(path string, expect *mapping.KMap, handler SwagHandler)
-  Post(path string, expect *mapping.KMap, handler SwagHandler)
-  Put(path string, expect *mapping.KMap, handler SwagHandler)
-  Delete(path string, expect *mapping.KMap, handler SwagHandler)
-  Connect(path string, expect *mapping.KMap, handler SwagHandler)
-  Options(path string, expect *mapping.KMap, handler SwagHandler)
-  Trace(path string, expect *mapping.KMap, handler SwagHandler)
+  Get(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Head(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Post(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Put(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Delete(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Connect(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Options(path string, expect *mapping.KMap, handler SwagRouteHandler)
+  Trace(path string, expect *mapping.KMap, handler SwagRouteHandler)
   Bind(composes collection.KListImpl[SwagComposeImpl])
   Composes() collection.KListImpl[SwagComposeImpl]
 }
@@ -52,7 +52,7 @@ func (router *SwagRouter) Group(path string, tag string) SwagGroupImpl {
   return group
 }
 
-func (router *SwagRouter) Get(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Get(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -63,7 +63,7 @@ func (router *SwagRouter) Get(path string, expect *mapping.KMap, handler SwagHan
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Head(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Head(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -74,7 +74,7 @@ func (router *SwagRouter) Head(path string, expect *mapping.KMap, handler SwagHa
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Post(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Post(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -85,7 +85,7 @@ func (router *SwagRouter) Post(path string, expect *mapping.KMap, handler SwagHa
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Put(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Put(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -96,7 +96,7 @@ func (router *SwagRouter) Put(path string, expect *mapping.KMap, handler SwagHan
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Delete(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Delete(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -107,7 +107,7 @@ func (router *SwagRouter) Delete(path string, expect *mapping.KMap, handler Swag
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Connect(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Connect(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -118,7 +118,7 @@ func (router *SwagRouter) Connect(path string, expect *mapping.KMap, handler Swa
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Options(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Options(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {
@@ -129,7 +129,7 @@ func (router *SwagRouter) Options(path string, expect *mapping.KMap, handler Swa
   router.composes.Push(compose)
 }
 
-func (router *SwagRouter) Trace(path string, expect *mapping.KMap, handler SwagHandler) {
+func (router *SwagRouter) Trace(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
   if path != "" {

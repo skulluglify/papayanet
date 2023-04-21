@@ -4,21 +4,40 @@ import "github.com/gofiber/fiber/v2"
 
 type SwagContext struct {
   *fiber.Ctx
+  event  bool
+  data   any
+  Closed bool
 }
 
-func MakeSwagContext(ctx *fiber.Ctx) *SwagContext {
+func MakeSwagContext(ctx *fiber.Ctx, event bool) *SwagContext {
 
   return &SwagContext{
-    Ctx: ctx,
+    Ctx:   ctx,
+    event: event,
+    data:  nil,
   }
 }
 
-func (c *SwagContext) Send(body []byte) error {
+func MakeSwagContextWithEvent(ctx *fiber.Ctx, data any) *SwagContext {
 
-  return c.Ctx.Send(body)
+  return &SwagContext{
+    Ctx:   ctx,
+    event: true,
+    data:  data,
+  }
 }
 
-func (c *SwagContext) SendFile(file string, compress ...bool) error {
+func (c *SwagContext) Event() any {
 
-  return c.Ctx.SendFile(file, compress...)
+  if c.event {
+
+    if c.data == nil {
+
+      return true
+    }
+
+    return c.data
+  }
+
+  return nil
 }

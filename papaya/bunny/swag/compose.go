@@ -13,11 +13,11 @@ type SwagCompose struct {
   tag     string
   path    posix.KPathImpl
   expect  mapping.KMapImpl
-  handler SwagHandler
+  handler SwagRouteHandler
 }
 
 type SwagComposeImpl interface {
-  Init(method string, tag string, path posix.KPathImpl, expect mapping.KMapImpl, handler SwagHandler)
+  Init(method string, tag string, path posix.KPathImpl, expect mapping.KMapImpl, handler SwagRouteHandler)
   Method() string
   Tag() string
   Path() string
@@ -30,7 +30,7 @@ func MakeSwagComposes() collection.KListImpl[SwagComposeImpl] {
   return collection.KListNew[SwagComposeImpl]()
 }
 
-func MakeSwagCompose(method string, tag string, path posix.KPathImpl, expect mapping.KMapImpl, handler SwagHandler) SwagComposeImpl {
+func MakeSwagCompose(method string, tag string, path posix.KPathImpl, expect mapping.KMapImpl, handler SwagRouteHandler) SwagComposeImpl {
 
   compose := &SwagCompose{}
   compose.Init(method, tag, path, expect, handler)
@@ -38,7 +38,7 @@ func MakeSwagCompose(method string, tag string, path posix.KPathImpl, expect map
   return compose
 }
 
-func (c *SwagCompose) Init(method string, tag string, path posix.KPathImpl, expect mapping.KMapImpl, handler SwagHandler) {
+func (c *SwagCompose) Init(method string, tag string, path posix.KPathImpl, expect mapping.KMapImpl, handler SwagRouteHandler) {
 
   c.method = method
   c.tag = tag

@@ -11,7 +11,7 @@ type KMap map[string]any
 type KMapImpl interface {
   Iterable() gen.KMapIterationImpl
   Enums() koala.KEnums[string, any]
-  Keys() []string
+  Keys() Keys
   Values() []any
   Get(name string) any
   Set(name string, data any) bool
@@ -26,7 +26,7 @@ type KMapTree KMap
 type KMapTreeImpl interface {
   Iterable() gen.KMapIterationImpl
   Enums() koala.KEnums[string, any]
-  Keys() []string
+  Keys() Keys
   Get(name string) any
   Set(name string, data any) bool
   Del(name string) bool
@@ -46,7 +46,7 @@ func (m *KMap) Enums() koala.KEnums[string, any] {
   return KMapEnums(m)
 }
 
-func (m *KMap) Keys() []string {
+func (m *KMap) Keys() Keys {
 
   return KMapKeys(m)
 }
@@ -102,7 +102,7 @@ func (m *KMapTree) Enums() koala.KEnums[string, any] {
   return KMapTreeEnums(m)
 }
 
-func (m *KMapTree) Keys() []string {
+func (m *KMapTree) Keys() Keys {
 
   return KMapTreeKeys(m)
 }

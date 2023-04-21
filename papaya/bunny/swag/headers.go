@@ -60,12 +60,20 @@ func SwagHeadersFormatter(mapping any) []m.KMapImpl {
 
             required, name := SwagHeaderRequired(k)
 
-            header := &m.KMap{
+            var header m.KMapImpl
+
+            schema := SwagContentFormatter(v)
+
+            header = &m.KMap{
               "in":       "header",
               "name":     name,
               "required": required,
-              "schema":   SwagContentFormatter(v),
+              "schema":   schema,
+              "type":     "object",
             }
+
+            // redoc requirement, specific compatible
+            //header.Put("type", schema.Get("type"))
 
             res = append(res, header)
           }

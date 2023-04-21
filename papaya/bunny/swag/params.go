@@ -88,24 +88,25 @@ func SwagParamsFormatter(mapping any) []m.KMapImpl {
 
             k, v := enum.Tuple()
 
-            required, token := SwagHeaderRequired(k)
+            required, token := SwagParamRequired(k)
             isPath, name := SwagParamPathValid(token)
 
-            var header m.KMapImpl
+            var params m.KMapImpl
 
             schema := SwagContentFormatter(v)
 
-            header = &m.KMap{
+            params = &m.KMap{
               "in":       pp.LStr(isPath, "path", "query"),
               "name":     name,
               "required": required,
               "schema":   schema,
+              "type":     "object",
             }
 
-            // redoc requirment, specific compatible
-            header.Put("type", schema.Get("type"))
+            // redoc requirement, specific compatible
+            //params.Put("type", schema.Get("type"))
 
-            res = append(res, header)
+            res = append(res, params)
           }
         }
       }

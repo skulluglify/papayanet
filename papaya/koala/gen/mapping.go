@@ -94,9 +94,9 @@ func KMapIterable(mapping any) KMapIterationImpl {
       var k, n int
       var vf reflect.Value
       var tf reflect.StructField
-      //var tags reflect.StructTag
-      //var sName, sTag string
-      var sName string
+      var tags reflect.StructTag
+      var sName, sTag string
+      //var sName string
       var sValue any
 
       k, n = 0, ty.NumField()
@@ -122,7 +122,7 @@ func KMapIterable(mapping any) KMapIterationImpl {
                 }
 
                 tf, vf = ty.Field(k), val.Field(k)
-                //tags = tf.Tag
+                tags = tf.Tag
 
                 if tf.IsExported() {
 
@@ -130,9 +130,9 @@ func KMapIterable(mapping any) KMapIterationImpl {
 
                     sName = tf.Name
                     sValue = vf.Interface()
-                    //sTag = tags.Get("tag")
+                    sTag = pp.QStr(tags.Get("tag"), tags.Get("json"))
 
-                    v.SetValues(sName, sValue)
+                    v.SetValues(pp.QStr(sTag, sName), sValue)
                     k += 1
                     break
                   }

@@ -71,7 +71,7 @@ func SwagUniversalReType(v any) string {
     switch ty.Kind() {
 
     case reflect.Bool:
-      return "bool"
+      return "boolean"
 
     case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
       reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
@@ -88,7 +88,7 @@ func SwagUniversalReType(v any) string {
       return "object"
 
     case reflect.String:
-      
+
       return pp.QStr(m.KValueToString(SwagUniversalType(val.String(), nil).Get("type")), "string")
     }
   }

@@ -5,7 +5,6 @@ import (
   "PapayaNet/papaya/koala/collection"
   m "PapayaNet/papaya/koala/mapping"
   "PapayaNet/papaya/koala/tools/posix"
-  "fmt"
   "net/http"
   "strings"
 
@@ -39,7 +38,7 @@ type SwagImpl interface {
   Router() SwagRouterImpl                      // alias as a Group('/')
   AddTag(tag string)
   AddPath(path string, method string, expect *SwagExpect)
-  AddTask(name string, handler SwagRouteHandler)
+  AddTask(task *SwagTask)
   Start() error
 }
 
@@ -148,9 +147,9 @@ func (swag *Swag) AddPath(path string, method string, expect *SwagExpect) {
   }
 }
 
-func (swag *Swag) AddTask(name string, handler SwagRouteHandler) {
+func (swag *Swag) AddTask(task *SwagTask) {
 
-  swag.SwagTasksQueueImpl.AddTask(name, handler)
+  swag.SwagTasksQueueImpl.AddTask(task)
 }
 
 func (swag *Swag) Start() error {
@@ -163,10 +162,7 @@ func (swag *Swag) Start() error {
     path := value.Path()
     expect := SwagExpectEvaluation(exp, []string{tag})
 
-    authToken := expect.AuthToken
     requestValidation := expect.RequestValidation
-
-    println(authToken, requestValidation)
 
     swag.Add(method, path, func(ctx *fiber.Ctx) error {
 
@@ -186,18 +182,13 @@ func (swag *Swag) Start() error {
           })
         }
 
-        fmt.Println(req.Query)
+        func(_ any) {}(req)
+        //fmt.Println(req.Query)
       }
 
-      stopped, err := swag.SwagTasksQueueImpl.Start(exp, ctx)
+      if swag.SwagTasksQueueImpl.Start(exp, ctx) {
 
-      if err != nil {
-
-        return err
-      }
-
-      if stopped {
-
+        // stopped process response
         return nil
       }
 

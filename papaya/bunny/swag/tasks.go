@@ -5,6 +5,7 @@ import (
   m "PapayaNet/papaya/koala/mapping"
   "fmt"
   "github.com/gofiber/fiber/v2"
+  "log"
 )
 
 type SwagTask struct {
@@ -33,8 +34,8 @@ type SwagTasksQueue struct {
 
 type SwagTasksQueueImpl interface {
   Init()
-  AddTask(name string, handler SwagRouteHandler)
-  Start(exp m.KMapImpl, ctx *fiber.Ctx) (bool, error)
+  AddTask(task *SwagTask)
+  Start(exp m.KMapImpl, ctx *fiber.Ctx) bool
 }
 
 func SwagTasksQueueNew() SwagTasksQueueImpl {
@@ -50,19 +51,21 @@ func (t *SwagTasksQueue) Init() {
   t.tasks = MakeSwagTasks()
 }
 
-func (t *SwagTasksQueue) AddTask(name string, handler SwagRouteHandler) {
+func (t *SwagTasksQueue) AddTask(task *SwagTask) {
 
-  task := MakeSwagTask(name, handler)
   t.tasks.Push(task)
 }
 
-func (t *SwagTasksQueue) Start(exp m.KMapImpl, ctx *fiber.Ctx) (bool, error) {
+func (t *SwagTasksQueue) Start(exp m.KMapImpl, ctx *fiber.Ctx) bool {
 
   // why use iteration, bcs for limited searching, not for all
 
   var i uint
 
+  // minify field of searching
   iter := exp.Tree().Iterable()
+
+  // for _, enum := range exp.Tree().Enums() {
 
   for next := iter.Next(); next.HasNext(); next = next.Next() {
 
@@ -82,13 +85,24 @@ func (t *SwagTasksQueue) Start(exp m.KMapImpl, ctx *fiber.Ctx) (bool, error) {
       if k == task.Name {
 
         context := MakeSwagContextWithEvent(ctx, v)
-        err := task.Handler(context)
+        e := task.Handler(context)
+
+        if e != nil {
+
+          log.Fatal(e)
+
+          // stopped process response
+          return true
+        }
 
         // catch var `context.Closed`
-        return context.Closed, err
+        if context.Closed {
+
+          return true
+        }
       }
     }
   }
 
-  return false, nil
+  return false
 }

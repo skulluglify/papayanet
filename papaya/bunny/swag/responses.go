@@ -3,6 +3,8 @@ package swag
 import (
   m "PapayaNet/papaya/koala/mapping"
   "PapayaNet/papaya/koala/pp"
+  "net/http"
+  "strconv"
 )
 
 func SwagResponseSchemes(responses m.KMapImpl) m.KMapImpl {
@@ -14,6 +16,22 @@ func SwagResponseSchemes(responses m.KMapImpl) m.KMapImpl {
     k, v := enum.Tuple()
 
     if statusCode := m.KValueToString(k); statusCode != "" {
+
+      // --- status code ---
+
+      n, err := strconv.Atoi(statusCode)
+
+      if err != nil {
+
+        n = 200
+
+        // wrong implement status code
+        panic("wrong implemented status code in responses")
+      }
+
+      statusMessage := http.StatusText(n)
+
+      // --- status code ---
 
       if mm := m.KMapCast(v); mm != nil {
 
@@ -28,7 +46,7 @@ func SwagResponseSchemes(responses m.KMapImpl) m.KMapImpl {
               if vM := m.KMapCast(bV); vM != nil {
 
                 schema := vM.Get("schema")
-                description := pp.QStr(m.KValueToString(vM.Get("description")), "Ok")
+                description := pp.QStr(m.KValueToString(vM.Get("description")), statusMessage)
                 res.Put(statusCode, SwagContentSchema(mimeTy, schema, description))
               }
             }

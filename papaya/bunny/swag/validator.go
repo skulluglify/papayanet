@@ -14,6 +14,8 @@ import (
   "strconv"
 )
 
+// request validation, only on type json, xml, form
+
 type SwagRequestValidator struct {
   *fiber.Ctx
   exp m.KMapImpl
@@ -295,7 +297,7 @@ func (v *SwagRequestValidator) Validation() (kornet.Request, error) {
 
       k, t := enum.Tuple()
 
-      fmt.Println(k, t)
+      //fmt.Println(k, t)
 
       // params
 

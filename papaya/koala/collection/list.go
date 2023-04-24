@@ -29,6 +29,7 @@ type KListImpl[T comparable] interface {
   PopLeft() (T, error)
   Pop() (T, error)
   Len() uint
+
   ForEach(cb KListMapHandler[T]) error
 
   // Concat(values ...any) KListImpl[T] << KListImpl[T] / T
@@ -41,16 +42,15 @@ type KListImpl[T comparable] interface {
 
 func KListNew[T comparable]() KListImpl[T] {
 
-  list := &KList[T]{}
-  list.Init()
+  array := &KList[T]{}
+  array.Init()
 
-  return list
+  return array
 }
 
 func KListNewR[T comparable](data []T) KListImpl[T] {
 
-  list := &KList[T]{}
-  list.Init()
+  array := KListNew[T]()
 
   var i, n uint
 
@@ -58,22 +58,21 @@ func KListNewR[T comparable](data []T) KListImpl[T] {
 
   for i = 0; i < n; i++ {
 
-    // copy value into an array list
-    list.Add(data[i])
+    // copy value into an array array
+    array.Add(data[i])
   }
 
-  return list
+  return array
 }
 
 func KListNewV[T comparable](values ...T) KListImpl[T] {
 
-  list := &KList[T]{}
-  list.Init()
+  array := KListNew[T]()
 
   // set variadic values
-  list.Add(values...)
+  array.Add(values...)
 
-  return list
+  return array
 }
 
 func (v *KList[T]) Init() {
@@ -280,86 +279,52 @@ func (v *KList[T]) Del(index uint) error {
 
 func (v *KList[T]) Slice(index uint, size uint) (KListImpl[T], error) {
 
-  var i, j, m, n uint
-  var list KListImpl[T]
+  var err error
+  var array KListImpl[T]
   var node KNodeImpl[T]
 
-  list = KListNew[T]()
+  array = KListNew[T]()
 
-  if v.size <= index {
+  var i, n uint
 
-    return list, errors.New("index out of bound")
+  node, err = v.findNodeByIndex(index)
+
+  if err != nil {
+
+    return array, err
   }
 
   n = size + index
 
   if v.size < n {
 
-    return list, errors.New("size out of range")
+    return array, errors.New("size out of range")
   }
 
-  m = nosign.CeilHalf(v.size)
+  for i = index; i < n; i++ {
 
-  if index <= m {
-
-    node = v.head
-
-    for i = 0; i < n; i++ {
-
-      if index <= i {
-
-        list.Push(node.Value())
-      }
-
-      node = node.Next()
-    }
-
-  } else {
-
-    node = v.tail
-
-    //for i = v.size - 1; index <= i; i-- {
-    //
-    //  if i < n {
-    //
-    //    list.PushLeft(node.Value())
-    //  }
-    //
-    //  node = node.Prev()
-    //}
-
-    // safety
-    for i = index; i < v.size; i++ {
-
-      j = v.size - i - 1
-
-      if j < n {
-
-        list.PushLeft(node.Value())
-      }
-
-      node = node.Prev()
-    }
+    array.Push(node.Value())
+    node = node.Next()
   }
 
-  return list, nil
+  return array, nil
 }
 
 func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T] {
 
   var value T
   var i, j, n uint
-  var list KListImpl[T]
+  var array KListImpl[T]
   var nodeSelect, nodeSafe, node *KNode[T]
   var err error
 
-  list = KListNew[T]()
+  array = KListNew[T]()
   nodeSelect, err = v.findNodeByIndex(index)
 
   if err != nil {
 
     v.Add(values...)
-    return list
+    return array
   }
 
   n = uint(len(values))
@@ -390,7 +355,7 @@ func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T
   for i = 0; i < deleteCount; i++ {
 
     if nodeSafe != nil {
-      list.Push(nodeSafe.Value())
+      array.Push(nodeSafe.Value())
       node = nodeSafe.Next()
       v.removeNode(nodeSafe)
       nodeSafe = node
@@ -399,27 +364,27 @@ func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T
     break
   }
 
-  return list
+  return array
 }
 
 func (v *KList[T]) Copy() KListImpl[T] {
 
   var i uint
-  var list KListImpl[T]
+  var array KListImpl[T]
   var node KNodeImpl[T]
 
-  list = KListNew[T]()
+  array = KListNew[T]()
 
   node = v.head
 
   for i = 0; i < v.size; i++ {
 
-    list.Push(node.Value())
+    array.Push(node.Value())
 
     node = node.Next()
   }
 
-  return list
+  return array
 }
 
 func (v *KList[T]) Push(value T) {

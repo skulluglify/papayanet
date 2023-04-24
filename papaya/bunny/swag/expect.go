@@ -16,7 +16,6 @@ import (
 //responses.200.body.application/json
 
 type SwagExpect struct {
-  AuthToken         bool
   RequestValidation bool
   Path              m.KMapImpl
 }
@@ -32,7 +31,6 @@ func SwagExpectEvaluation(expect m.KMapImpl, tags []string) *SwagExpect {
   reqVal := expect.Get("request.validation")
   checkRequestValidation := reqVal != nil
 
-  authToken := m.KValueToBool(expect.Get("AuthToken")) // default value is false
   description := m.KValueToString(expect.Get("description"))
   requestValidation := pp.LBool(checkRequestValidation, m.KValueToBool(reqVal), true) // default value is true
   parameters := SwagParamsFormatter(expect.Get("request.params"))
@@ -77,7 +75,6 @@ func SwagExpectEvaluation(expect m.KMapImpl, tags []string) *SwagExpect {
   }
 
   return &SwagExpect{
-    AuthToken:         authToken,
     RequestValidation: requestValidation,
     Path:              path,
   }

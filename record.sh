@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -xe
+
 echo -n >scripts.lst
 # shellcheck disable=SC2046
 # shellcheck disable=SC2002

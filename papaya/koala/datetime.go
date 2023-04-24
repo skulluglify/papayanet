@@ -62,6 +62,8 @@ func (t *KDateTime) UTC() *KDateTime {
 
 func (t *KDateTime) String() string {
 
+  // TODO: better use format like 2023-04-23 04:23:36.843698+00
+
   Y := KStrZeroFill(strconv.Itoa(t.Year), 4)
   M := KStrZeroFill(strconv.Itoa(t.Month), 2)
   D := KStrZeroFill(strconv.Itoa(t.Day), 2)

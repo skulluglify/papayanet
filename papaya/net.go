@@ -1,7 +1,7 @@
 package papaya
 
 import (
-  swag2 "PapayaNet/papaya/bunny/swag"
+  "PapayaNet/papaya/bunny/swag"
   "PapayaNet/papaya/koala"
   m "PapayaNet/papaya/koala/mapping"
   "PapayaNet/papaya/pigeon"
@@ -20,14 +20,17 @@ type Net struct {
   *fiber.App
   *postgresql.DBConfig
   *postgresql.DBConnection
-  Version koala.KVersionImpl
+  version koala.KVersionImpl
 }
 
 type NetImpl interface {
   Init()
   Serve(host string, port int) error
-  MakeSwagger(info *swag2.SwagInfo) swag2.SwagImpl
+  MakeSwagger(info *swag.SwagInfo) swag.SwagImpl
   Logger() koala.KConsoleImpl
+  Connection() postgresql.DBConnectionImpl
+  Version() koala.KVersionImpl
+  Use(args ...any)
   Close() error
 }
 
@@ -83,13 +86,13 @@ func (n *Net) Init() {
     }
   }
 
-  n.Version = koala.KVersionNew(
+  n.version = koala.KVersionNew(
     util.VersionMajor,
     util.VersionMinor,
     util.VersionPatch,
   )
 
-  n.Console.Log(n.Console.Text(util.Banner(n.Version), koala.ColorGreen, koala.ColorBlack, koala.StyleBold))
+  n.Console.Log(n.Console.Text(util.Banner(n.version), koala.ColorGreen, koala.ColorBlack, koala.StyleBold))
   n.Console.Log("Server has started ...")
 }
 
@@ -98,14 +101,33 @@ func (n *Net) Serve(host string, port int) error {
   return n.App.Listen(host + ":" + strconv.Itoa(port))
 }
 
-func (n *Net) MakeSwagger(info *swag2.SwagInfo) swag2.SwagImpl {
+func (n *Net) MakeSwagger(info *swag.SwagInfo) swag.SwagImpl {
 
-  return swag2.MakeSwag(n.App, info)
+  return swag.MakeSwag(n.App, info)
+}
+
+func (n *Net) Connection() postgresql.DBConnectionImpl {
+
+  return n.DBConnection
+}
+
+func (n *Net) Version() koala.KVersionImpl {
+
+  return n.version
 }
 
 func (n *Net) Logger() koala.KConsoleImpl {
 
   return n.Console
+}
+
+func (n *Net) Use(args ...any) {
+
+  if n.App != nil {
+
+    // registry new middleware
+    n.App.Use(args...)
+  }
 }
 
 func (n *Net) Close() error {

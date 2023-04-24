@@ -71,6 +71,7 @@ func SwagUniversalReType(v any) string {
     switch ty.Kind() {
 
     case reflect.Bool:
+
       return "boolean"
 
     case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,

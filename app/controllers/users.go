@@ -15,10 +15,10 @@ func UserController(router swag.SwagRouterImpl) {
 
 	router.Get("/:id",
 		&m.KMap{
-			"permit":      true,
 			"description": "Catch All Users",
 			"request": &m.KMap{
-				"task": true,
+				"task":   true,
+				"permit": true,
 				"params": &m.KMap{
 					"#id": "number",
 					"q":   "number",
@@ -37,9 +37,10 @@ func UserController(router swag.SwagRouterImpl) {
 
 	router.Post("/:id",
 		&m.KMap{
-			"permit":      true,
+			"AuthToken":   true,
 			"description": "Catch All Users",
 			"request": &m.KMap{
+				"permit": true,
 				"params": &m.KMap{
 					"#id": "number",
 					"q":   "string",
@@ -61,7 +62,7 @@ func UserController(router swag.SwagRouterImpl) {
 					},
 				}),
 			},
-			"responses": swag.OkJSON(Say{}),
+			"responses": swag.CreatedJSON(Say{}),
 		},
 		func(ctx *swag.SwagContext) error {
 

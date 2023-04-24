@@ -5,6 +5,7 @@ import (
   "PapayaNet/papaya/koala/kio"
   "PapayaNet/papaya/koala/pp"
   "PapayaNet/papaya/pigeon"
+  "database/sql"
   "errors"
   "gorm.io/driver/postgres"
   "gorm.io/gorm"
@@ -51,10 +52,12 @@ type DBConnection struct {
   *DBConfig
 }
 
-type DBConfigImpl interface {
+type DBConnectionImpl interface {
   Init(flags int) (*gorm.DB, error)
   IsUnixSock() bool
   RawQuery() string
+  Database() (*sql.DB, error)
+  GORM() *gorm.DB
   String() string
   Close() error
 }
@@ -176,6 +179,16 @@ func (c *DBConnection) RawQuery() string {
   values.Add("TimeZone", timeZone)
 
   return values.Encode()
+}
+
+func (c *DBConnection) Database() (*sql.DB, error) {
+
+  return c.DB.DB()
+}
+
+func (c *DBConnection) GORM() *gorm.DB {
+
+  return c.DB
 }
 
 func (c *DBConnection) String() string {

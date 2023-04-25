@@ -409,20 +409,24 @@ func (m *KMiddleList[T]) uniMoveUp(index uint, size uint) (ActionMoveImpl, error
 
 	var currLen, currMidPos, virtLen, virtMidPos uint
 
+	if size == 0 {
+
+		return nil, errors.New("no movement required")
+	}
+
 	// current position
 	currLen = m.array.size
 	currMidPos = m.pos
 
-	var err error
-
 	// virtual position
 	virtLen = currLen + size
-	virtMidPos, err = VirtMidPos(virtLen)
 
-	if err != nil {
+	if virtLen == 0 {
 
-		return nil, err
+		return nil, errors.New("array is empty")
 	}
+
+	virtMidPos = VirtMidPos(virtLen)
 
 	// determine the value of the position and distance
 	var pos int
@@ -470,9 +474,14 @@ func (m *KMiddleList[T]) uniMoveDown(index uint, size uint) (ActionMoveImpl, err
 
 	var currLen, currMidPos, virtLen, virtMidPos uint
 
+	if size == 0 {
+
+		return nil, errors.New("no movement required")
+	}
+
 	if m.array.size < size {
 
-		return nil, errors.New("down size is larger than array size")
+		return nil, errors.New("downsize is larger than array size")
 	}
 
 	// current position
@@ -491,7 +500,7 @@ func (m *KMiddleList[T]) uniMoveDown(index uint, size uint) (ActionMoveImpl, err
 		return nil, nil
 	}
 
-	virtMidPos, _ = VirtMidPos(virtLen)
+	virtMidPos = VirtMidPos(virtLen)
 
 	// determine the value of the position and distance
 	var pos int
@@ -567,7 +576,6 @@ func (m *KMiddleList[T]) updateMiddlePosition(actionMove ActionMoveImpl) error {
 
 func (m *KMiddleList[T]) findNodeByIndex(index uint) (*KNode[T], error) {
 
-	var err error
 	var i, k, q, t uint
 	var node *KNode[T]
 
@@ -583,17 +591,8 @@ func (m *KMiddleList[T]) findNodeByIndex(index uint) (*KNode[T], error) {
 
 	node = nil
 
-	k, err = VirtMidPos(m.array.size)
-	if err != nil {
-
-		return nil, err
-	}
-
-	q, err = VirtMidPos(nosign.FloorHalf(m.array.size))
-	if err != nil {
-
-		return nil, err
-	}
+	k = VirtMidPos(m.array.size)
+	q = VirtMidPos(nosign.FloorHalf(m.array.size))
 
 	// t, err = VirtMidPos(nosign.FloorHalf(m.array.size))
 	// if err != nil {

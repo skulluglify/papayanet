@@ -20,7 +20,7 @@ func App(pn papaya.NetImpl) error {
 
 	swagger.AddTask(swag.MakeSwagTask("request.task", func(ctx *swag.SwagContext) error {
 
-		//ctx.Closed = true
+		//ctx.Prevent()
 
 		pn.Logger().Log("task running 1 ...", ctx.Event())
 
@@ -35,8 +35,6 @@ func App(pn papaya.NetImpl) error {
 	}))
 
 	swagger.AddTask(swag.MakeSwagTask("request.task", func(ctx *swag.SwagContext) error {
-
-		//ctx.Closed = true
 
 		pn.Logger().Log("task running 2 ...", ctx.Event())
 

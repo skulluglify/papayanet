@@ -470,20 +470,28 @@ func (m *KMiddleList[T]) uniMoveDown(index uint, size uint) (ActionMoveImpl, err
 
 	var currLen, currMidPos, virtLen, virtMidPos uint
 
+	if m.array.size < size {
+
+		return nil, errors.New("down size is larger than array size")
+	}
+
 	// current position
 	currLen = m.array.size
 	currMidPos = m.pos
 
-	var err error
-
 	// virtual position
 	virtLen = currLen - size
-	virtMidPos, err = VirtMidPos(virtLen)
 
-	if err != nil {
+	if virtLen == 0 { // downside come nullable
 
-		return nil, err
+		// pre - processing
+		m.middle = nil
+		m.pos = 0
+
+		return nil, nil
 	}
+
+	virtMidPos, _ = VirtMidPos(virtLen)
 
 	// determine the value of the position and distance
 	var pos int

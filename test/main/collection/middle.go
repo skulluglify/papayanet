@@ -55,6 +55,9 @@ func main() {
     }
   }
 
+  console.Log(array.Get(0))
+  console.Log(array.Get(1))
+
   if m := array.Splice(2, 10, 44, 55); m != nil {
     if err := m.ForEach(func(i uint, value int) error {
 
@@ -67,6 +70,9 @@ func main() {
       console.Error(err)
     }
   }
+
+  console.Log(array.Get(0))
+  console.Log(array.Get(1))
 
   console.Log(array.Pop())
   console.Log(array.PopLeft())

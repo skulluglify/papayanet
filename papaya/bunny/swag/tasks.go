@@ -1,109 +1,109 @@
 package swag
 
 import (
-	"PapayaNet/papaya/koala/collection"
-	m "PapayaNet/papaya/koala/mapping"
-	"fmt"
-	"log"
+  "PapayaNet/papaya/koala/collection"
+  m "PapayaNet/papaya/koala/mapping"
+  "fmt"
+  "log"
 
-	"github.com/gofiber/fiber/v2"
+  "github.com/gofiber/fiber/v2"
 )
 
 type SwagTask struct {
-	Name    string
-	Handler SwagRouteHandler
+  Name    string
+  Handler SwagRouteHandler
 }
 
 func MakeSwagTask(name string, handler SwagRouteHandler) *SwagTask {
 
-	return &SwagTask{
-		Name:    name,
-		Handler: handler,
-	}
+  return &SwagTask{
+    Name:    name,
+    Handler: handler,
+  }
 }
 
 type SwagTasks collection.KListImpl[*SwagTask]
 
 func MakeSwagTasks() collection.KListImpl[*SwagTask] {
 
-	return collection.KListNew[*SwagTask]()
+  return collection.KListNew[*SwagTask]()
 }
 
 type SwagTasksQueue struct {
-	tasks SwagTasks
+  tasks SwagTasks
 }
 
 type SwagTasksQueueImpl interface {
-	Init()
-	AddTask(task *SwagTask)
-	Start(exp m.KMapImpl, ctx *fiber.Ctx) bool
+  Init()
+  AddTask(task *SwagTask)
+  Start(exp m.KMapImpl, ctx *fiber.Ctx) bool
 }
 
 func SwagTasksQueueNew() SwagTasksQueueImpl {
 
-	tasks := &SwagTasksQueue{}
-	tasks.Init()
+  tasks := &SwagTasksQueue{}
+  tasks.Init()
 
-	return tasks
+  return tasks
 }
 
 func (t *SwagTasksQueue) Init() {
 
-	t.tasks = MakeSwagTasks()
+  t.tasks = MakeSwagTasks()
 }
 
 func (t *SwagTasksQueue) AddTask(task *SwagTask) {
 
-	t.tasks.Push(task)
+  t.tasks.Push(task)
 }
 
 func (t *SwagTasksQueue) Start(exp m.KMapImpl, ctx *fiber.Ctx) bool {
 
-	// why use iteration, bcs for limited searching, not for all
+  // why use iteration, bcs for limited searching, not for all
 
-	var i uint
+  var i uint
 
-	// minify field of searching
-	iter := exp.Tree().Iterable()
+  // minify field of searching
+  iter := exp.Tree().Iterable()
 
-	// for _, enum := range exp.Tree().Enums() {
+  // for _, enum := range exp.Tree().Enums() {
 
-	for next := iter.Next(); next.HasNext(); next = next.Next() {
+  for next := iter.Next(); next.HasNext(); next = next.Next() {
 
-		enum := next.Enum()
-		k, v := enum.Tuple()
+    enum := next.Enum()
+    k, v := enum.Tuple()
 
-		for i = 0; i < t.tasks.Len(); i++ {
+    for i = 0; i < t.tasks.Len(); i++ {
 
-			task, err := t.tasks.Get(i)
+      task, err := t.tasks.Get(i)
 
-			if err != nil {
+      if err != nil {
 
-				fmt.Println("task failed to execute ...")
-				continue
-			}
+        fmt.Println("task failed to execute ...")
+        continue
+      }
 
-			if k == task.Name {
+      if k == task.Name {
 
-				context := MakeSwagContextWithEvent(ctx, v)
-				e := task.Handler(context)
+        context := MakeSwagContextWithEvent(ctx, v)
+        e := task.Handler(context)
 
-				if e != nil {
+        if e != nil {
 
-					log.Fatal(e)
+          log.Fatal(e)
 
-					// stopped process response
-					return true
-				}
+          // stopped process response
+          return true
+        }
 
-				// catch var `context.Closed`
-				if context.Override() {
+        // catch var `context.Closed`
+        if context.Override() {
 
-					return true
-				}
-			}
-		}
-	}
+          return true
+        }
+      }
+    }
+  }
 
-	return false
+  return false
 }

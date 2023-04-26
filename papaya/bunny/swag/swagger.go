@@ -1,207 +1,207 @@
 package swag
 
 import (
-	"PapayaNet/papaya/koala"
-	"PapayaNet/papaya/koala/collection"
-	"PapayaNet/papaya/koala/kornet"
-	m "PapayaNet/papaya/koala/mapping"
-	"PapayaNet/papaya/koala/tools/posix"
-	"net/http"
-	"strings"
+  "PapayaNet/papaya/koala"
+  "PapayaNet/papaya/koala/collection"
+  "PapayaNet/papaya/koala/kornet"
+  m "PapayaNet/papaya/koala/mapping"
+  "PapayaNet/papaya/koala/tools/posix"
+  "net/http"
+  "strings"
 
-	"github.com/gofiber/fiber/v2"
+  "github.com/gofiber/fiber/v2"
 )
 
 // using openapi 3
 const (
-	VersionMajor = 3
-	VersionMinor = 0
-	VersionPatch = 0
+  VersionMajor = 3
+  VersionMinor = 0
+  VersionPatch = 0
 )
 
 type Swag struct {
-	*fiber.App
-	SwagTasksQueueImpl
-	version  koala.KVersionImpl
-	info     *SwagInfo
-	tag      string
-	tags     []m.KMapImpl
-	paths    m.KMapImpl
-	root     posix.KPathImpl
-	composes collection.KListImpl[SwagComposeImpl]
-	renderer SwagRendererImpl
+  *fiber.App
+  SwagTasksQueueImpl
+  version  koala.KVersionImpl
+  info     *SwagInfo
+  tag      string
+  tags     []m.KMapImpl
+  paths    m.KMapImpl
+  root     posix.KPathImpl
+  composes collection.KListImpl[SwagComposeImpl]
+  renderer SwagRendererImpl
 }
 
 type SwagImpl interface {
-	Init(app *fiber.App, info *SwagInfo)
-	Version() koala.KVersionImpl
-	Group(path string, tag string) SwagGroupImpl // alias as a Group('/')
-	Router() SwagRouterImpl                      // alias as a Group('/')
-	AddTag(tag string)
-	AddPath(path string, method string, expect *SwagExpect)
-	AddTask(task *SwagTask)
-	Start() error
+  Init(app *fiber.App, info *SwagInfo)
+  Version() koala.KVersionImpl
+  Group(path string, tag string) SwagGroupImpl // alias as a Group('/')
+  Router() SwagRouterImpl                      // alias as a Group('/')
+  AddTag(tag string)
+  AddPath(path string, method string, expect *SwagExpect)
+  AddTask(task *SwagTask)
+  Start() error
 }
 
 func MakeSwag(app *fiber.App, info *SwagInfo) SwagImpl {
 
-	swag := &Swag{}
-	swag.Init(app, info)
+  swag := &Swag{}
+  swag.Init(app, info)
 
-	return swag
+  return swag
 }
 
 func (swag *Swag) Init(app *fiber.App, info *SwagInfo) {
 
-	swag.App = app
-	swag.SwagTasksQueueImpl = SwagTasksQueueNew()
+  swag.App = app
+  swag.SwagTasksQueueImpl = SwagTasksQueueNew()
 
-	swag.info = info
+  swag.info = info
 
-	swag.version = koala.KVersionNew(
-		VersionMajor,
-		VersionMinor,
-		VersionPatch,
-	)
+  swag.version = koala.KVersionNew(
+    VersionMajor,
+    VersionMinor,
+    VersionPatch,
+  )
 
-	swag.tag = "App"
+  swag.tag = "App"
 
-	swag.tags = make([]m.KMapImpl, 0)
-	swag.paths = &m.KMap{}
+  swag.tags = make([]m.KMapImpl, 0)
+  swag.paths = &m.KMap{}
 
-	swag.root = posix.KPathNew("/")
-	swag.composes = MakeSwagComposes()
+  swag.root = posix.KPathNew("/")
+  swag.composes = MakeSwagComposes()
 
-	swag.renderer = SwagRendererNew("/api/v3/openapi.json", app)
+  swag.renderer = SwagRendererNew("/api/v3/openapi.json", app)
 }
 
 func (swag *Swag) Version() koala.KVersionImpl {
 
-	return swag.version
+  return swag.version
 }
 
 func (swag *Swag) Group(path string, tag string) SwagGroupImpl {
 
-	tag = swag.tag + "\\" + tag
-	group := MakeSwagGroup(swag.root.Join(posix.KPathNew(path)), tag)
-	group.Bind(swag.composes)
+  tag = swag.tag + "\\" + tag
+  group := MakeSwagGroup(swag.root.Join(posix.KPathNew(path)), tag)
+  group.Bind(swag.composes)
 
-	return group
+  return group
 }
 
 func (swag *Swag) Router() SwagRouterImpl {
 
-	group := MakeSwagGroup(swag.root, swag.tag)
-	group.Bind(swag.composes)
+  group := MakeSwagGroup(swag.root, swag.tag)
+  group.Bind(swag.composes)
 
-	return group.Router()
+  return group.Router()
 }
 
 func (swag *Swag) AddTag(tag string) {
 
-	dupTag := false
+  dupTag := false
 
-	for _, dTag := range swag.tags {
+  for _, dTag := range swag.tags {
 
-		if t := m.KValueToString(dTag.Get("name")); t != "" {
+    if t := m.KValueToString(dTag.Get("name")); t != "" {
 
-			if t == tag {
+      if t == tag {
 
-				dupTag = true
-				break
-			}
-		}
-	}
+        dupTag = true
+        break
+      }
+    }
+  }
 
-	if !dupTag {
+  if !dupTag {
 
-		swag.tags = append(swag.tags, &m.KMap{
-			"name": tag,
-		})
-	}
+    swag.tags = append(swag.tags, &m.KMap{
+      "name": tag,
+    })
+  }
 }
 
 func (swag *Swag) AddPath(path string, method string, expect *SwagExpect) {
 
-	var data m.KMapImpl
+  var data m.KMapImpl
 
-	path = SwagPathNorm(path)
-	data = nil
+  path = SwagPathNorm(path)
+  data = nil
 
-	if currPath := swag.paths.Get(path); currPath != nil {
+  if currPath := swag.paths.Get(path); currPath != nil {
 
-		if mm := m.KMapCast(currPath); mm != nil {
+    if mm := m.KMapCast(currPath); mm != nil {
 
-			data = mm
-		}
-	}
+      data = mm
+    }
+  }
 
-	if data != nil {
+  if data != nil {
 
-		data.Put(strings.ToLower(method), expect.Path)
+    data.Put(strings.ToLower(method), expect.Path)
 
-	} else {
+  } else {
 
-		data = &m.KMap{}
-		data.Put(strings.ToLower(method), expect.Path)
-		swag.paths.Put(path, data)
-	}
+    data = &m.KMap{}
+    data.Put(strings.ToLower(method), expect.Path)
+    swag.paths.Put(path, data)
+  }
 }
 
 func (swag *Swag) AddTask(task *SwagTask) {
 
-	swag.SwagTasksQueueImpl.AddTask(task)
+  swag.SwagTasksQueueImpl.AddTask(task)
 }
 
 func (swag *Swag) Start() error {
 
-	if err := swag.composes.ForEach(func(i uint, value SwagComposeImpl) error {
+  if err := swag.composes.ForEach(func(i uint, value SwagComposeImpl) error {
 
-		method := value.Method()
-		exp := value.Expect()
-		tag := value.Tag()
-		path := value.Path()
-		expect := SwagExpectEvaluation(exp, []string{tag})
+    method := value.Method()
+    exp := value.Expect()
+    tag := value.Tag()
+    path := value.Path()
+    expect := SwagExpectEvaluation(exp, []string{tag})
 
-		requestValidation := expect.RequestValidation
+    requestValidation := expect.RequestValidation
 
-		swag.Add(method, path, func(ctx *fiber.Ctx) error {
+    swag.Add(method, path, func(ctx *fiber.Ctx) error {
 
-			// auth token
-			// request validation
+      // auth token
+      // request validation
 
-			if requestValidation {
+      if requestValidation {
 
-				validator := SwagRequestValidatorNew(exp, ctx)
-				req, err := validator.Validation()
+        validator := SwagRequestValidatorNew(exp, ctx)
+        req, err := validator.Validation()
 
-				if err != nil {
+        if err != nil {
 
-					return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
-				}
+          return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+        }
 
-				func(_ any) {}(req)
-				//fmt.Println(req.Query)
-			}
+        func(_ any) {}(req)
+        //fmt.Println(req.Query)
+      }
 
-			if swag.SwagTasksQueueImpl.Start(exp, ctx) {
+      if swag.SwagTasksQueueImpl.Start(exp, ctx) {
 
-				// stopped process response
-				return nil
-			}
+        // stopped process response
+        return nil
+      }
 
-			return value.Handler(MakeSwagContext(ctx, false))
-		})
+      return value.Handler(MakeSwagContext(ctx, false))
+    })
 
-		swag.AddTag(tag)
-		swag.AddPath(path, method, expect)
+    swag.AddTag(tag)
+    swag.AddPath(path, method, expect)
 
-		return nil
+    return nil
 
-	}); err != nil {
+  }); err != nil {
 
-		return err
-	}
+    return err
+  }
 
-	return swag.renderer.Render(swag.version, swag.info, swag.tags, swag.paths)
+  return swag.renderer.Render(swag.version, swag.info, swag.tags, swag.paths)
 }

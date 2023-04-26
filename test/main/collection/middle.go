@@ -17,15 +17,6 @@ func main() {
   if err != nil {
     panic(err)
   }
-  //array.Push()
-  //array.PushLeft()
-  //
-  //array.Pop()
-  //array.PopLeft()
-  //array.Del()
-  //array.Splice()
-  //
-  //array.Slice()
 
   array.Reverse()
 
@@ -65,7 +56,7 @@ func main() {
   console.Log(array.Get(0))
   console.Log(array.Get(1))
 
-  if m := array.Splice(2, 10, 44, 55); m != nil {
+  if m, _ := array.Splice(2, 10, 44, 55); m != nil {
     if err := m.ForEach(func(i uint, value int) error {
 
       console.Log(i, value, 2)

@@ -21,7 +21,7 @@ type KListImpl[T comparable] interface {
   Set(index uint, value T) error
   Del(index uint) error
   Slice(index uint, size uint) (KListImpl[T], error)
-  Splice(index uint, deleteCount uint, values ...T) KListImpl[T]
+  Splice(index uint, deleteCount uint, values ...T) (KListImpl[T], error)
   Copy() KListImpl[T]
   PushLeft(value T)
   Push(value T)
@@ -290,13 +290,14 @@ func (v *KList[T]) Slice(index uint, size uint) (KListImpl[T], error) {
   return array, nil
 }
 
-func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T] {
+func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) (KListImpl[T], error) {
 
-  var value T
+  var err error
+
   var i, j, n uint
   var array KListImpl[T]
   var nodeSelect, nodeSafe, node *KNode[T]
-  var err error
+  var value T
 
   array = KListNew[T]()
   nodeSelect, err = v.findNodeByIndex(index)
@@ -304,7 +305,7 @@ func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T
   if err != nil {
 
     v.Add(values...)
-    return array
+    return array, err
   }
 
   n = uint(len(values))
@@ -357,7 +358,7 @@ func (v *KList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T
     break
   }
 
-  return array
+  return array, nil
 }
 
 func (v *KList[T]) Copy() KListImpl[T] {

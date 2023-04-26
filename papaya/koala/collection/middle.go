@@ -205,21 +205,19 @@ func (m *KMiddleList[T]) Slice(index uint, size uint) (KListImpl[T], error) {
   return array, nil
 }
 
-func (m *KMiddleList[T]) Splice(index uint, deleteCount uint, values ...T) KListImpl[T] {
+func (m *KMiddleList[T]) Splice(index uint, deleteCount uint, values ...T) (KListImpl[T], error) {
+
+  var err error
 
   var array KListImpl[T]
 
   m.refresh(MoveDown, index, deleteCount)
 
-  var n uint
+  array, err = m.array.Splice(index, deleteCount, values...)
 
-  array = m.array.Splice(index, deleteCount, values...)
+  m.refresh(MoveUp, index, uint(len(values)))
 
-  n = uint(len(values))
-
-  m.refresh(MoveUp, index, n)
-
-  return array
+  return array, err
 }
 
 func (m *KMiddleList[T]) Copy() KListImpl[T] {

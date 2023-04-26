@@ -1,8 +1,8 @@
 package mapping
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/gen"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/gen"
 )
 
 // typed KMap with a commonly built-in type

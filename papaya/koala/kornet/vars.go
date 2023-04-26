@@ -1,6 +1,6 @@
 package kornet
 
-import m "PapayaNet/papaya/koala/mapping"
+import m "skfw/papaya/koala/mapping"
 
 // ref:https://www.iana.org/assignments/character-sets/character-sets.xhtml
 

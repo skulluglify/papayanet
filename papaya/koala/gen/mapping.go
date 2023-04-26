@@ -1,8 +1,8 @@
 package gen
 
 import (
-  "PapayaNet/papaya/koala/pp"
   "reflect"
+  "skfw/papaya/koala/pp"
   "strconv"
   "strings"
 )

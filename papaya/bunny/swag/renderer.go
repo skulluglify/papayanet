@@ -1,13 +1,13 @@
 package swag
 
 import (
-  "PapayaNet/papaya/bunny/swag/binaries"
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/kio/leaf"
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
   "fmt"
   "net/url"
+  "skfw/papaya/bunny/swag/binaries"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/kio/leaf"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "strconv"
 
   "github.com/gofiber/fiber/v2"

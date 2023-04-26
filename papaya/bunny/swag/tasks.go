@@ -1,10 +1,10 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala/collection"
-  m "PapayaNet/papaya/koala/mapping"
   "fmt"
   "log"
+  "skfw/papaya/koala/collection"
+  m "skfw/papaya/koala/mapping"
 
   "github.com/gofiber/fiber/v2"
 )

@@ -1,8 +1,8 @@
 package swag
 
 import (
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
 )
 
 //AuthToken

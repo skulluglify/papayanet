@@ -1,9 +1,9 @@
 package main
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/collection"
   "math"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
   "time"
 )
 
@@ -13,8 +13,8 @@ func main() {
 
   console := koala.KConsoleNew()
 
-  // array := collection.KListNew[int]()
-  array := collection.KMiddleListNew[int]()
+  array := collection.KListNew[int]()
+  //array := collection.KMiddleListNew[int]()
 
   n := 6
 
@@ -40,6 +40,6 @@ func main() {
 
     t := time.UnixMicro(b - a).UTC()
 
-    console.Log(t.Hour(), t.Minute(), t.Second(), t.Nanosecond())
+    console.Log(t.Hour()*3600*1000+t.Minute()*60*1000+t.Second()*1000, t.Nanosecond())
   }
 }

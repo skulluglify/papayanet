@@ -1,11 +1,11 @@
 package kornet
 
 import (
-  "PapayaNet/papaya/koala/kio/leaf"
   "bytes"
   "io"
   "net/http"
   "net/url"
+  "skfw/papaya/koala/kio/leaf"
   "time"
 )
 

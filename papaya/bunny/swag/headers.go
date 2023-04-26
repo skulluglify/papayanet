@@ -1,10 +1,10 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala"
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
   "reflect"
+  "skfw/papaya/koala"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
 )
 
 // once set char be known required or not

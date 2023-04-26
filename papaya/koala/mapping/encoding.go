@@ -1,9 +1,9 @@
 package mapping
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/pp"
   "reflect"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/pp"
   "strconv"
 )
 

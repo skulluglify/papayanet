@@ -1,16 +1,16 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala/kio/leaf"
-  "PapayaNet/papaya/koala/kornet"
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
   "encoding/json"
   "errors"
   "fmt"
   "github.com/gofiber/fiber/v2"
   "net/url"
   "reflect"
+  "skfw/papaya/koala/kio/leaf"
+  "skfw/papaya/koala/kornet"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "strconv"
 )
 

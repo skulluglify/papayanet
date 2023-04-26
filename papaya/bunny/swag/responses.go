@@ -1,9 +1,9 @@
 package swag
 
 import (
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
   "net/http"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "strconv"
 )
 

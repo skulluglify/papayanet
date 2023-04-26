@@ -1,19 +1,20 @@
 # PpNet (PapayaNet)
 
-PpNet (PapayaNet) is a web framework for API server, built-in from library Echo, Gorm, Etc. Make it easy use for production, development, and testing code ...
+PpNet (PapayaNet) is a web framework for API server, built-in from library Fiber, GORM, Etc.
+Make it easy use for development, debugging and testing ...
 
 ![PapayaNet Showcase](docs/imgs/papayanet_showcase.png)
 
 ## Features
 
-- Swag, Swagger
-- Console, Koala
-- Vector, Panda
+- Swagger, Validator
+- Collection, Mapping, Iterator
+- Console, Colorful
 
 ## Built With
 
-- Echo, Context
-- Gorm, Postgres
+- Fiber, FastHTTP
+- GORM, PostgreSQL, MySQL, SQlite
 
 ## Getting Started
 

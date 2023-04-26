@@ -1,10 +1,10 @@
 package app
 
 import (
-	"PapayaNet/app/controllers"
-	"PapayaNet/papaya"
-	"PapayaNet/papaya/bunny/swag"
-	"PapayaNet/papaya/pigeon/templates/basic"
+	"skfw/app/controllers"
+	"skfw/papaya"
+	"skfw/papaya/bunny/swag"
+	"skfw/papaya/pigeon/templates/basic"
 )
 
 func App(pn papaya.NetImpl) error {

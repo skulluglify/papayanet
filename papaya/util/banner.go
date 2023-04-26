@@ -1,7 +1,7 @@
 package util
 
 import (
-  "PapayaNet/papaya/koala"
+  "skfw/papaya/koala"
 )
 
 func Banner(version koala.KVersionImpl) string {

@@ -1,8 +1,8 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala"
-  m "PapayaNet/papaya/koala/mapping"
+  "skfw/papaya/koala"
+  m "skfw/papaya/koala/mapping"
   "strings"
 )
 

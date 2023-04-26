@@ -1,10 +1,10 @@
 package koala
 
 import (
-  "PapayaNet/papaya/koala/kio/leaf"
-  "PapayaNet/papaya/koala/os/runtime"
   "fmt"
   "reflect"
+  "skfw/papaya/koala/kio/leaf"
+  "skfw/papaya/koala/os/runtime"
   "strconv"
 )
 

@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"PapayaNet/papaya/bunny/swag"
-	m "PapayaNet/papaya/koala/mapping"
 	"net/http"
+	"skfw/papaya/bunny/swag"
+	m "skfw/papaya/koala/mapping"
 )
 
 type Say struct {

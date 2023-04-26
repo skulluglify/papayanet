@@ -1,8 +1,8 @@
 package main
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/collection"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
 )
 
 func main() {
@@ -12,6 +12,11 @@ func main() {
   array := collection.KMiddleListNew[int]()
 
   array.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 0)
+
+  err := array.Replace(collection.KListNewV[int](3, 4, 5))
+  if err != nil {
+    panic(err)
+  }
   //array.Push()
   //array.PushLeft()
   //
@@ -21,6 +26,8 @@ func main() {
   //array.Splice()
   //
   //array.Slice()
+
+  array.Reverse()
 
   var i uint
 

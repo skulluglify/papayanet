@@ -2,6 +2,7 @@ package collection
 
 import (
   "errors"
+  "skfw/papaya/panda/nosign"
 )
 
 type KMiddleList[T comparable] struct {
@@ -227,7 +228,7 @@ func (m *KMiddleList[T]) Copy() KListImpl[T] {
   var array KListImpl[T]
   var node KNodeImpl[T]
 
-  array = KListNew[T]()
+  array = KMiddleListNew[T]()
 
   node = m.array.head
 
@@ -317,6 +318,93 @@ func (m *KMiddleList[T]) Pop() (T, error) {
 func (m *KMiddleList[T]) Len() uint {
 
   return m.array.size
+}
+
+func (m *KMiddleList[T]) Concat(values ...T) KListImpl[T] {
+
+  var array KListImpl[T]
+  array = m.Copy()
+  array.Add(values...)
+  return array
+}
+
+func (m *KMiddleList[T]) ConcatArray(arrays ...KListImpl[T]) (KListImpl[T], error) {
+
+  var err error
+
+  var i uint
+  var array KListImpl[T]
+  var value T
+  array = m.Copy()
+
+  for _, arr := range arrays {
+
+    for i = 0; i < arr.Len(); i++ {
+
+      if value, err = arr.Get(i); err != nil {
+
+        return array, err
+      }
+
+      array.Push(value)
+    }
+  }
+
+  return array, nil
+}
+
+func (m *KMiddleList[T]) Replace(array KListImpl[T]) error {
+
+  var err error
+
+  var i uint
+  var node *KNode[T]
+  var value T
+
+  node = m.array.head
+
+  for i = 0; i < nosign.Min(m.array.size, array.Len()); i++ {
+
+    // getting current value
+    if value, err = array.Get(i); err != nil {
+
+      return err
+    }
+
+    // set current node
+    node.Set(value)
+
+    // update node
+    node = node.next
+  }
+
+  for i = i + 1; i < array.Len(); i++ {
+
+    // getting current value
+    if value, err = array.Get(i); err != nil {
+
+      return err
+    }
+
+    // added current value
+    m.Push(value)
+  }
+
+  return nil
+}
+
+func (m *KMiddleList[T]) Reverse() {
+
+  // reverse
+  m.array.Reverse()
+
+  // update middle position
+  if m.array.size&1 == 0 {
+    m.pos += 1
+  }
+
+  // update middle node position
+  m.refresh(MoveUp, 0, 0) // refresh middle
 }
 
 func (m *KMiddleList[T]) ForEach(cb KListMapHandler[T]) error {
@@ -638,7 +726,7 @@ func (m *KMiddleList[T]) removeNode(node *KNode[T]) {
 
     } else { // update by knowing index
 
-      m.reset(MoveDown, 1)
+      m.reset(MoveDown, 1) // index?
 
     }
 

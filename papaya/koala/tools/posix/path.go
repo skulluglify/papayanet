@@ -1,7 +1,7 @@
 package posix
 
 import (
-  "PapayaNet/papaya/koala"
+  "skfw/papaya/koala"
 )
 
 type KPath struct {

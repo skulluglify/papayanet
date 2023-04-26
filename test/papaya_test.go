@@ -1,7 +1,7 @@
 package test
 
 import (
-  "PapayaNet/papaya"
+  "skfw/papaya"
   "testing"
 )
 

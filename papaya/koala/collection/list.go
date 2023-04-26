@@ -1,8 +1,8 @@
 package collection
 
 import (
-  "PapayaNet/papaya/panda/nosign"
   "errors"
+  "skfw/papaya/panda/nosign"
 )
 
 type KList[T comparable] struct {
@@ -29,9 +29,14 @@ type KListImpl[T comparable] interface {
   Pop() (T, error)
   Len() uint
 
+  Concat(values ...T) KListImpl[T]
+  ConcatArray(arrays ...KListImpl[T]) (KListImpl[T], error)
+  Replace(array KListImpl[T]) error
+
+  Reverse()
+
   ForEach(cb KListMapHandler[T]) error
 
-  // Concat(values ...any) KListImpl[T] << KListImpl[T] / T
   // Merge, Replace
 
   // Helper Methods
@@ -474,6 +479,84 @@ func (v *KList[T]) Len() uint {
   return v.size
 }
 
+func (v *KList[T]) Concat(values ...T) KListImpl[T] {
+
+  var array KListImpl[T]
+  array = v.Copy()
+
+  for _, value := range values {
+
+    array.Push(value)
+  }
+
+  return array
+}
+
+func (v *KList[T]) ConcatArray(arrays ...KListImpl[T]) (KListImpl[T], error) {
+
+  var err error
+
+  var i uint
+  var array KListImpl[T]
+  var value T
+  array = v.Copy()
+
+  for _, arr := range arrays {
+
+    for i = 0; i < arr.Len(); i++ {
+
+      if value, err = arr.Get(i); err != nil {
+
+        return array, err
+      }
+
+      array.Push(value)
+    }
+  }
+
+  return array, nil
+}
+
+func (v *KList[T]) Replace(array KListImpl[T]) error {
+
+  var err error
+
+  var i uint
+  var node *KNode[T]
+  var value T
+
+  node = v.head
+
+  for i = 0; i < nosign.Min(v.size, array.Len()); i++ {
+
+    // getting current value
+    if value, err = array.Get(i); err != nil {
+
+      return err
+    }
+
+    // set current node
+    node.Set(value)
+
+    // update node
+    node = node.next
+  }
+
+  for i = i + 1; i < array.Len(); i++ {
+
+    // getting current value
+    if value, err = array.Get(i); err != nil {
+
+      return err
+    }
+
+    // added current value
+    v.Push(value)
+  }
+
+  return nil
+}
+
 func (v *KList[T]) findNodeByIndex(index uint) (*KNode[T], error) {
 
   var i, m uint
@@ -583,6 +666,36 @@ func (v *KList[T]) removeNode(node *KNode[T]) {
   }
 
   // ---------- Head, Tail ----------
+}
+
+func (v *KList[T]) Reverse() {
+
+  var node, nodeSwap, nodeTemp *KNode[T]
+
+  node = v.head
+
+  v.head = v.tail
+  v.tail = node
+
+  nodeTemp = node.next
+
+  for nodeTemp != nil {
+
+    // initial node
+    node = nodeTemp.prev
+    nodeSwap = nodeTemp
+
+    // update nodeTemp
+    nodeTemp = nodeTemp.next
+
+    // swap
+    node.prev = nodeSwap
+    nodeSwap.next = node
+  }
+
+  // safe null
+  v.head.prev = nil
+  v.tail.next = nil
 }
 
 func (v *KList[T]) ForEach(cb KListMapHandler[T]) error {

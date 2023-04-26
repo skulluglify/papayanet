@@ -1,9 +1,9 @@
 package koala
 
 import (
-  "PapayaNet/papaya/koala/pp"
-  "PapayaNet/papaya/panda"
   "reflect"
+  "skfw/papaya/koala/pp"
+  "skfw/papaya/panda"
   "strconv"
 )
 

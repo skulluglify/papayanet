@@ -1,16 +1,16 @@
 package postgresql
 
 import (
-  "PapayaNet/papaya/koala/environ"
-  "PapayaNet/papaya/koala/kio"
-  "PapayaNet/papaya/koala/pp"
-  "PapayaNet/papaya/pigeon"
   "database/sql"
   "errors"
   "gorm.io/driver/postgres"
   "gorm.io/gorm"
   "math"
   "net/url"
+  "skfw/papaya/koala/environ"
+  "skfw/papaya/koala/kio"
+  "skfw/papaya/koala/pp"
+  "skfw/papaya/pigeon"
   "strconv"
   "strings"
 )

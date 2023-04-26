@@ -1,4 +1,4 @@
-module PapayaNet
+module skfw
 
 go 1.20
 

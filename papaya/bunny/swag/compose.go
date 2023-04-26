@@ -1,9 +1,9 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala/collection"
-  "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/tools/posix"
+  "skfw/papaya/koala/collection"
+  "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/tools/posix"
 )
 
 // compose, from expectation

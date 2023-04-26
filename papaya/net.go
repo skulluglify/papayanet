@@ -1,13 +1,13 @@
 package papaya
 
 import (
-  "PapayaNet/papaya/bunny/swag"
-  "PapayaNet/papaya/koala"
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/pigeon"
-  "PapayaNet/papaya/pigeon/drivers/postgresql"
-  "PapayaNet/papaya/util"
   "os"
+  "skfw/papaya/bunny/swag"
+  "skfw/papaya/koala"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/pigeon"
+  "skfw/papaya/pigeon/drivers/postgresql"
+  "skfw/papaya/util"
   "strconv"
 
   "github.com/gofiber/fiber/v2"

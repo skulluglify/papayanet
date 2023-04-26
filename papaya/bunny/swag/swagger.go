@@ -1,12 +1,12 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/collection"
-  "PapayaNet/papaya/koala/kornet"
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/tools/posix"
   "net/http"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
+  "skfw/papaya/koala/kornet"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/tools/posix"
   "strings"
 
   "github.com/gofiber/fiber/v2"

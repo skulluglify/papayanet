@@ -1,8 +1,8 @@
 package mapping
 
 import (
-  "PapayaNet/papaya/koala/pp"
   "reflect"
+  "skfw/papaya/koala/pp"
 )
 
 // try parsing into traditional typing, like boolean, int, uint, float, complex, string

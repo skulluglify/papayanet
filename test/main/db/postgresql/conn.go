@@ -1,11 +1,11 @@
 package main
 
 import (
-  "PapayaNet/papaya/pigeon"
-  "PapayaNet/papaya/pigeon/drivers/postgresql"
-  "PapayaNet/papaya/pigeon/templates/basic/models"
   "log"
   "os"
+  "skfw/papaya/pigeon"
+  "skfw/papaya/pigeon/drivers/postgresql"
+  "skfw/papaya/pigeon/templates/basic/models"
 )
 
 func main() {

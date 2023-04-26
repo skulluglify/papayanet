@@ -1,9 +1,9 @@
 package main
 
 import (
-	"PapayaNet/app"
-	"PapayaNet/papaya"
 	"fmt"
+	"skfw/app"
+	"skfw/papaya"
 )
 
 func main() {

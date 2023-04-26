@@ -1,9 +1,9 @@
 package swag
 
 import (
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
   "reflect"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
 )
 
 func SwagContentSchema(mimeType string, data any, description string) m.KMapImpl {

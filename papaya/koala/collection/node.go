@@ -83,6 +83,7 @@ func (v *KNode[T]) Before(node *KNode[T]) {
 
 func (v *KNode[T]) Swap(node *KNode[T]) {
 
+  // universal movement
   var next, prev *KNode[T]
 
   if node != nil {
@@ -95,14 +96,8 @@ func (v *KNode[T]) Swap(node *KNode[T]) {
     node.prev = v.prev
 
     // swap on next
-    if next != nil {
-      v.next = next
-    }
-
-    // swap on prev
-    if prev != nil {
-      v.prev = prev
-    }
+    v.next = next
+    v.prev = prev
   }
 }
 

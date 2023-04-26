@@ -1,9 +1,9 @@
 package kornet
 
 import (
-  "PapayaNet/papaya/koala/kio/leaf"
-  m "PapayaNet/papaya/koala/mapping"
   "net/url"
+  "skfw/papaya/koala/kio/leaf"
+  m "skfw/papaya/koala/mapping"
 )
 
 // boolean, number, string

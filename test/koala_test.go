@@ -1,9 +1,9 @@
 package test
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/gen"
-  "PapayaNet/papaya/koala/mapping"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/gen"
+  "skfw/papaya/koala/mapping"
   "testing"
 )
 

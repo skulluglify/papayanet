@@ -1,8 +1,8 @@
 package gen
 
 import (
-  "PapayaNet/papaya/koala"
   "errors"
+  "skfw/papaya/koala"
 )
 
 // ---------------------------- Iteration ----------------------------

@@ -1,12 +1,12 @@
 package basic
 
 import (
-  "PapayaNet/papaya"
-  "PapayaNet/papaya/bunny/swag"
-  "PapayaNet/papaya/koala/kornet"
-  m "PapayaNet/papaya/koala/mapping"
   "fmt"
   "net/http"
+  "skfw/papaya"
+  "skfw/papaya/bunny/swag"
+  "skfw/papaya/koala/kornet"
+  m "skfw/papaya/koala/mapping"
 )
 
 func MakeAuthTokenTask(pn papaya.NetImpl) *swag.SwagTask {

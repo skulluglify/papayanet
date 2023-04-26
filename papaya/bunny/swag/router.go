@@ -1,10 +1,10 @@
 package swag
 
 import (
-  "PapayaNet/papaya/bunny/swag/method"
-  "PapayaNet/papaya/koala/collection"
-  "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/tools/posix"
+  "skfw/papaya/bunny/swag/method"
+  "skfw/papaya/koala/collection"
+  "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/tools/posix"
 )
 
 type SwagRouter struct {

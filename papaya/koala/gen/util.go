@@ -1,8 +1,8 @@
 package gen
 
 import (
-  "PapayaNet/papaya/koala/pp"
   "reflect"
+  "skfw/papaya/koala/pp"
 )
 
 func KMapHunt(value any) bool {

@@ -1,11 +1,11 @@
 package main
 
 import (
-  "PapayaNet/papaya/koala"
-  "PapayaNet/papaya/koala/collection"
-  "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/tools/posix"
   "math"
+  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
+  "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/tools/posix"
 )
 
 func main() {

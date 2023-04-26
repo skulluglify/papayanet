@@ -1,8 +1,8 @@
 package swag
 
 import (
-  "PapayaNet/papaya/koala/collection"
-  "PapayaNet/papaya/koala/tools/posix"
+  "skfw/papaya/koala/collection"
+  "skfw/papaya/koala/tools/posix"
 )
 
 type SwagGroup struct {

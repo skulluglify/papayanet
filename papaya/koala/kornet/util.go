@@ -1,8 +1,6 @@
 package kornet
 
 import (
-  m "PapayaNet/papaya/koala/mapping"
-  "PapayaNet/papaya/koala/pp"
   "encoding/json"
   "encoding/xml"
   "errors"
@@ -10,6 +8,8 @@ import (
   "net/http"
   "net/url"
   "reflect"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "strconv"
   "strings"
 )

@@ -34,10 +34,9 @@ type KListImpl[T comparable] interface {
   Replace(array KListImpl[T]) error
 
   Reverse()
+  Sort()
 
   ForEach(cb KListMapHandler[T]) error
-
-  // Merge, Replace
 
   // Helper Methods
   findNodeByIndex(index uint) (*KNode[T], error)
@@ -678,25 +677,106 @@ func (v *KList[T]) Reverse() {
   v.head = v.tail
   v.tail = node
 
-  nodeTemp = node.next
+  if node != nil {
 
-  for nodeTemp != nil {
+    nodeTemp = node.next
 
-    // initial node
-    node = nodeTemp.prev
-    nodeSwap = nodeTemp
+    for nodeTemp != nil {
 
-    // update nodeTemp
-    nodeTemp = nodeTemp.next
+      // initial node
+      node = nodeTemp.prev
+      nodeSwap = nodeTemp
 
-    // swap
-    node.prev = nodeSwap
-    nodeSwap.next = node
+      // update nodeTemp
+      nodeTemp = nodeTemp.next
+
+      // swap
+      node.prev = nodeSwap
+      nodeSwap.next = node
+    }
+
+    // safe null
+    v.head.prev = nil
+    v.tail.next = nil
   }
+}
 
-  // safe null
-  v.head.prev = nil
-  v.tail.next = nil
+func (v *KList[T]) Sort() {
+
+  var p, q bool
+  var i, j uint
+  var node, nodeSafe, nodeTemp *KNode[T]
+
+  nodeSafe = v.head
+
+  for i = 0; i < v.size; i++ {
+
+    node = nodeSafe
+    nodeSafe = node.next
+    nodeTemp = v.head
+
+    for j = 0; j < i; j++ {
+
+      p, q = false, false
+
+      if nodeTemp.Gt(node) {
+
+        // swap linked
+        nodeTemp.Swap(node)
+
+        if nodeTemp == v.head {
+
+          v.head = node
+
+          if node == v.tail {
+
+            v.tail = nodeTemp
+          }
+
+          p = true
+
+        } else if nodeTemp == v.tail {
+
+          v.tail = node
+
+          if node == v.head {
+
+            v.head = nodeTemp
+          }
+
+          q = true
+        }
+
+        if node == v.head && !p {
+
+          v.head = nodeTemp
+
+          if nodeTemp == v.tail {
+
+            v.tail = node
+          }
+
+        } else if node == v.tail && !q {
+
+          v.tail = nodeTemp
+
+          if nodeTemp == v.head {
+
+            v.head = node
+          }
+        }
+
+        // node is nodeTemp
+        // nodeTemp is node
+
+        // swap variable
+        node, nodeTemp = nodeTemp, node.next
+        continue
+      }
+
+      nodeTemp = nodeTemp.next
+    }
+  }
 }
 
 func (v *KList[T]) ForEach(cb KListMapHandler[T]) error {

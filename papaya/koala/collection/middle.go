@@ -405,6 +405,14 @@ func (m *KMiddleList[T]) Reverse() {
   m.refresh(MoveUp, 0, 0) // refresh middle
 }
 
+func (m *KMiddleList[T]) Sort() {
+
+  m.array.Sort()
+
+  // hard reset
+  m.reset(MoveUp, 0)
+}
+
 func (m *KMiddleList[T]) ForEach(cb KListMapHandler[T]) error {
 
   return m.array.ForEach(cb)

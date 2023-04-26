@@ -17,6 +17,11 @@ type KNodeImpl[T comparable] interface {
   Prev() *KNode[T]
   Value() T
   Free()
+  Gt(node *KNode[T]) bool
+  Ge(node *KNode[T]) bool
+  Lt(node *KNode[T]) bool
+  Le(node *KNode[T]) bool
+  Eq(node *KNode[T]) bool
 }
 
 func KNodeNew[T comparable](value T) *KNode[T] {
@@ -88,16 +93,55 @@ func (v *KNode[T]) Swap(node *KNode[T]) {
 
   if node != nil {
 
-    next = node.next
-    prev = node.prev
+    /*
+    * Normalize
+     */
+
+    next = node.next // nullable
+    prev = node.prev // nullable
+
+    if next != nil {
+
+      next.prev = v
+    }
+
+    if prev != nil {
+
+      prev.next = v
+    }
+
+    /*
+    * Normalize
+     */
 
     // linked on current node
-    node.next = v.next
-    node.prev = v.prev
+    node.next = v.next // nullable
+    node.prev = v.prev // nullable
 
-    // swap on next
-    v.next = next
-    v.prev = prev
+    // swap on another node
+    v.next = next // nullable
+    v.prev = prev // nullable
+
+    /*
+    * Normalize
+     */
+
+    next = node.next // is v.next
+    prev = node.prev // is v.prev
+
+    if next != nil {
+
+      next.prev = node
+    }
+
+    if prev != nil {
+
+      prev.next = node
+    }
+
+    /*
+    * Normalize
+     */
   }
 }
 
@@ -136,4 +180,31 @@ func (v *KNode[T]) Free() {
   if prev != nil {
     prev.next = next
   }
+}
+
+// comparable
+
+func (v *KNode[T]) Gt(node *KNode[T]) bool {
+
+  return CompareNew[T](v.value, node.value).Gt()
+}
+
+func (v *KNode[T]) Ge(node *KNode[T]) bool {
+
+  return CompareNew[T](v.value, node.value).Ge()
+}
+
+func (v *KNode[T]) Lt(node *KNode[T]) bool {
+
+  return CompareNew[T](v.value, node.value).Lt()
+}
+
+func (v *KNode[T]) Le(node *KNode[T]) bool {
+
+  return CompareNew[T](v.value, node.value).Le()
+}
+
+func (v *KNode[T]) Eq(node *KNode[T]) bool {
+
+  return CompareNew[T](v.value, node.value).Eq()
 }

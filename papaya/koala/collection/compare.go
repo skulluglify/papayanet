@@ -249,6 +249,10 @@ func CompareValue(vA reflect.Value, vB reflect.Value) int {
       case reflect.Array, reflect.Slice:
 
         return CompareArray(vA.Interface(), vB.Interface())
+
+      case reflect.Map, reflect.Struct:
+
+        return Unknown
       }
     }
   }

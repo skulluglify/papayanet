@@ -19,12 +19,13 @@ f870439174afa4f992b9e3d111f2734f papaya/bunny/swag/typed.go
 df75bac659bb60776706eafeae1b6344 papaya/bunny/swag/util.go
 f94672a5a8573b77b065ee330acf4623 papaya/bunny/swag/validator.go
 9f9365bdd9db5f4b37a831b863cad3db papaya/koala/collection/action.go
-d3c3f43bf7e8d5101a8b70ac431f725c papaya/koala/collection/compare.go
+b5327cd21b439720d0ae4d2ea7afd9d7 papaya/koala/collection/compare.go
 f867613a2bfb9f5b83ab154e29f5a24b papaya/koala/collection/list.go
 d893914f13d665f892438039a17bacd9 papaya/koala/collection/middle.go
 d71ca03b0745249fe280aba405ba499f papaya/koala/collection/node.go
 8ffc3f5cb6e59c33afbfff3823947443 papaya/koala/collection/typed.go
 e979757c99c923989316b4a5256a1f6f papaya/koala/collection/util.go
+58a0b692e3e37b0d5ff8ae4475f824e4 papaya/koala/collection/value.go
 bdf2743e73e7bb517900498270e27541 papaya/koala/console.go
 0cfc420aecae5ef123694dd72d1a1103 papaya/koala/cores/jsc/Runtime.go
 eddcca4eb161c1d7b322de9d47b6220b papaya/koala/cores/jsc/types/Array.go

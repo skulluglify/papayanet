@@ -19,7 +19,7 @@ f870439174afa4f992b9e3d111f2734f papaya/bunny/swag/typed.go
 df75bac659bb60776706eafeae1b6344 papaya/bunny/swag/util.go
 f94672a5a8573b77b065ee330acf4623 papaya/bunny/swag/validator.go
 9f9365bdd9db5f4b37a831b863cad3db papaya/koala/collection/action.go
-3bf8e9f4c58d63a427e38603dc94ab45 papaya/koala/collection/compare.go
+d3c3f43bf7e8d5101a8b70ac431f725c papaya/koala/collection/compare.go
 f867613a2bfb9f5b83ab154e29f5a24b papaya/koala/collection/list.go
 d893914f13d665f892438039a17bacd9 papaya/koala/collection/middle.go
 d71ca03b0745249fe280aba405ba499f papaya/koala/collection/node.go

@@ -93,6 +93,70 @@ func (c *Compare[T]) Eq() bool {
   return false
 }
 
+func CompareArray(a any, b any) int {
+
+  var i, k, m, n int
+
+  vA := pp.KIndirectValueOf(a)
+  vB := pp.KIndirectValueOf(b)
+
+  if vA.IsValid() && vB.IsValid() {
+
+    tA := vA.Type()
+    tB := vB.Type()
+
+    if tA.Kind() == tB.Kind() {
+
+      switch tA.Kind() {
+      case reflect.Array, reflect.Slice:
+
+        eA := tA.Elem()
+        eB := tB.Elem()
+
+        if eA.Kind() == eB.Kind() {
+
+          m, n = vA.Len(), vB.Len()
+          k = panda.Min(m, n)
+
+          for i = 0; i < k; i++ {
+
+            a = vA.Index(i).Interface()
+            b = vB.Index(i).Interface()
+
+            compare := CompareNew[any](a, b)
+
+            if compare.Gt() {
+
+              return IsGreaterThan
+            }
+
+            if compare.Lt() {
+
+              return IsLessThan
+            }
+          }
+
+          // by length
+
+          if m > n {
+
+            return IsGreaterThan
+          }
+
+          if m < n {
+
+            return IsLessThan
+          }
+
+          return IsEqual
+        }
+      }
+    }
+  }
+
+  return Unknown
+}
+
 func CompareString(a string, b string) int {
 
   var i, k, m, n int
@@ -141,7 +205,7 @@ func CompareValue(vA reflect.Value, vB reflect.Value) int {
     tB := vB.Type()
 
     // same data type
-    if tA == tB {
+    if tA.Kind() == tB.Kind() {
 
       switch tA.Kind() {
       case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -161,7 +225,7 @@ func CompareValue(vA reflect.Value, vB reflect.Value) int {
           return IsLessThan
         }
 
-      case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+      case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64: // nosafe: reflect.Uintptr
 
         if vA.Uint() == vB.Uint() {
 
@@ -181,6 +245,10 @@ func CompareValue(vA reflect.Value, vB reflect.Value) int {
       case reflect.String:
 
         return CompareString(vA.String(), vB.String())
+
+      case reflect.Array, reflect.Slice:
+
+        return CompareArray(vA.Interface(), vB.Interface())
       }
     }
   }

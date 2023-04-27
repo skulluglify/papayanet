@@ -2,7 +2,7 @@ package gen
 
 import (
   "errors"
-  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
 )
 
 // ---------------------------- Iteration ----------------------------
@@ -42,8 +42,8 @@ type KIteration[K any, V any] struct {
 type KIterationImpl[K any, V any] interface {
   Set(key K, value V, done bool)
   SetValues(key K, value V)
-  SetEnum(enum koala.KEnumImpl[K, V])
-  Enum() koala.KEnumImpl[K, V]
+  SetEnum(enum collection.KEnumImpl[K, V])
+  Enum() collection.KEnumImpl[K, V]
   Next() KIterationImpl[K, V]
   HasNext() bool
   Error() error
@@ -77,7 +77,7 @@ func (v *KIteration[K, V]) SetValues(key K, value V) {
   v.mark = true
 }
 
-func (v *KIteration[K, V]) SetEnum(enum koala.KEnumImpl[K, V]) {
+func (v *KIteration[K, V]) SetEnum(enum collection.KEnumImpl[K, V]) {
 
   v.key = enum.Key()
   v.value = enum.Value()
@@ -89,9 +89,9 @@ func (v *KIteration[K, V]) SetEnum(enum koala.KEnumImpl[K, V]) {
   v.mark = true
 }
 
-func (v *KIteration[K, V]) Enum() koala.KEnumImpl[K, V] {
+func (v *KIteration[K, V]) Enum() collection.KEnumImpl[K, V] {
 
-  return koala.KEnumNew(v.key, v.value)
+  return collection.KEnumNew(v.key, v.value)
 }
 
 func (v *KIteration[K, V]) Error() error {

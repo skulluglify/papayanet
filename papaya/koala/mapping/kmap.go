@@ -1,7 +1,7 @@
 package mapping
 
 import (
-  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
   "skfw/papaya/koala/gen"
 )
 
@@ -10,7 +10,7 @@ import (
 type KMap map[string]any
 type KMapImpl interface {
   Iterable() gen.KMapIterationImpl
-  Enums() koala.KEnums[string, any]
+  Enums() []collection.KEnumImpl[string, any]
   Keys() Keys
   Values() []any
   Get(name string) any
@@ -25,7 +25,7 @@ type KMapImpl interface {
 type KMapTree KMap
 type KMapTreeImpl interface {
   Iterable() gen.KMapIterationImpl
-  Enums() koala.KEnums[string, any]
+  Enums() []collection.KEnumImpl[string, any]
   Keys() Keys
   Get(name string) any
   Set(name string, data any) bool
@@ -41,7 +41,7 @@ func (m *KMap) Iterable() gen.KMapIterationImpl {
   return gen.KMapIterable(m)
 }
 
-func (m *KMap) Enums() koala.KEnums[string, any] {
+func (m *KMap) Enums() []collection.KEnumImpl[string, any] {
 
   return KMapEnums(m)
 }
@@ -97,7 +97,7 @@ func (m *KMapTree) Iterable() gen.KMapIterationImpl {
   return gen.KMapTreeIterable(m)
 }
 
-func (m *KMapTree) Enums() koala.KEnums[string, any] {
+func (m *KMapTree) Enums() []collection.KEnumImpl[string, any] {
 
   return KMapTreeEnums(m)
 }

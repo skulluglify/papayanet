@@ -2,14 +2,14 @@ package mapping
 
 import (
   "reflect"
-  "skfw/papaya/koala"
+  "skfw/papaya/koala/collection"
   "skfw/papaya/koala/pp"
   "strconv"
 )
 
-func KMapEnums(mapping any) koala.KEnums[string, any] {
+func KMapEnums(mapping any) []collection.KEnumImpl[string, any] {
 
-  enums := koala.KEnumsNew[string, any](0)
+  enums := make([]collection.KEnumImpl[string, any], 0)
 
   val := pp.KIndirectValueOf(mapping)
 
@@ -23,7 +23,7 @@ func KMapEnums(mapping any) koala.KEnums[string, any] {
       for i := 0; i < val.Len(); i++ {
 
         k, v := strconv.Itoa(i), val.Index(i).Interface()
-        enum := koala.KEnumNew[string, any](k, v)
+        enum := collection.KEnumNew[string, any](k, v)
         enums = append(enums, enum)
       }
 
@@ -38,7 +38,7 @@ func KMapEnums(mapping any) koala.KEnums[string, any] {
         for mapIter.Next() {
 
           k, v := mapIter.Key().String(), mapIter.Value().Interface()
-          enum := koala.KEnumNew[string, any](k, v)
+          enum := collection.KEnumNew[string, any](k, v)
           enums = append(enums, enum)
         }
       }
@@ -65,7 +65,7 @@ func KMapEnums(mapping any) koala.KEnums[string, any] {
 
             k, v := tf.Name, vf.Interface()
             t := pp.QStr(tags.Get("tag"), tags.Get("json"))
-            enum := koala.KEnumNew[string, any](pp.QStr(t, k), v)
+            enum := collection.KEnumNew[string, any](pp.QStr(t, k), v)
             enums = append(enums, enum)
           }
         }
@@ -78,21 +78,21 @@ func KMapEnums(mapping any) koala.KEnums[string, any] {
   return enums
 }
 
-func KMapTreeEnums(mapping any) koala.KEnums[string, any] {
+func KMapTreeEnums(mapping any) []collection.KEnumImpl[string, any] {
 
-  enums := koala.KEnumsNew[string, any](0)
+  enums := make([]collection.KEnumImpl[string, any], 0)
 
   for _, first := range KMapEnums(mapping) {
 
     k, v := first.Tuple()
 
-    enum := koala.KEnumNew[string, any](k, v)
+    enum := collection.KEnumNew[string, any](k, v)
     enums = append(enums, enum)
 
     for _, second := range KMapTreeEnums(v) {
 
       kk, vv := second.Tuple()
-      enum := koala.KEnumNew[string, any](k+"."+kk, vv)
+      enum := collection.KEnumNew[string, any](k+"."+kk, vv)
       enums = append(enums, enum)
     }
   }

@@ -413,7 +413,7 @@ func (m *KMiddleList[T]) Sort() {
   m.reset(MoveUp, 0)
 }
 
-func (m *KMiddleList[T]) ForEach(cb KListMapHandler[T]) error {
+func (m *KMiddleList[T]) ForEach(cb KIndexHandler[T]) error {
 
   return m.array.ForEach(cb)
 }

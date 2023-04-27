@@ -45,7 +45,7 @@ func KMapEncodeJSON(mapping any) string {
       var res string
 
       enums := KMapEnums(val)
-      n := enums.Len()
+      n := len(enums)
 
       for i, enum := range enums {
 

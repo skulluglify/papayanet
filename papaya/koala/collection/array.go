@@ -36,7 +36,7 @@ type KListImpl[T comparable] interface {
   Reverse()
   Sort()
 
-  ForEach(cb KListMapHandler[T]) error
+  ForEach(cb KIndexHandler[T]) error
 
   // Helper Methods
   findNodeByIndex(index uint) (*KNode[T], error)
@@ -779,7 +779,7 @@ func (v *KList[T]) Sort() {
   }
 }
 
-func (v *KList[T]) ForEach(cb KListMapHandler[T]) error {
+func (v *KList[T]) ForEach(cb KIndexHandler[T]) error {
 
   var i uint
   var next *KNode[T]

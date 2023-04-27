@@ -53,19 +53,20 @@ import (
 
 type UserModel struct {
   *gorm.Model
-  ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary" json:"id"`
-  Name        string    `gorm:"type:varchar(52);" json:"name"`
-  Username    string    `gorm:"type:varchar(16);unique;not null" json:"username"`
-  Email       string    `gorm:"type:varchar(254);unique;not null" json:"email"`
-  Password    string    `gorm:"type:varchar(128);not null" json:"password"`
-  Gender      string    `gorm:"type:char(1)" json:"gender"`
-  Phone       string    `gorm:"type:varchar(24)" json:"phone"`
-  DOB         time.Time `gorm:"type:timestamp" json:"dob"`
-  Address     string    `gorm:"type:varchar(128)" json:"address"`
-  CountryCode string    `gorm:"type:varchar(4)" json:"country_code"`
-  City        string    `gorm:"type:varchar(64)" json:"city"`
-  PostalCode  string    `gorm:"type:varchar(10)" json:"postal_code"`
-  Admin       bool      `gorm:"type:boolean" gorm:"default:false" json:"admin"`
+  ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primary" json:"id"`
+  Name        string         `gorm:"type:varchar(52);" json:"name"`
+  Username    string         `gorm:"type:varchar(16);unique;not null" json:"username"`
+  Email       string         `gorm:"type:varchar(254);unique;not null" json:"email"`
+  Password    string         `gorm:"type:varchar(128);not null" json:"password"`
+  Gender      string         `gorm:"type:char(1)" json:"gender"`
+  Phone       string         `gorm:"type:varchar(24)" json:"phone"`
+  DOB         time.Time      `gorm:"type:timestamp" json:"dob"`
+  Address     string         `gorm:"type:varchar(128)" json:"address"`
+  CountryCode string         `gorm:"type:varchar(4)" json:"country_code"`
+  City        string         `gorm:"type:varchar(64)" json:"city"`
+  PostalCode  string         `gorm:"type:varchar(10)" json:"postal_code"`
+  Admin       bool           `gorm:"type:boolean;default:false" json:"admin"`
+  Sessions    []SessionModel `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"sessions"`
 }
 
 // set table name

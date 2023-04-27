@@ -7,3 +7,6 @@ clean:
 
 test:
 	go test -v test/*.go
+
+tidy:
+	go mod tidy

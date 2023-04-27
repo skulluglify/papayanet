@@ -9,6 +9,8 @@ import (
 type SessionModel struct {
   *gorm.Model
   ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary" json:"id"`
+  UserID    uuid.UUID `gorm:"type:uuid" json:"user_id"`
+  UserAgent string    `gorm:"type:text" json:"user_agent"`
   Token     string    `gorm:"type:text;unique;not null" json:"token"`
   SecretKey string    `gorm:"type:text;unique;not null" json:"secret_key"`
   Expired   time.Time `gorm:"type:timestamp;not null" json:"expired"`

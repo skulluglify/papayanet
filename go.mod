@@ -5,6 +5,7 @@ go 1.20
 // requirements
 require (
 	github.com/gofiber/fiber/v2 v2.44.0
+	github.com/golang-jwt/jwe v0.0.0-20220815104040-b2647e820b90
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1

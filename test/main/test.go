@@ -25,7 +25,7 @@ func main() {
 
   // TODO: fix problem --
   // TODO: initial val.Type() after val.IsValid() ++
-  removes := list.Splice(1, 1, 72, 80)
+  removes, _ := list.Splice(1, 1, 72, 80)
 
   for i = 0; i < removes.Len(); i++ {
 

@@ -11,43 +11,47 @@ func SwagResponseSchemes(responses m.KMapImpl) m.KMapImpl {
 
   res := &m.KMap{}
 
-  for _, enum := range responses.Enums() {
+  // bypass responses, if not set up
+  if responses != nil {
 
-    k, v := enum.Tuple()
+    for _, enum := range responses.Enums() {
 
-    if statusCode := m.KValueToString(k); statusCode != "" {
+      k, v := enum.Tuple()
 
-      // --- status code ---
+      if statusCode := m.KValueToString(k); statusCode != "" {
 
-      n, err := strconv.Atoi(statusCode)
+        // --- status code ---
 
-      if err != nil {
+        n, err := strconv.Atoi(statusCode)
 
-        n = 200
+        if err != nil {
 
-        // wrong implement status code
-        panic("wrong implemented status code in responses")
-      }
+          n = 200
 
-      statusMessage := http.StatusText(n)
+          // wrong implement status code
+          panic("wrong implemented status code in responses")
+        }
 
-      // --- status code ---
+        statusMessage := http.StatusText(n)
 
-      if mm := m.KMapCast(v); mm != nil {
+        // --- status code ---
 
-        if body := m.KMapCast(mm.Get("body")); body != nil {
+        if mm := m.KMapCast(v); mm != nil {
 
-          for _, bEnum := range body.Enums() {
+          if body := m.KMapCast(mm.Get("body")); body != nil {
 
-            bK, bV := bEnum.Tuple()
+            for _, bEnum := range body.Enums() {
 
-            if mimeTy := m.KValueToString(bK); bK != "" {
+              bK, bV := bEnum.Tuple()
 
-              if vM := m.KMapCast(bV); vM != nil {
+              if mimeTy := m.KValueToString(bK); bK != "" {
 
-                schema := vM.Get("schema")
-                description := pp.QStr(m.KValueToString(vM.Get("description")), statusMessage)
-                res.Put(statusCode, SwagContentSchema(mimeTy, schema, description))
+                if vM := m.KMapCast(bV); vM != nil {
+
+                  schema := vM.Get("schema")
+                  description := pp.QStr(m.KValueToString(vM.Get("description")), statusMessage)
+                  res.Put(statusCode, SwagContentSchema(mimeTy, schema, description))
+                }
               }
             }
           }

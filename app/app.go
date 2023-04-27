@@ -4,7 +4,7 @@ import (
 	"skfw/app/controllers"
 	"skfw/papaya"
 	"skfw/papaya/bunny/swag"
-	"skfw/papaya/pigeon/templates/basic"
+	"skfw/papaya/pigeon/templates/basic/repository"
 )
 
 func App(pn papaya.NetImpl) error {
@@ -15,38 +15,13 @@ func App(pn papaya.NetImpl) error {
 		Description: "Example API for documentation",
 	})
 
-	//conn := pn.Connection()
-	//db, _ := conn.Database()
-
-	swagger.AddTask(swag.MakeSwagTask("request.task", func(ctx *swag.SwagContext) error {
-
-		//ctx.Prevent()
-
-		pn.Logger().Log("task running 1 ...", ctx.Event())
-
-		return nil
-	}))
-
-	swagger.AddTask(swag.MakeSwagTask("request.permit", func(ctx *swag.SwagContext) error {
-
-		pn.Logger().Log("task permit granted ...", ctx.Event())
-
-		return nil
-	}))
-
-	swagger.AddTask(swag.MakeSwagTask("request.task", func(ctx *swag.SwagContext) error {
-
-		pn.Logger().Log("task running 2 ...", ctx.Event())
-
-		return nil
-	}))
-
-	swagger.AddTask(basic.MakeAuthTokenTask(pn))
+	simpleAction := repository.SimpleActionNew(pn.Connection())
+	swagger.AddTask(simpleAction.MakeAuthTokenTask())
 
 	mainGroup := swagger.Group("/api/v1", "Schema")
 	userGroup := mainGroup.Group("/users", "Authentication")
 
-	controllers.UserController(userGroup.Router())
+	controllers.UserController(pn, userGroup.Router())
 
 	if err := swagger.Start(); err != nil {
 		return err

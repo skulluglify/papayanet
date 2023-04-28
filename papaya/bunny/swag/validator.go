@@ -23,7 +23,7 @@ type SwagRequestValidator struct {
 
 type SwagRequestValidatorImpl interface {
   Init(exp m.KMapImpl, ctx *fiber.Ctx)
-  Validation() (kornet.Request, error)
+  Validation() (*kornet.Request, error)
 }
 
 func SwagRequestValidatorNew(exp m.KMapImpl, ctx *fiber.Ctx) SwagRequestValidatorImpl {
@@ -39,11 +39,11 @@ func (v *SwagRequestValidator) Init(exp m.KMapImpl, ctx *fiber.Ctx) {
   v.exp = exp
 }
 
-func (v *SwagRequestValidator) Validation() (kornet.Request, error) {
+func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
   // try getting content-type and charset
 
-  request := kornet.Request{}
+  request := &kornet.Request{}
 
   //charset := "UTF-8"
   contentTy := string(v.Ctx.Request().Header.ContentType())
@@ -231,7 +231,7 @@ func (v *SwagRequestValidator) Validation() (kornet.Request, error) {
   // re-packing into json format
   request.Body = leaf.KMakeBuffer([]byte(body.JSON()))
 
-  var header map[string]any
+  header := map[string]any{}
 
   if content := m.KMapCast(v.exp.Get("request.headers")); content != nil {
 
@@ -241,41 +241,46 @@ func (v *SwagRequestValidator) Validation() (kornet.Request, error) {
 
       k, t := enum.Tuple()
 
-      if p, ok := h[k]; ok {
+      required, token := SwagHeaderRequired(k)
 
-        switch t {
-        case "bool", "boolean":
+      if required {
 
-          y, err := strconv.ParseBool(p)
+        if p, ok := h[token]; ok {
 
-          if err != nil {
+          switch t {
+          case "bool", "boolean":
 
-            return request, fmt.Errorf("key `%s` either not set or is not a boolean in header", k)
+            y, err := strconv.ParseBool(p)
+
+            if err != nil {
+
+              return request, fmt.Errorf("key `%s` either not set or is not a boolean in header", k)
+            }
+
+            header[token] = y
+
+            break
+
+          case "int", "number", "integer", "byte":
+
+            // try parsing if not number
+            n, err := kornet.KSafeParsingNumber(p)
+
+            if err != nil {
+
+              return request, fmt.Errorf("key `%s` either not set or is not a number in request header", k)
+            }
+
+            header[token] = n
+
+            break
+
+          case "str", "text", "string":
+
+            header[token] = p
+
+            break
           }
-
-          header[k] = y
-
-          break
-
-        case "int", "number", "integer", "byte":
-
-          // try parsing if not number
-          n, err := kornet.KSafeParsingNumber(p)
-
-          if err != nil {
-
-            return request, fmt.Errorf("key `%s` either not set or is not a number in request header", k)
-          }
-
-          header[k] = n
-
-          break
-
-        case "str", "text", "string":
-
-          header[k] = p
-
-          break
         }
       }
     }
@@ -406,8 +411,8 @@ func (v *SwagRequestValidator) Validation() (kornet.Request, error) {
     }
   }
 
-  pp := m.KMap(paths)
-  request.Path = &pp
+  mp := m.KMap(paths)
+  request.Path = &mp
 
   request.Query = queries
 

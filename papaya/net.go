@@ -6,6 +6,7 @@ import (
   "skfw/papaya/koala"
   m "skfw/papaya/koala/mapping"
   "skfw/papaya/pigeon"
+  "skfw/papaya/pigeon/drivers/common"
   "skfw/papaya/pigeon/drivers/postgresql"
   "skfw/papaya/util"
   "strconv"
@@ -19,8 +20,8 @@ type Net struct {
   *fiber.Config
   *fiber.App
   *postgresql.DBConfig
-  *postgresql.DBConnection
-  version koala.KVersionImpl
+  DBConnection common.DBConnectionImpl
+  version      koala.KVersionImpl
 }
 
 type NetImpl interface {
@@ -28,7 +29,7 @@ type NetImpl interface {
   Serve(host string, port int) error
   MakeSwagger(info *swag.SwagInfo) swag.SwagImpl
   Logger() koala.KConsoleImpl
-  Connection() postgresql.DBConnectionImpl
+  Connection() common.DBConnectionImpl
   Version() koala.KVersionImpl
   Use(args ...any)
   Close() error
@@ -106,7 +107,7 @@ func (n *Net) MakeSwagger(info *swag.SwagInfo) swag.SwagImpl {
   return swag.MakeSwag(n.App, info)
 }
 
-func (n *Net) Connection() postgresql.DBConnectionImpl {
+func (n *Net) Connection() common.DBConnectionImpl {
 
   return n.DBConnection
 }

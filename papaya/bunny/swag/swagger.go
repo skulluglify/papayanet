@@ -170,6 +170,8 @@ func (swag *Swag) Start() error {
       // auth token
       // request validation
 
+      context := MakeSwagContext(ctx, false)
+
       if requestValidation {
 
         validator := SwagRequestValidatorNew(exp, ctx)
@@ -180,17 +182,20 @@ func (swag *Swag) Start() error {
           return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
         }
 
-        func(_ any) {}(req)
-        //fmt.Println(req.Query)
+        context.Bind(req, nil)
       }
 
-      if swag.SwagTasksQueueImpl.Start(exp, ctx) {
+      if err := swag.SwagTasksQueueImpl.Start(exp, context); err != nil {
 
-        // stopped process response
+        if !context.Revoke() {
+
+          return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))
+        }
+
         return nil
       }
 
-      return value.Handler(MakeSwagContext(ctx, false))
+      return value.Handler(context)
     })
 
     swag.AddTag(tag)

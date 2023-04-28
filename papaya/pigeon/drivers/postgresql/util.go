@@ -1,8 +1,12 @@
 package postgresql
 
-import "database/sql"
+import (
+  "database/sql"
+  "skfw/papaya/pigeon/drivers/common"
+  "strings"
+)
 
-func Query(conn DBConnectionImpl, query string, args ...any) (*sql.Rows, error) {
+func Query(conn common.DBConnectionImpl, query string, args ...any) (*sql.Rows, error) {
 
   // SHORT NAME function query FROM db.DB()
 
@@ -16,25 +20,38 @@ func Query(conn DBConnectionImpl, query string, args ...any) (*sql.Rows, error) 
   return db.Query("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
 }
 
-func PgEnableExtensionUUID(conn DBConnectionImpl) error {
+func IsPostgreSQL(conn common.DBConnectionImpl) bool {
+
+  return strings.HasPrefix(conn.DSN(), "postgres")
+}
+
+func PgEnableExtensionUUID(conn common.DBConnectionImpl) error {
 
   // FIX PROBLEM USE function uuid_generate_v4()
 
-  if _, err := Query(conn, "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"); err != nil {
+  // check scheme is postgres
+  if IsPostgreSQL(conn) {
 
-    return err
+    if _, err := Query(conn, "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"); err != nil {
+
+      return err
+    }
   }
 
   return nil
 }
 
-func PgSetTimeZoneUTC(conn DBConnectionImpl) error {
+func PgSetTimeZoneUTC(conn common.DBConnectionImpl) error {
 
   // GENERIC PURPOSE SET TIMEZONE INTO UTC MODE
 
-  if _, err := Query(conn, "SET TIME ZONE \"UTC\";"); err != nil {
+  // check scheme is postgres
+  if IsPostgreSQL(conn) {
 
-    return err
+    if _, err := Query(conn, "SET TIME ZONE \"UTC\";"); err != nil {
+
+      return err
+    }
   }
 
   return nil

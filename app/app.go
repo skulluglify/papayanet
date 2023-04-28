@@ -4,10 +4,13 @@ import (
 	"skfw/app/controllers"
 	"skfw/papaya"
 	"skfw/papaya/bunny/swag"
-	"skfw/papaya/pigeon/templates/basic/repository"
+	"skfw/papaya/pigeon/templates/basicAuth/repository"
+	"time"
 )
 
 func App(pn papaya.NetImpl) error {
+
+	var err error
 
 	swagger := pn.MakeSwagger(&swag.SwagInfo{
 		Title:       "Example API",
@@ -15,15 +18,29 @@ func App(pn papaya.NetImpl) error {
 		Description: "Example API for documentation",
 	})
 
-	simpleAction := repository.SimpleActionNew(pn.Connection())
-	swagger.AddTask(simpleAction.MakeAuthTokenTask())
-
 	mainGroup := swagger.Group("/api/v1", "Schema")
 	userGroup := mainGroup.Group("/users", "Authentication")
 
-	controllers.UserController(pn, userGroup.Router())
+	userRouter := userGroup.Router()
 
-	if err := swagger.Start(); err != nil {
+	expired := time.Hour * 24
+	activeDuration := time.Minute * 30
+	maxSessions := 6
+
+	basicAuth := repository.BasicAuthNew(pn.Connection(), expired, activeDuration, maxSessions)
+
+	swagger.AddTask(basicAuth.MakeAuthTokenTask())
+
+	basicAuth.MakeSessionEndpoint(userRouter)
+	basicAuth.MakeUserLoginEndpoint(userRouter)
+	basicAuth.MakeUserRegisterEndpoint(userRouter)
+
+	err = controllers.UserController(pn, userRouter)
+	if err != nil {
+		return err
+	}
+
+	if err = swagger.Start(); err != nil {
 		return err
 	}
 

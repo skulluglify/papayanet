@@ -11,8 +11,8 @@ import (
   "skfw/papaya/koala/kio"
   "skfw/papaya/koala/pp"
   "skfw/papaya/pigeon"
+  "skfw/papaya/pigeon/drivers/common"
   "strconv"
-  "strings"
 )
 
 // Ref: https://www.postgresql.org/docs/current/libpq-connect.html
@@ -22,18 +22,7 @@ import (
 // TODO: postgresql not implemented connection by socket
 
 type DBConfig struct {
-
-  // general purpose
-  Host     string `env:"DB_HOST"`
-  Port     int    `env:"DB_PORT"`
-  UnixSock string `env:"DB_UNIX_SOCK"`
-  Username string `env:"DB_USERNAME"`
-  Password string `env:"DB_PASSWORD"`
-  PassFile string `env:"DB_PASSWORD_FILE"`
-  TimeZone string `env:"DB_TIMEZONE"`
-  Charset  string `env:"DB_CHARSET"`
-  Secure   bool   `env:"DB_SECURE"`
-  Name     string `env:"DB_NAME"`
+  *common.DBConfig
 
   // postgresql only
   PgConnectTimeout  int    `env:"PG_CONNECT_TIMEOUT"`
@@ -47,27 +36,19 @@ type DBConfig struct {
 }
 
 type DBConnection struct {
-  *gorm.Config
   *gorm.DB
+  *gorm.Config
   *DBConfig
 }
 
-type DBConnectionImpl interface {
-  Init(flags int) (*gorm.DB, error)
-  IsUnixSock() bool
-  RawQuery() string
-  Database() (*sql.DB, error)
-  GORM() *gorm.DB
-  String() string
-  Close() error
-}
-
-func DBConnectionNew(flags int) (*DBConnection, error) {
+func DBConnectionNew(flags int) (common.DBConnectionImpl, error) {
 
   conn := &DBConnection{
     Config: &gorm.Config{},
     DBConfig: &DBConfig{
-      Port: 5432,
+      DBConfig: &common.DBConfig{
+        Port: 5432,
+      },
     },
   }
 
@@ -79,18 +60,21 @@ func (c *DBConnection) Init(flags int) (*gorm.DB, error) {
 
   if pp.QFlag(flags, pigeon.InitLoadEnviron) {
 
-    envLoader := environ.KEnvLoaderNew[*DBConfig]()
-    envLoader.Load(c.DBConfig)
+    // common load
+    environ.KEnvLoaderNew[*common.DBConfig]().Load(c.DBConfig.DBConfig)
+
+    // current load
+    environ.KEnvLoaderNew[*DBConfig]().Load(c.DBConfig)
   }
 
-  if math.MaxUint16 < c.Port {
+  if math.MaxUint16 < c.DBConfig.Port {
 
     panic("var `port` has been configured incorrectly")
   }
 
-  DSN := c.String()
+  DSN := c.DSN()
 
-  DB, err := gorm.Open(postgres.Open(DSN), c)
+  DB, err := gorm.Open(postgres.Open(DSN), c.Config)
 
   if err != nil {
 
@@ -120,53 +104,53 @@ func (c *DBConnection) RawQuery() string {
   timeZone := "UTC"
 
   // general purpose
-  if c.Secure {
+  if c.DBConfig.Secure {
 
     sslmode = "require"
   }
 
-  if c.Charset != "" {
+  if c.DBConfig.Charset != "" {
 
-    clientEncoding = c.Charset
+    clientEncoding = c.DBConfig.Charset
   }
 
-  if c.TimeZone != "" {
+  if c.DBConfig.TimeZone != "" {
 
-    timeZone = c.TimeZone
+    timeZone = c.DBConfig.TimeZone
   }
 
   // postgresql only
 
-  if c.PgConnectTimeout != 0 {
-    connectTimeout = c.PgConnectTimeout
+  if c.DBConfig.PgConnectTimeout != 0 {
+    connectTimeout = c.DBConfig.PgConnectTimeout
   }
 
-  if c.PgSSLMode != "" {
-    sslmode = c.PgSSLMode
+  if c.DBConfig.PgSSLMode != "" {
+    sslmode = c.DBConfig.PgSSLMode
   }
 
-  if c.PgSSLCert != "" {
-    sslcert = c.PgSSLCert
+  if c.DBConfig.PgSSLCert != "" {
+    sslcert = c.DBConfig.PgSSLCert
   }
 
-  if c.PgSSLPassword != "" {
-    sslpassword = c.PgSSLPassword
+  if c.DBConfig.PgSSLPassword != "" {
+    sslpassword = c.DBConfig.PgSSLPassword
   }
 
-  if c.PgApplicationName != "" {
-    applicationName = c.PgApplicationName
+  if c.DBConfig.PgApplicationName != "" {
+    applicationName = c.DBConfig.PgApplicationName
   }
 
-  if c.PgOptions != "" {
-    options = c.PgOptions
+  if c.DBConfig.PgOptions != "" {
+    options = c.DBConfig.PgOptions
   }
 
-  if c.PgClientEncoding != "" {
-    clientEncoding = c.PgClientEncoding
+  if c.DBConfig.PgClientEncoding != "" {
+    clientEncoding = c.DBConfig.PgClientEncoding
   }
 
-  if c.PgTimeZone != "" {
-    timeZone = c.PgTimeZone
+  if c.DBConfig.PgTimeZone != "" {
+    timeZone = c.DBConfig.PgTimeZone
   }
 
   values.Add("connect_timeout", strconv.Itoa(connectTimeout))
@@ -191,53 +175,9 @@ func (c *DBConnection) GORM() *gorm.DB {
   return c.DB
 }
 
-func (c *DBConnection) String() string {
+func (c *DBConnection) DSN() string {
 
-  //// trim all strings
-  //c.Host = strings.Trim(c.Host, " ")
-  //c.UnixSock = strings.Trim(c.UnixSock, " ")
-  //c.Username = strings.Trim(c.Username, " ")
-  //c.Password = strings.Trim(c.Password, " ")
-  //c.PassFile = strings.Trim(c.PassFile, " ")
-  //c.TimeZone = strings.Trim(c.TimeZone, " ")
-  //c.Charset = strings.Trim(c.Charset, " ")
-  //c.Name = strings.Trim(c.Name, " ")
-
-  // set default value
-  if c.Host != "" {
-
-    c.Host = "localhost"
-  }
-
-  // replace var `port` with var `host`
-  if c.Port != 0 {
-
-    if !strings.Contains(c.Host, ":") {
-
-      c.Host += ":" + strconv.Itoa(c.Port)
-    }
-  }
-
-  // read pass file as var `password`
-  if c.Password == "" {
-
-    f := kio.KFileNew(c.PassFile)
-
-    if f.IsExist() {
-
-      c.Password = f.Cat()
-    }
-  }
-
-  DSN := &url.URL{
-    Scheme:   "postgres",
-    User:     url.UserPassword(c.Username, c.Password),
-    Host:     c.Host,
-    Path:     c.Name,
-    RawQuery: c.RawQuery(),
-  }
-
-  return DSN.String()
+  return c.DBConfig.DSN("postgres", c.RawQuery())
 }
 
 func (c *DBConnection) Close() error {

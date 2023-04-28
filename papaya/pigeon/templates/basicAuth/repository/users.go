@@ -2,8 +2,10 @@ package repository
 
 import (
   "errors"
+  "skfw/papaya/pigeon/templates/basicAuth/models"
+
+  "github.com/google/uuid"
   "gorm.io/gorm"
-  "skfw/papaya/pigeon/templates/basic/models"
 )
 
 type UserRepository struct {
@@ -18,16 +20,20 @@ type UserRepositoryImpl interface {
   SearchFast(username string, email string) (*models.UserModel, bool)
   CreateFast(username string, email string, password string) (*models.UserModel, error)
   DeleteFast(username string, email string) error
+
+  SearchFastById(userId uuid.UUID) (*models.UserModel, bool)
+
+  SessionNew()
 }
 
-func UserRepositoryNew(db *gorm.DB) UserRepositoryImpl {
+func UserRepositoryNew(db *gorm.DB) (UserRepositoryImpl, error) {
 
   userRepo := &UserRepository{}
   err := userRepo.Init(db.Model(&models.UserModel{}))
   if err != nil {
-    return nil
+    return nil, err
   }
-  return userRepo
+  return userRepo, nil
 }
 
 func (u *UserRepository) Init(db *gorm.DB) error {
@@ -42,6 +48,8 @@ func (u *UserRepository) Init(db *gorm.DB) error {
 }
 
 func (u *UserRepository) Search(user *models.UserModel) bool {
+
+  u.SessionNew()
 
   if user == nil {
 
@@ -87,7 +95,7 @@ func (u *UserRepository) Create(user *models.UserModel) error {
 
   if u.DB.Create(user).Error != nil {
 
-    return errors.New("unable to add user")
+    return errors.New("unable to create user")
   }
 
   return nil
@@ -119,6 +127,8 @@ func (u *UserRepository) Delete(user *models.UserModel) error {
 }
 
 func (u *UserRepository) SearchFast(username string, email string) (*models.UserModel, bool) {
+
+  u.SessionNew()
 
   if username == "" && email == "" {
 
@@ -170,7 +180,7 @@ func (u *UserRepository) CreateFast(username string, email string, password stri
 
   if u.DB.Create(&user).Error != nil {
 
-    return nil, errors.New("unable to add user")
+    return nil, errors.New("unable to create user")
   }
 
   return &user, nil
@@ -201,4 +211,33 @@ func (u *UserRepository) DeleteFast(username string, email string) error {
   }
 
   return nil
+}
+
+func (u *UserRepository) SearchFastById(userId uuid.UUID) (*models.UserModel, bool) {
+
+  u.SessionNew()
+
+  if EmptyId(userId) {
+
+    return nil, false
+  }
+
+  var users []models.UserModel
+
+  if u.DB.Where("id = ?", userId).Limit(1).Find(&users).Error != nil {
+
+    return nil, false
+  }
+
+  if len(users) > 0 {
+
+    return &users[0], true
+  }
+
+  return nil, false
+}
+
+func (u *UserRepository) SessionNew() {
+
+  u.DB = u.DB.Session(&gorm.Session{})
 }

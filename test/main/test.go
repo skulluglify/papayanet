@@ -112,4 +112,8 @@ func main() {
   console.Log(p.Base())
   console.Log(p.Pop())
   console.Log(p)
+
+  console.Log(!false, !false, !false && !false)
+  console.Log(!false, !false, !(false && !false))
+  console.Log(!false, !false, !false && true)
 }

@@ -1,12 +1,10 @@
 package swag
 
 import (
+  "errors"
   "fmt"
-  "log"
   "skfw/papaya/koala/collection"
   m "skfw/papaya/koala/mapping"
-
-  "github.com/gofiber/fiber/v2"
 )
 
 type SwagTask struct {
@@ -36,7 +34,7 @@ type SwagTasksQueue struct {
 type SwagTasksQueueImpl interface {
   Init()
   AddTask(task *SwagTask)
-  Start(exp m.KMapImpl, ctx *fiber.Ctx) bool
+  Start(exp m.KMapImpl, context *SwagContext) error
 }
 
 func SwagTasksQueueNew() SwagTasksQueueImpl {
@@ -57,7 +55,7 @@ func (t *SwagTasksQueue) AddTask(task *SwagTask) {
   t.tasks.Push(task)
 }
 
-func (t *SwagTasksQueue) Start(exp m.KMapImpl, ctx *fiber.Ctx) bool {
+func (t *SwagTasksQueue) Start(exp m.KMapImpl, context *SwagContext) error {
 
   // why use iteration, bcs for limited searching, not for all
 
@@ -85,25 +83,23 @@ func (t *SwagTasksQueue) Start(exp m.KMapImpl, ctx *fiber.Ctx) bool {
 
       if k == task.Name {
 
-        context := MakeSwagContextWithEvent(ctx, v)
+        context.Solve(v)
+
         e := task.Handler(context)
 
         if e != nil {
 
-          log.Fatal(e)
-
-          // stopped process response
-          return true
+          return errors.New("process failed task")
         }
 
         // catch var `context.Closed`
-        if context.Override() {
+        if context.Revoke() {
 
-          return true
+          return errors.New("revoke context")
         }
       }
     }
   }
 
-  return false
+  return nil
 }

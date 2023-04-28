@@ -6,8 +6,11 @@ import (
   "errors"
   "github.com/golang-jwt/jwe"
   "github.com/golang-jwt/jwt/v5"
+  "github.com/google/uuid"
   "github.com/valyala/fasthttp"
   "golang.org/x/crypto/bcrypt"
+  "skfw/papaya/bunny/swag"
+  "skfw/papaya/pigeon/templates/basicAuth/models"
   "strings"
   "time"
 )
@@ -15,6 +18,16 @@ import (
 // generated from chatGPT, more fixed and readability for utilities
 
 // function to hash a password using bcrypt
+
+func EmptyId(id uuid.UUID) bool {
+
+  return id.String() == "00000000-0000-0000-0000-000000000000"
+}
+
+func DeviceRecognition(session *models.SessionModel, ctx *swag.SwagContext) bool {
+
+  return session.ClientIP == ctx.IP() && session.UserAgent == ctx.Get("User-Agent")
+}
 
 func HashPassword(password string) (string, error) {
 
@@ -169,6 +182,19 @@ func RequestAuth(req *fasthttp.Request) string {
 
       return token
     }
+
+    // try with a lower case
+    if len(auth) > 7 {
+
+      bearer := strings.ToLower(auth[:6])
+      if bearer == "bearer" {
+
+        return auth[7:]
+      }
+    }
+
+    // bypass
+    return auth
   }
 
   return noop

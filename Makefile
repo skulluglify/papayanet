@@ -10,3 +10,9 @@ test:
 
 tidy:
 	go mod tidy
+
+push:
+	bash beauty.sh record.sh
+	git add .
+	git commit -am 'heat/feat/update'
+	git push

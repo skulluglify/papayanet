@@ -4,6 +4,7 @@ import (
 	"skfw/app/controllers"
 	"skfw/papaya"
 	"skfw/papaya/bunny/swag"
+	"skfw/papaya/pigeon/templates/basicAuth/models"
 	"skfw/papaya/pigeon/templates/basicAuth/repository"
 	"time"
 )
@@ -11,6 +12,9 @@ import (
 func App(pn papaya.NetImpl) error {
 
 	var err error
+
+	conn := pn.Connection()
+	gorm := conn.GORM()
 
 	swagger := pn.MakeSwagger(&swag.SwagInfo{
 		Title:       "Example API",
@@ -23,20 +27,21 @@ func App(pn papaya.NetImpl) error {
 
 	userRouter := userGroup.Router()
 
-	expired := time.Hour * 24
-	activeDuration := time.Minute * 30
+	expired := time.Hour * 4
+	activeDuration := time.Minute * 30 // interval
 	maxSessions := 6
 
-	basicAuth := repository.BasicAuthNew(pn.Connection(), expired, activeDuration, maxSessions)
+	basicAuth := repository.BasicAuthNew(conn, expired, activeDuration, maxSessions)
+	basicAuth.Bind(swagger, userRouter)
 
-	swagger.AddTask(basicAuth.MakeAuthTokenTask())
+	//gorm.Exec("ALTER TABLE carts ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE")
 
-	basicAuth.MakeSessionEndpoint(userRouter)
-	basicAuth.MakeUserLoginEndpoint(userRouter)
-	basicAuth.MakeUserRegisterEndpoint(userRouter)
+	if err = gorm.AutoMigrate(&models.UserModel{}, &models.SessionModel{}); err != nil {
 
-	err = controllers.UserController(pn, userRouter)
-	if err != nil {
+		return err
+	}
+
+	if err = controllers.UserController(pn, userRouter); err != nil {
 		return err
 	}
 

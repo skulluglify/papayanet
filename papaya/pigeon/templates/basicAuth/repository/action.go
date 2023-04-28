@@ -27,6 +27,9 @@ type BasicAuth struct {
 
 type BasicAuthImpl interface {
   Init(conn common.DBConnectionImpl, expired time.Duration, activeDuration time.Duration, maxSessions int) error
+  Bind(swag swag.SwagImpl, router swag.SwagRouterImpl)
+  Migration() error
+
   MakeAuthTokenTask() *swag.SwagTask
   MakeSessionEndpoint(router swag.SwagRouterImpl)
   MakeUserLoginEndpoint(router swag.SwagRouterImpl)
@@ -54,9 +57,6 @@ func (s *BasicAuth) Init(conn common.DBConnectionImpl, expired time.Duration, ac
 
   s.conn = conn
   s.gorm = conn.GORM()
-
-  user := &models.UserModel{}
-  session := &models.SessionModel{}
 
   s.userRepo, err = UserRepositoryNew(s.gorm)
 
@@ -88,10 +88,30 @@ func (s *BasicAuth) Init(conn common.DBConnectionImpl, expired time.Duration, ac
     return errors.New("failed to set TimeZone as UTC")
   }
 
-  // auto migration
-  err = s.gorm.AutoMigrate(user, session)
   if err != nil {
     return errors.New("failed to migrate database")
+  }
+
+  return nil
+}
+
+func (s *BasicAuth) Bind(swag swag.SwagImpl, router swag.SwagRouterImpl) {
+
+  // register task
+  swag.AddTask(s.MakeAuthTokenTask())
+
+  // register endpoints
+  s.MakeSessionEndpoint(router)
+  s.MakeUserLoginEndpoint(router)
+  s.MakeUserRegisterEndpoint(router)
+}
+
+func (s *BasicAuth) Migration() error {
+
+  // auto migration
+  if err := s.gorm.AutoMigrate(&models.UserModel{}, &models.SessionModel{}); err != nil {
+
+    return err
   }
 
   return nil

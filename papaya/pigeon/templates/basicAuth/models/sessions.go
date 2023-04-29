@@ -35,8 +35,8 @@ import (
 
 type SessionModel struct {
   *gorm.Model
-  ID            string    `gorm:"VARCHAR(32);primary" json:"id"`
-  UserID        string    `gorm:"VARCHAR(32);not null" json:"user_id"`
+  ID            string    `gorm:"type:VARCHAR(32);primary" json:"id"`
+  UserID        string    `gorm:"type:VARCHAR(32);not null" json:"user_id"`
   ClientIP      string    `gorm:"type:VARCHAR(40)" json:"client_ip"`
   UserAgent     string    `gorm:"type:TEXT" json:"user_agent"`
   Token         string    `gorm:"type:TEXT;unique;not null" json:"token"`

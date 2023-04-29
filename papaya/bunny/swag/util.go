@@ -7,8 +7,9 @@ import (
 )
 
 // normalize path
+// /foo/bar/:name -> /foo/bar/{name}
 
-func SwagPathNorm(p string) string {
+func PathWrapSpecialNameWithBrackets(p string) string {
 
   res := make([]string, 0)
   tokens := strings.Split(p, "/")
@@ -24,6 +25,9 @@ func SwagPathNorm(p string) string {
         res = append(res, "{"+token[1:]+"}")
         continue
       }
+
+      // TODO: handle special characters
+      //? /foo/bar/baz:name or something like that
     }
 
     res = append(res, token)

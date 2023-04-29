@@ -125,7 +125,7 @@ func (swag *Swag) AddPath(path string, method string, expect *SwagExpect) {
 
   var data m.KMapImpl
 
-  path = SwagPathNorm(path)
+  path = PathWrapSpecialNameWithBrackets(path)
   data = nil
 
   if currPath := swag.paths.Get(path); currPath != nil {

@@ -16,6 +16,8 @@ func App(pn papaya.NetImpl) error {
 	conn := pn.Connection()
 	gorm := conn.GORM()
 
+	ManageControlResourceShared(pn)
+
 	swagger := pn.MakeSwagger(&swag.SwagInfo{
 		Title:       "Example API",
 		Version:     "1.0.0",

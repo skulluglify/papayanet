@@ -4,7 +4,6 @@ import (
   "encoding/json"
   "errors"
   "fmt"
-  "github.com/gofiber/fiber/v2"
   "net/url"
   "reflect"
   "skfw/papaya/koala/kio/leaf"
@@ -12,6 +11,8 @@ import (
   m "skfw/papaya/koala/mapping"
   "skfw/papaya/koala/pp"
   "strconv"
+
+  "github.com/gofiber/fiber/v2"
 )
 
 // request validation, only on type json, xml, form
@@ -46,8 +47,8 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
   request := &kornet.Request{}
 
   //charset := "UTF-8"
-  contentTy := string(v.Ctx.Request().Header.ContentType())
-  contentTy, _ = kornet.KSafeContentTy(contentTy)
+  bCTy := string(v.Ctx.Request().Header.ContentType()) // body request content-type
+  bCTy, _ = kornet.KSafeContentTy(bCTy)
 
   // -- end
 
@@ -62,13 +63,15 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
   // validation the request body
   if content := m.KMapCast(v.exp.Get("request.body")); content != nil {
 
-    if content.Keys().Contain(contentTy) {
+    cTys := content.Keys()
+
+    if cTys.Contain(bCTy) {
 
       mm, err := kornet.KSafeParsingRequestBody(req)
 
       if err != nil {
 
-        return request, fmt.Errorf("data format does not match mime type %s", contentTy)
+        return request, fmt.Errorf("data format does not match mime type %s", bCTy)
       }
 
       body = mm
@@ -84,147 +87,178 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
       }
 
       // update current content-type
-      contentTy = "application/json"
+      bCTy = "application/json"
 
       mm := m.KMap(*data)
       body = &mm
     }
 
-    contentTys := content.Keys()
+    var RequestBodySameAsContentTypeRequired bool
+    var RequestBodyKeySameAsSampleKey bool
 
-    var found bool
-    for _, cTy := range contentTys {
+    for _, cTy := range cTys {
 
-      if cTy == contentTy {
+      if cTy != bCTy {
 
-        schema := content.Get(cTy + ".schema")
+        continue
+      }
 
-        if mm := m.KMapCast(schema); mm != nil {
+      schema := content.Get(cTy + ".schema") // ex: application/json.schema
 
-          // tree iteration
-          iter := mm.Tree().Iterable()
-          // iteration all values, bool, number, string
-          for next := iter.Next(); next.HasNext(); next = next.Next() {
+      if schema == nil { // schema from expectation
 
-            enum := next.Enum()
-            k, t := enum.Tuple()
+        // {{content-type}}.schema not found
+        // not set up schema for handle it
 
-            rt := SwagUniversalReType(t)
+        return request, errors.New("schema from request body is not implemented")
 
-            p := body.Get(k)
+      }
 
-            // foolish reason if value set into null
+      if mm := m.KMapCast(schema); mm != nil {
 
-            if p != nil {
+        for _, enum := range mm.Tree().Enums() { // schema required
 
-              switch rt {
+          schemaKey, schemaType := enum.Tuple()
 
-              case "bool", "boolean":
+          rt := SwagUniversalReType(schemaKey)
 
-                y, err := kornet.KSafeParsingBoolean(p)
+          compareSampleKey, err := CompareSampleKeyNew(schemaKey)
 
-                if err != nil {
+          if err != nil {
 
-                  return request, fmt.Errorf("key `%s` either not set or is not a boolean in request body", k)
-                }
+            return request, errors.New("unable to compare with sample key from schema object")
+          }
 
-                body.Set(k, y)
+          RequestBodyKeySameAsSampleKey = false
 
-                break
+          for _, enum := range body.Tree().Enums() { // schema request body
 
-              case "int", "number", "integer", "byte": // byte -> uint8
+            bK, bV := enum.Tuple()
 
-                // try parsing if not number
-                n, err := kornet.KSafeParsingNumber(p)
-
-                if err != nil {
-
-                  return request, fmt.Errorf("key `%s` either not set or is not a number in request body", k)
-                }
-
-                // maybe origin is string
-                body.Set(k, n)
-
-                break
-
-              case "str", "text", "string":
-
-                // check is string or not
-                if tx := m.KValueToString(p); tx == "" {
-
-                  return request, fmt.Errorf("key `%s` either not set or is not a string in request body", k)
-                }
-
-                break
-
-              case "array":
-
-                tt := reflect.TypeOf(t)
-                val := pp.KIndirectValueOf(p)
-
-                if val.IsValid() {
-
-                  ty := val.Type()
-
-                  tte := tt.Elem()
-
-                  // get a element type in universal type
-                  rTte := SwagUniversalReType(tte.Name())
-
-                  switch ty.Kind() {
-                  case reflect.Array, reflect.Slice:
-
-                    for i := 0; i < val.Len(); i++ {
-
-                      vt := pp.KIndirectValueOf(val.Index(i))
-
-                      if vt.IsValid() {
-
-                        vtt := vt.Type()
-
-                        // that problem is,
-                        // tte = map[k]v
-                        // vtt = map[k]v
-                        // tte != vtt
-                        // same as a array or slice too
-
-                        // fast compare
-                        if tte.Kind() != vtt.Kind() {
-
-                          return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", k, rTte)
-                        }
-                      }
-                    }
-
-                  default:
-
-                    return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", k, rTte)
-                  }
-                }
-
-                break
-
-              case "object":
-
-                break
-              }
+            if !compareSampleKey.Check(bK) {
 
               continue
             }
 
-            return request, fmt.Errorf("key `%s` is null in request body", k)
+            RequestBodyKeySameAsSampleKey = true
 
+            switch rt {
+
+            case "bool", "boolean":
+
+              y, err := kornet.KSafeParsingBoolean(bV)
+
+              if err != nil {
+
+                return request, fmt.Errorf("key `%s` either not set or is not a boolean in request body", schemaKey)
+              }
+
+              // update value from request body
+              body.Set(bK, y)
+
+              break
+
+            case "int", "number", "integer", "byte": // byte -> uint8
+
+              // try parsing if not number
+              n, err := kornet.KSafeParsingNumber(bV)
+
+              if err != nil {
+
+                return request, fmt.Errorf("key `%s` either not set or is not a number in request body", schemaKey)
+              }
+
+              // update value from request body
+              body.Set(bK, n)
+
+              break
+
+            case "str", "text", "string":
+
+              // check is string or not
+              if tx := m.KValueToString(bV); tx == "" {
+
+                return request, fmt.Errorf("key `%s` either not set or is not a string in request body", schemaKey)
+              }
+
+              break
+
+            case "array":
+
+              schemaTypeOf := reflect.TypeOf(schemaType) // type of type
+
+              // test body value
+              val := pp.KIndirectValueOf(bV)
+
+              if val.IsValid() {
+
+                bodyTypeOf := val.Type() // get type of body value
+
+                schemaTypeOfKey := schemaTypeOf.Elem() // type of type element
+
+                // get a element type in universal type
+                uniTypeSchemaTypeOfKey := SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
+
+                switch bodyTypeOf.Kind() {
+                case reflect.Array, reflect.Slice: // check body value is array, or slice
+
+                  for i := 0; i < val.Len(); i++ {
+
+                    indexBodyValue := pp.KIndirectValueOf(val.Index(i))
+
+                    if indexBodyValue.IsValid() {
+
+                      typeIndexBodyValue := indexBodyValue.Type()
+
+                      // that problem is,
+                      // tte = map[k]v
+                      // vtt = map[k]v
+                      // tte != vtt
+                      // same as a array or slice too
+
+                      // fast compare
+                      if schemaTypeOfKey.Kind() != typeIndexBodyValue.Kind() {
+
+                        return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
+                      }
+                    }
+                  }
+
+                default:
+
+                  return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
+                }
+              }
+
+              break
+
+            case "object":
+
+              // skip map, not null
+
+              if bV == nil {
+
+                return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+              }
+
+              break
+            }
+          }
+
+          if !RequestBodyKeySameAsSampleKey {
+
+            return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
           }
         }
-
-        found = true
-        break
       }
+
+      RequestBodySameAsContentTypeRequired = true
+      break
     }
 
-    if !found {
+    if !RequestBodySameAsContentTypeRequired {
 
-      return request, errors.New("mime type is not registered")
+      return request, fmt.Errorf("content-type from request body is not supported")
     }
   }
 

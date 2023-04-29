@@ -34,6 +34,7 @@ func App(pn papaya.NetImpl) error {
 	basicAuth := repository.BasicAuthNew(conn, expired, activeDuration, maxSessions)
 	basicAuth.Bind(swagger, userRouter)
 
+	// ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 	//gorm.Exec("ALTER TABLE carts ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE")
 
 	if err = gorm.AutoMigrate(&models.UserModel{}, &models.SessionModel{}); err != nil {

@@ -1,11 +1,14 @@
 package main
 
 import (
+  "encoding/hex"
   "math"
   "skfw/papaya/koala"
   "skfw/papaya/koala/collection"
   "skfw/papaya/koala/mapping"
   "skfw/papaya/koala/tools/posix"
+
+  "github.com/google/uuid"
 )
 
 func main() {
@@ -14,7 +17,7 @@ func main() {
   console := koala.KConsoleNew()
   console.Log("KList testing ...")
 
-  list := collection.KListNewR[int]([]int{12, 24, 36, 48, 60, 72, 84, 96, 108})
+  list := collection.KListNewR([]int{12, 24, 36, 48, 60, 72, 84, 96, 108})
 
   for i = 0; i < list.Len(); i++ {
 
@@ -113,7 +116,12 @@ func main() {
   console.Log(p.Pop())
   console.Log(p)
 
-  console.Log(!false, !false, !false && !false)
   console.Log(!false, !false, !(false && !false))
   console.Log(!false, !false, !false && true)
+
+  x := uuid.UUID{}
+
+  id, _ := x.MarshalBinary()
+
+  println(hex.EncodeToString(id))
 }

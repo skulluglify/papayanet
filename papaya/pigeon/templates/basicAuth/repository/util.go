@@ -3,25 +3,110 @@ package repository
 import (
   "crypto/rand"
   "encoding/base64"
+  "encoding/hex"
   "errors"
+  "skfw/papaya/bunny/swag"
+  "skfw/papaya/pigeon/templates/basicAuth/models"
+  "strings"
+  "time"
+
   "github.com/golang-jwt/jwe"
   "github.com/golang-jwt/jwt/v5"
   "github.com/google/uuid"
   "github.com/valyala/fasthttp"
   "golang.org/x/crypto/bcrypt"
-  "skfw/papaya/bunny/swag"
-  "skfw/papaya/pigeon/templates/basicAuth/models"
-  "strings"
-  "time"
 )
 
 // generated from chatGPT, more fixed and readability for utilities
 
 // function to hash a password using bcrypt
 
-func EmptyId(id uuid.UUID) bool {
+func EmptyAsterisk(t string) string {
 
-  return id.String() == "00000000-0000-0000-0000-000000000000"
+  if t != "*" {
+
+    return t
+  }
+
+  return ""
+}
+
+func EmptyIds(id string) bool {
+
+  for _, c := range []byte(id) {
+
+    if c != 48 { // 00 11 00 00
+
+      return false
+    }
+  }
+
+  return true
+}
+
+func EmptyId(id []byte) bool {
+
+  return EmptyIds(hex.EncodeToString(id))
+}
+
+func EmptyIdx(id uuid.UUID) bool {
+
+  var err error
+  var idx []byte
+
+  idx, err = id.MarshalBinary()
+
+  if err != nil {
+
+    return false
+  }
+
+  return EmptyId(idx)
+}
+
+func Id(id []byte) uuid.UUID {
+
+  var err error
+  var idx uuid.UUID
+
+  idx, err = uuid.FromBytes(id)
+  if err != nil {
+
+    return uuid.UUID{}
+  }
+
+  return idx
+}
+
+func Idx(id uuid.UUID) string {
+
+  var err error
+  var data []byte
+
+  data, err = id.MarshalBinary()
+  if err != nil {
+
+    return "00000000000000000000000000000000"
+  }
+
+  return hex.EncodeToString(data)
+}
+
+func Ids(id string) uuid.UUID {
+
+  var err error
+  var data []byte
+
+  // remove all pad
+  id = strings.ReplaceAll(id, "-", "")
+
+  data, err = hex.DecodeString(id)
+  if err != nil {
+
+    return uuid.UUID{}
+  }
+
+  return Id(data)
 }
 
 func DeviceRecognition(session *models.SessionModel, ctx *swag.SwagContext) bool {

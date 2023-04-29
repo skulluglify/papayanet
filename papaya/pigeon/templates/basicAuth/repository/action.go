@@ -3,8 +3,6 @@ package repository
 import (
   "encoding/json"
   "errors"
-  "github.com/google/uuid"
-  "gorm.io/gorm"
   "net/http"
   "skfw/papaya/bunny/swag"
   "skfw/papaya/koala/kornet"
@@ -13,6 +11,9 @@ import (
   "skfw/papaya/pigeon/drivers/postgresql"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "time"
+
+  "github.com/google/uuid"
+  "gorm.io/gorm"
 )
 
 type BasicAuth struct {
@@ -134,7 +135,7 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
 
       if session, found = s.sessionRepo.SearchFast(uuid.UUID{}, auth); found {
 
-        if err := s.sessionRepo.RecoveryFast(session.UserID, auth, s.activeDuration, s.maxSessions); err != nil {
+        if err := s.sessionRepo.RecoveryFast(Ids(session.UserID), auth, s.activeDuration, s.maxSessions); err != nil {
 
           switch err {
           case TokenExpiredOrUserNoLongerActive, SessionReachedLimit:
@@ -153,7 +154,7 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
 
             if session.LastActivated.Before(currentTime.Add(s.activeDuration)) {
 
-              if user, found = s.userRepo.SearchFastById(session.UserID); found {
+              if user, found = s.userRepo.SearchFastById(Ids(session.UserID)); found {
 
                 if err := s.sessionRepo.CheckIn(session); err != nil {
 
@@ -219,7 +220,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew("unable to parse uuid", true))
         }
 
-        if !EmptyId(sessionId) {
+        if !EmptyIdx(sessionId) {
 
           if user, ok := ctx.Target().(*models.UserModel); ok {
 
@@ -268,7 +269,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
 
         if user, ok := ctx.Target().(*models.UserModel); ok {
 
-          if err := s.sessionRepo.DeleteFast(user.ID, "*"); err != nil {
+          if err := s.sessionRepo.DeleteFast(Ids(user.ID), "*"); err != nil {
 
             return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to remove all sessions", true))
           }
@@ -308,7 +309,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
 
           auth := RequestAuth(ctx.Request())
 
-          sessions, err := s.sessionRepo.GetAll(user.ID, s.maxSessions)
+          sessions, err := s.sessionRepo.GetAll(Ids(user.ID), s.maxSessions)
           if err != nil {
 
             return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to delete all sessions", true))
@@ -391,7 +392,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
 
       if user, ok = s.userRepo.SearchFast(username, email); ok {
 
-        if err = s.sessionRepo.RecoveryFast(user.ID, "", s.activeDuration, s.maxSessions); err != nil {
+        if err = s.sessionRepo.RecoveryFast(Ids(user.ID), "", s.activeDuration, s.maxSessions); err != nil {
 
           if err != TokenExpiredOrUserNoLongerActive {
 

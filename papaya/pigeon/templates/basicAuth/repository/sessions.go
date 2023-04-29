@@ -1,6 +1,7 @@
 package repository
 
 import (
+  "encoding/hex"
   "errors"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "time"
@@ -68,7 +69,7 @@ func (s *SessionRepository) Search(session *models.SessionModel) bool {
     return false
   }
 
-  if EmptyId(session.UserID) && session.Token == "" {
+  if EmptyIds(session.UserID) && session.Token == "" {
 
     return false
   }
@@ -92,17 +93,44 @@ func (s *SessionRepository) Search(session *models.SessionModel) bool {
 
 func (s *SessionRepository) Create(session *models.SessionModel, activeDuration time.Duration, maxSessions int) error {
 
+  var err error
+
   if session == nil {
 
     return errors.New("session is NULL")
   }
 
-  if EmptyId(session.UserID) || session.Token == "" || session.SecretKey == "" {
+  if EmptyIds(session.UserID) || session.Token == "" || session.SecretKey == "" {
 
     return errors.New("userId, token, and secret key can't be empty")
   }
 
-  if err := s.RecoveryFast(session.UserID, session.Token, activeDuration, maxSessions); err != nil {
+  var idx uuid.UUID
+
+  idx = Ids(session.UserID)
+
+  if EmptyIdx(idx) {
+
+    return errors.New("ids doesn't match id format")
+  }
+
+  if err := s.RecoveryFast(idx, session.Token, activeDuration, maxSessions); err != nil {
+
+    return err
+  }
+
+  var id []byte
+
+  id, err = uuid.New().MarshalBinary()
+
+  if err != nil {
+
+    return err
+  }
+
+  session.ID = hex.EncodeToString(id)
+
+  if err != nil {
 
     return err
   }
@@ -122,7 +150,7 @@ func (s *SessionRepository) Delete(session *models.SessionModel) error {
     return errors.New("session is NULL")
   }
 
-  if EmptyId(session.UserID) && session.Token == "" {
+  if EmptyIds(session.UserID) && session.Token == "" {
 
     return errors.New("userId, or token can't be empty")
   }
@@ -144,17 +172,41 @@ func (s *SessionRepository) SearchFast(userId uuid.UUID, token string) (*models.
 
   s.SessionNew()
 
-  if EmptyId(userId) && token == "" {
-
-    return nil, false
-  }
+  token = EmptyAsterisk(token)
 
   var sessions []models.SessionModel
   sessions = make([]models.SessionModel, 0)
 
-  if s.DB.Where("user_id = ? OR token = ?", userId, token).Limit(1).Find(&sessions).Error != nil {
+  if !EmptyIdx(userId) {
 
-    return nil, false
+    if token != "" {
+
+      if s.DB.Where("user_id = ? OR token = ?", Idx(userId), token).Limit(1).Find(&sessions).Error != nil {
+
+        return nil, false
+      }
+
+    } else {
+
+      if s.DB.Where("user_id = ?", Idx(userId)).Limit(1).Find(&sessions).Error != nil {
+
+        return nil, false
+      }
+    }
+
+  } else {
+
+    if token != "" {
+
+      if s.DB.Where("token = ?", token).Limit(1).Find(&sessions).Error != nil {
+
+        return nil, false
+      }
+    } else {
+
+      // userId, or token is empty
+      return nil, false
+    }
   }
 
   if len(sessions) > 0 {
@@ -167,15 +219,32 @@ func (s *SessionRepository) SearchFast(userId uuid.UUID, token string) (*models.
 
 func (s *SessionRepository) CreateFast(userId uuid.UUID, clientIP string, userAgent string, token string, secret string, expired time.Time, activeDuration time.Duration, maxSessions int) (*models.SessionModel, error) {
 
-  if EmptyId(userId) && token == "" {
+  if EmptyIdx(userId) && token == "" {
 
     return nil, errors.New("userId, or token can't be empty")
+  }
+
+  var sID, uID string
+
+  sID = Idx(uuid.New())
+
+  if EmptyIds(sID) {
+
+    return nil, errors.New("unable convert id to string")
+  }
+
+  uID = Idx(userId)
+
+  if EmptyIds(uID) {
+
+    return nil, errors.New("unable convert id to string")
   }
 
   var session models.SessionModel
 
   session = models.SessionModel{
-    UserID:    userId,
+    ID:        sID,
+    UserID:    uID,
     ClientIP:  clientIP,
     UserAgent: userAgent,
     Token:     token,
@@ -183,7 +252,7 @@ func (s *SessionRepository) CreateFast(userId uuid.UUID, clientIP string, userAg
     Expired:   expired,
   }
 
-  if err := s.RecoveryFast(session.UserID, token, activeDuration, maxSessions); err != nil {
+  if err := s.RecoveryFast(userId, token, activeDuration, maxSessions); err != nil {
 
     return nil, err
   }
@@ -198,7 +267,7 @@ func (s *SessionRepository) CreateFast(userId uuid.UUID, clientIP string, userAg
 
 func (s *SessionRepository) DeleteFast(userId uuid.UUID, token string) error {
 
-  if EmptyId(userId) && token == "" {
+  if EmptyIdx(userId) && token == "" {
 
     return errors.New("userId, or token can't be empty")
   }
@@ -208,7 +277,7 @@ func (s *SessionRepository) DeleteFast(userId uuid.UUID, token string) error {
     return errors.New("session has been deleted")
   }
 
-  if s.DB.Where("user_id = ? OR token = ?", userId, token).Delete(&models.SessionModel{}).Error != nil {
+  if s.DB.Where("user_id = ? OR token = ?", Idx(userId), token).Delete(&models.SessionModel{}).Error != nil {
 
     return errors.New("unable to delete session")
   }
@@ -220,7 +289,7 @@ func (s *SessionRepository) GetAll(userId uuid.UUID, maxSessions int) ([]models.
 
   s.SessionNew()
 
-  if EmptyId(userId) {
+  if EmptyIdx(userId) {
 
     return nil, errors.New("userId is empty")
   }
@@ -228,7 +297,7 @@ func (s *SessionRepository) GetAll(userId uuid.UUID, maxSessions int) ([]models.
   var sessions []models.SessionModel
   sessions = make([]models.SessionModel, 0)
 
-  if s.DB.Where("user_id = ?", userId).Limit(maxSessions).Find(&sessions).Error != nil {
+  if s.DB.Where("user_id = ?", Idx(userId)).Limit(maxSessions).Find(&sessions).Error != nil {
 
     return nil, errors.New("unable to search all sessions")
   }
@@ -240,14 +309,14 @@ func (s *SessionRepository) SearchFastById(sessionId uuid.UUID) (*models.Session
 
   s.SessionNew()
 
-  if EmptyId(sessionId) {
+  if EmptyIdx(sessionId) {
 
     return nil, false
   }
 
   var sessions []models.SessionModel
 
-  if s.DB.Where("id = ?", sessionId).Limit(1).Find(&sessions).Error != nil {
+  if s.DB.Where("id = ?", Idx(sessionId)).Limit(1).Find(&sessions).Error != nil {
 
     return nil, false
   }
@@ -264,7 +333,7 @@ func (s *SessionRepository) RecoveryFast(userId uuid.UUID, token string, activeD
 
   s.SessionNew()
 
-  if EmptyId(userId) {
+  if EmptyIdx(userId) {
 
     return errors.New("userId is empty")
   }
@@ -278,7 +347,7 @@ func (s *SessionRepository) RecoveryFast(userId uuid.UUID, token string, activeD
   currentTime := time.Now().UTC()
 
   // limit process to get max sessions requirement
-  if s.DB.Where("user_id = ?", userId).Limit(maxSessions).Find(&sessions).Error != nil {
+  if s.DB.Where("user_id = ?", Idx(userId)).Limit(maxSessions).Find(&sessions).Error != nil {
 
     return errors.New("unable to find session")
   }
@@ -321,7 +390,7 @@ func (s *SessionRepository) CreateFastAutoToken(user *models.UserModel, clientIP
     return nil, errors.New("user is NULL")
   }
 
-  if EmptyId(user.ID) || user.Username == "" || user.Email == "" {
+  if EmptyIds(user.ID) || user.Username == "" || user.Email == "" {
 
     return nil, errors.New("userId, username, and email can't be empty")
   }
@@ -349,7 +418,16 @@ func (s *SessionRepository) CreateFastAutoToken(user *models.UserModel, clientIP
     return nil, errors.New("unable to create token")
   }
 
-  return s.CreateFast(user.ID, clientIP, userAgent, token, secret, expired, activeDuration, maxSessions)
+  var idx uuid.UUID
+
+  idx = Ids(user.ID)
+
+  if EmptyIdx(idx) {
+
+    return nil, errors.New("ids doesn't match id format")
+  }
+
+  return s.CreateFast(idx, clientIP, userAgent, token, secret, expired, activeDuration, maxSessions)
 }
 
 func (s *SessionRepository) CheckIn(session *models.SessionModel) error {

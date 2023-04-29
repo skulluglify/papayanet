@@ -51,6 +51,12 @@ func NetNew() NetImpl {
 
 func (n *Net) Init() {
 
+  n.version = koala.KVersionNew(
+    util.VersionMajor,
+    util.VersionMinor,
+    util.VersionPatch,
+  )
+
   if n.Console == nil {
 
     n.Console = koala.KConsoleNew()
@@ -72,6 +78,8 @@ func (n *Net) Init() {
       })
     }
 
+    n.Config.ServerHeader = "PapayaNet v" + n.Version().String()
+
     n.App = fiber.New(*n.Config)
   }
 
@@ -86,12 +94,6 @@ func (n *Net) Init() {
       os.Exit(1)
     }
   }
-
-  n.version = koala.KVersionNew(
-    util.VersionMajor,
-    util.VersionMinor,
-    util.VersionPatch,
-  )
 
   n.Console.Log(n.Console.Text(util.Banner(n.version), koala.ColorGreen, koala.ColorBlack, koala.StyleBold))
   n.Console.Log("Server has started ...")

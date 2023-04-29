@@ -1,6 +1,7 @@
 package repository
 
 import (
+  "encoding/hex"
   "errors"
   "skfw/papaya/pigeon/templates/basicAuth/models"
 
@@ -78,6 +79,8 @@ func (u *UserRepository) Search(user *models.UserModel) bool {
 
 func (u *UserRepository) Create(user *models.UserModel) error {
 
+  var err error
+
   if user == nil {
 
     return errors.New("user is NULL")
@@ -92,6 +95,17 @@ func (u *UserRepository) Create(user *models.UserModel) error {
 
     return errors.New("user has been added")
   }
+
+  var id []byte
+
+  id, err = uuid.New().MarshalBinary()
+
+  if err != nil {
+
+    return err
+  }
+
+  user.ID = hex.EncodeToString(id)
 
   if u.DB.Create(user).Error != nil {
 
@@ -130,16 +144,44 @@ func (u *UserRepository) SearchFast(username string, email string) (*models.User
 
   u.SessionNew()
 
-  if username == "" && email == "" {
-
-    return nil, false
-  }
+  // solve about ignoring attempts to get all data
+  username = EmptyAsterisk(username)
+  email = EmptyAsterisk(email)
 
   var users []models.UserModel
+  users = make([]models.UserModel, 0)
 
-  if u.DB.Where("username = ? OR email = ?", username, email).Limit(1).Find(&users).Error != nil {
+  if username != "" {
 
-    return nil, false
+    if email != "" {
+
+      if u.DB.Where("username = ? OR email = ?", username, email).Limit(1).Find(&users).Error != nil {
+
+        return nil, false
+      }
+
+    } else {
+
+      if u.DB.Where("username = ?", username).Limit(1).Find(&users).Error != nil {
+
+        return nil, false
+      }
+    }
+
+  } else {
+
+    if email != "" {
+
+      if u.DB.Where("email = ?", email).Limit(1).Find(&users).Error != nil {
+
+        return nil, false
+      }
+
+    } else {
+
+      // username, or email is empty
+      return nil, false
+    }
   }
 
   if len(users) > 0 {
@@ -165,9 +207,18 @@ func (u *UserRepository) CreateFast(username string, email string, password stri
     return nil, errors.New("password can't be hashed")
   }
 
+  var id []byte
   var user models.UserModel
 
+  id, err = uuid.New().MarshalBinary()
+
+  if err != nil {
+
+    return nil, err
+  }
+
   user = models.UserModel{
+    ID:       hex.EncodeToString(id),
     Username: username,
     Email:    email,
     Password: password,
@@ -217,14 +268,14 @@ func (u *UserRepository) SearchFastById(userId uuid.UUID) (*models.UserModel, bo
 
   u.SessionNew()
 
-  if EmptyId(userId) {
+  if EmptyIdx(userId) {
 
     return nil, false
   }
 
   var users []models.UserModel
 
-  if u.DB.Where("id = ?", userId).Limit(1).Find(&users).Error != nil {
+  if u.DB.Where("id = ?", Idx(userId)).Limit(1).Find(&users).Error != nil {
 
     return nil, false
   }

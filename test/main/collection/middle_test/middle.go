@@ -13,7 +13,7 @@ func main() {
 
   array.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 0)
 
-  err := array.Replace(collection.KListNewV[int](3, 4, 5))
+  err := array.Replace(collection.KListNewV(3, 4, 5))
   if err != nil {
     panic(err)
   }

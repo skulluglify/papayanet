@@ -13,8 +13,9 @@ func ManageControlResourceShared(pn papaya.NetImpl) error {
 		return err
 	}
 
-	// example using cors by consumer
-	manageConsumers.Add("GET", "https://google.com")
+	// grant all methods
+	manageConsumers.GrantAll("http://localhost")
+	manageConsumers.GrantAll("http://localhost:8000")
 	manageConsumers.GrantAll("https://google.com")
 
 	pn.Use(cors.MakeMiddlewareForManageConsumers(manageConsumers))

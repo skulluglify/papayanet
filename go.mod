@@ -37,3 +37,5 @@ require (
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 )
+
+require github.com/clbanning/mxj v1.8.4 // indirect

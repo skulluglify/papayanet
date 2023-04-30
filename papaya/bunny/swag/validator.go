@@ -93,8 +93,8 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
       body = &mm
     }
 
-    var RequestBodySameAsContentTypeRequired bool
-    var RequestBodyKeySameAsSampleKey bool
+    var requestBodySameAsContentTypeRequired bool
+    var requestBodyKeySameAsSampleKey bool
 
     for _, cTy := range cTys {
 
@@ -129,7 +129,7 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
             return request, errors.New("unable to compare with sample key from schema object")
           }
 
-          RequestBodyKeySameAsSampleKey = false
+          requestBodyKeySameAsSampleKey = false
 
           for _, enum := range body.Tree().Enums() { // schema request body
 
@@ -140,7 +140,7 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
               continue
             }
 
-            RequestBodyKeySameAsSampleKey = true
+            requestBodyKeySameAsSampleKey = true
 
             switch rt {
 
@@ -245,18 +245,18 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
             }
           }
 
-          if !RequestBodyKeySameAsSampleKey {
+          if !requestBodyKeySameAsSampleKey {
 
             return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
           }
         }
       }
 
-      RequestBodySameAsContentTypeRequired = true
+      requestBodySameAsContentTypeRequired = true
       break
     }
 
-    if !RequestBodySameAsContentTypeRequired {
+    if !requestBodySameAsContentTypeRequired {
 
       return request, fmt.Errorf("content-type from request body is not supported")
     }

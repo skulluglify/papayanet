@@ -16,14 +16,29 @@ type SwagContext struct {
 }
 
 type SwagContextImpl interface {
+
+  // create event if run on a task
+
   Event() bool    // if a task running, event is true
   Target() any    // Event
   Solve(data any) // --> Target()
+
+  // replace data body
+
   Modify(body []byte)
+
+  // wrapping from binding
+
   Body() []byte
   Status(status int) *SwagContext
+
+  // stop a task and send quickly
+
   Prevent()
   Revoke() bool
+
+  // Kornet binding for any purpose
+
   Kornet() (*kornet.Request, *kornet.Response)
   Bind(req *kornet.Request, res *kornet.Response)
 }

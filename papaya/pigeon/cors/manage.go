@@ -125,5 +125,14 @@ func (c *ManageConsumers) GrantAll(origin string) error {
     return nil
   }
 
+  // create new consumer and update consumer
+  for _, method := range Methods {
+
+    if err := c.Add(method, origin); err != nil {
+
+      return err
+    }
+  }
+
   return nil
 }

@@ -349,11 +349,22 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
         "headers": &m.KMap{
           "Authorization": "string",
         },
-        "body": swag.JSON(&m.KMap{
-          "username": "string",
-          "email":    "string",
-          "password": "string",
-        }),
+        "body": &m.KMap{
+          "application/json": &m.KMap{
+            "schema": &m.KMap{
+              "username": "string",
+              "email":    "string",
+              "password": "string",
+            },
+          },
+          "application/xml": &m.KMap{
+            "schema": &m.KMap{
+              "username": "string",
+              "email":    "string",
+              "password": "string",
+            },
+          },
+        },
       },
       "responses": swag.CreatedJSON(&m.KMap{
         "token":   "string",
@@ -470,22 +481,34 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
 
       data := m.KMap(mm)
 
-      user = &models.UserModel{
-        //Name:        m.KValueToString(data.Get("name")),
-        Username: m.KValueToString(data.Get("username")),
-        Email:    m.KValueToString(data.Get("email")),
-        Password: m.KValueToString(data.Get("password")),
-        //Gender:      m.KValueToString(data.Get("gender")),
-        //Phone:       m.KValueToString(data.Get("phone")),
-        //DOB:         time.UnixMilli(m.KValueToInt(data.Get("dob"))).UTC(), // make it relative to use in everywhere
-        //Address:     m.KValueToString(data.Get("address")),
-        //CountryCode: m.KValueToString(data.Get("country_code")),
-        //City:        m.KValueToString(data.Get("city")),
-        //PostalCode:  m.KValueToString(data.Get("postal_code")),
-        Admin: false,
-      }
+      var username, email, password string
 
-      err = s.userRepo.Create(user)
+      username = m.KValueToString(data.Get("username"))
+      email = m.KValueToString(data.Get("email"))
+      password = m.KValueToString(data.Get("password"))
+
+      //user = &models.UserModel{
+      //  //Name:        m.KValueToString(data.Get("name")),
+      //  Username: m.KValueToString(data.Get("username")),
+      //  Email:    m.KValueToString(data.Get("email")),
+      //  Password: m.KValueToString(data.Get("password")),
+      //  //Gender:      m.KValueToString(data.Get("gender")),
+      //  //Phone:       m.KValueToString(data.Get("phone")),
+      //  //DOB:         time.UnixMilli(m.KValueToInt(data.Get("dob"))).UTC(), // make it relative to use in everywhere
+      //  //Address:     m.KValueToString(data.Get("address")),
+      //  //CountryCode: m.KValueToString(data.Get("country_code")),
+      //  //City:        m.KValueToString(data.Get("city")),
+      //  //PostalCode:  m.KValueToString(data.Get("postal_code")),
+      //  Admin: false,
+      //}
+
+      //user.Password, err = HashPassword(user.Password)
+      //if err != nil {
+      //  return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to hash password", true))
+      //}
+
+      //err = s.userRepo.Create(user)
+      user, err = s.userRepo.CreateFast(username, email, password) // auto hashing password
       if err != nil {
 
         return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))

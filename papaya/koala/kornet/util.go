@@ -2,9 +2,7 @@ package kornet
 
 import (
   "encoding/json"
-  "encoding/xml"
   "errors"
-  "github.com/valyala/fasthttp"
   "net/http"
   "net/url"
   "reflect"
@@ -12,6 +10,9 @@ import (
   "skfw/papaya/koala/pp"
   "strconv"
   "strings"
+
+  "github.com/clbanning/mxj"
+  "github.com/valyala/fasthttp"
 )
 
 // fallback to use default values
@@ -72,6 +73,10 @@ func KSafeParsingRequestBody(req *fasthttp.Request) (m.KMapImpl, error) {
   contentTy := string(req.Header.ContentType())
   contentTy, _ = KSafeContentTy(contentTy) // get content-type only
 
+  // TODO: handle if request body is array
+  // request body must be type of object
+  // IF request body IS type of array, How to {{Ask Question}}
+
   res := &map[string]any{}
 
   switch contentTy {
@@ -87,11 +92,27 @@ func KSafeParsingRequestBody(req *fasthttp.Request) (m.KMapImpl, error) {
 
   case "text/xml", "application/xml", "application/atom+xml":
 
-    if err := xml.Unmarshal(req.Body(), res); err != nil {
+    // parse by mjx
+
+    mm, err := mxj.NewMapXml(req.Body(), true)
+
+    if err != nil {
 
       return nil, err
     }
 
+    // auto parsing
+    data := map[string]any(mm)
+
+    if root, ok := data["root"]; ok {
+      if rootMap, ok := root.(map[string]any); ok {
+
+        res = &rootMap
+        break
+      }
+    }
+
+    res = &data
     break
 
   case "multipart/form-data":

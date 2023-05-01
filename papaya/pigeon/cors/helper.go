@@ -2,7 +2,6 @@ package cors
 
 import (
   "net/url"
-  m "skfw/papaya/bunny/swag/method"
   "strconv"
   "strings"
 )
@@ -31,13 +30,18 @@ func SafeMethods(methods []string) string {
 
     temp := make([]string, 0)
 
-    for _, method := range methods {
+    // continuously
+    for _, vMethod := range Methods {
 
-      switch method {
+      vMethod = strings.ToUpper(vMethod)
 
-      case m.GET, m.HEAD, m.POST, m.PUT, m.DELETE, m.CONNECT, m.OPTIONS, m.TRACE:
+      for _, cMethod := range methods {
 
-        temp = append(temp, method)
+        if strings.ToUpper(cMethod) == vMethod {
+
+          temp = append(temp, vMethod)
+          break
+        }
       }
     }
 
@@ -55,7 +59,7 @@ func SafeHeaders(headers []string) string {
     return strings.Join(headers, ",")
   }
 
-  return "Content-Type" // fallback into defult value
+  return "Content-Type" // fallback into default value
 }
 
 func SafeCredentials(credentials bool) string {

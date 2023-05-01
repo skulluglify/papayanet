@@ -10,7 +10,7 @@ func MakeMiddlewareForManageConsumers(manageConsumers ManageConsumersImpl) fiber
 
   return func(ctx *fiber.Ctx) error {
 
-    req, res := ctx.Request(), ctx.Response()
+    req := ctx.Request()
 
     // GET/HEAD not have body
 
@@ -29,14 +29,8 @@ func MakeMiddlewareForManageConsumers(manageConsumers ManageConsumersImpl) fiber
 
       if consumer = manageConsumers.Get(method, origin); consumer != nil {
 
-        // fixing a problem if origin a have prefix of www.
-        if consumer = consumer.Origin(origin); consumer != nil {
-
-          consumer.Apply(res)
-
-          // consumer
-          return ctx.Next()
-        }
+        // apply consumer permission into context
+        return consumer.Apply(ctx).Next()
       }
 
       // blocked

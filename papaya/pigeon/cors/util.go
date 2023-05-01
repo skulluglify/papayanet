@@ -2,6 +2,7 @@ package cors
 
 import (
   m "skfw/papaya/bunny/swag/method"
+  "strings"
 )
 
 func CheckMethodAvail(method string) bool {
@@ -14,4 +15,53 @@ func CheckMethodAvail(method string) bool {
   }
 
   return false
+}
+
+func NormListBySources(sources []string, data []string) []string {
+
+  var found bool
+  var temp []string
+
+  if len(data) > 0 {
+
+    temp = make([]string, 0)
+
+    for _, curr := range sources {
+
+      curr = strings.ToUpper(curr)
+
+      // find dup
+      found = false
+      for _, value := range temp {
+
+        // case insensitive
+        if value == curr {
+
+          found = true
+          break
+        }
+      }
+
+      // no dup
+      if !found {
+
+        // check available
+        for _, value := range data {
+
+          // case insensitive
+          if strings.ToUpper(value) == curr {
+
+            temp = append(temp, curr)
+            break
+          }
+        }
+      }
+    }
+
+  } else {
+
+    temp = sources
+  }
+
+  return temp
 }

@@ -1,7 +1,8 @@
 package cors
 
 import (
-  "github.com/valyala/fasthttp"
+  "errors"
+  "github.com/gofiber/fiber/v2"
   "net/http"
   "net/url"
   "skfw/papaya/koala/mapping"
@@ -21,12 +22,10 @@ type Consumer struct {
 
 type ConsumerImpl interface {
   Init(URL *url.URL, methods []string, headers []string, credentials bool, maxAge int) error
-  Header() *http.Header
+  Header(origin string, requestMethods []string, requestHeaders []string) (*http.Header, error)
   AcceptMethod(method string) bool
-  CheckOrigin(origin string) bool
-  Origin(origin string) ConsumerImpl
   Check(method string, origin string) bool
-  Apply(res *fasthttp.Response)
+  Apply(ctx *fiber.Ctx) *fiber.Ctx
 }
 
 func ConsumerNew(URL *url.URL, methods []string, headers []string, credentials bool, maxAge int) (ConsumerImpl, error) {
@@ -42,8 +41,11 @@ func ConsumerNew(URL *url.URL, methods []string, headers []string, credentials b
 
 func (c *Consumer) Init(URL *url.URL, methods []string, headers []string, credentials bool, maxAge int) error {
 
-  // normalize url by remove prefix of www.
-  URL.Host, _ = strings.CutPrefix(URL.Host, "www.")
+  if URL != nil {
+
+    // normalize url by remove prefix of www.
+    URL.Host, _ = strings.CutPrefix(URL.Host, "www.")
+  }
 
   c.URL = URL
   c.Methods = methods
@@ -54,7 +56,59 @@ func (c *Consumer) Init(URL *url.URL, methods []string, headers []string, creden
   return nil
 }
 
-func (c *Consumer) Header() *http.Header {
+func (c *Consumer) Header(origin string, requestMethods []string, requestHeaders []string) (*http.Header, error) {
+
+  var err error
+
+  var URL *url.URL
+  var ORIGIN string
+
+  var header *http.Header
+
+  var methods []string
+  var headers []string
+
+  header = &http.Header{}
+
+  // try fallback with current URL
+  if origin != "" && origin != "*" {
+
+    // check origin is URL
+    URL, err = url.Parse(origin)
+    if err != nil {
+
+      return header, errors.New("unable to parse URL from origin")
+    }
+
+    if URL.Scheme != "" && URL.Host != "" {
+
+      ORIGIN = URL.Scheme + "://" + URL.Host
+
+    } else {
+
+      return header, errors.New("undefined scheme or host from URL")
+    }
+
+  } else {
+
+    if c.URL != nil {
+
+      // fixing a problem if replace current origin
+      // got a problem if origin a have prefix of www.
+      ORIGIN = SafeURL(c.URL)
+
+    } else {
+
+      // origin asterisk allowed
+      ORIGIN = "*"
+    }
+  }
+
+  // normalize methods with request methods
+  methods = NormListBySources(c.Methods, requestMethods)
+
+  // normalize headers with request headers
+  headers = NormListBySources(c.Headers, requestHeaders)
 
   // Access-Control-Request-Method: POST
   // Access-Control-Request-Headers: Content-Type
@@ -74,19 +128,16 @@ func (c *Consumer) Header() *http.Header {
   // Keep-Alive: timeout=2, max=100
   // Connection: Keep-Alive
 
-  header := &http.Header{}
+  // asterisk
 
-  // fixing a problem if replace current origin
-  // got a problem if origin a have prefix of www.
-  header.Add("Access-Control-Allow-Origin", SafeURL(c.URL))
-
-  header.Add("Access-Control-Allow-Methods", SafeMethods(c.Methods))
-  header.Add("Access-Control-Allow-Headers", SafeHeaders(c.Headers))
+  header.Add("Access-Control-Allow-Origin", ORIGIN)
+  header.Add("Access-Control-Allow-Methods", SafeMethods(methods))
+  header.Add("Access-Control-Allow-Headers", SafeHeaders(headers))
   header.Add("Access-Control-Allow-Credentials", SafeCredentials(c.Credentials))
   header.Add("Access-Control-Max-Age", SafeMaxAge(c.MaxAge))
   // header.Add("Vary", "Accept-Encoding, Origin") // accept encoding for future
 
-  return header
+  return header, nil
 }
 
 func (c *Consumer) AcceptMethod(method string) bool {
@@ -104,67 +155,95 @@ func (c *Consumer) AcceptMethod(method string) bool {
   return true // method has been added
 }
 
-func (c *Consumer) CheckOrigin(origin string) bool {
+func (c *Consumer) Check(method string, origin string) bool {
 
-  URL, err := url.Parse(origin)
-  if err != nil {
+  // asterisk
 
-    return false // can't parse origin
+  // passing method by empty string
+  if method != "" && method != "*" {
+
+    // check method is granted or denied
+    if !mapping.Keys(c.Methods).Contain(method) {
+
+      return false
+    }
   }
 
-  // source scheme fallback into credential use case
-  if URL.Scheme == pp.QStr(c.URL.Scheme, "https") {
+  if c.URL != nil {
 
-    // normalize url by remove prefix of www.
-    URL.Host, _ = strings.CutPrefix(URL.Host, "www.")
+    if origin != "" && origin != "*" {
 
-    // must same as origin, safe compare www.
-    if URL.Host == c.URL.Host {
+      // check origin
+      URL, err := url.Parse(origin)
+      if err != nil {
 
-      return true
+        return false // can't parse origin
+      }
+
+      // source scheme fallback into credential use case
+      if URL.Scheme == pp.QStr(c.URL.Scheme, "https") {
+
+        // normalize url by remove prefix of www.
+        URL.Host, _ = strings.CutPrefix(URL.Host, "www.")
+
+        // must same as origin, safe compare www.
+        if URL.Host == c.URL.Host {
+
+          return true
+        }
+      }
     }
+
+  } else {
+
+    // enable all if current URL is NULL
+    return true
   }
 
   return false // fallback into default value
 }
 
-func (c *Consumer) Origin(origin string) ConsumerImpl {
+func (c *Consumer) Apply(ctx *fiber.Ctx) *fiber.Ctx {
 
-  URL, err := url.Parse(origin)
-  if err != nil {
+  // catch request and response method
+  req, res := ctx.Request(), ctx.Response()
 
-    return nil // bypass, unable to parse url
-  }
+  // must be checked first
 
-  // copy data
-  return &Consumer{
-    URL:         URL,
-    Methods:     c.Methods,
-    Headers:     c.Headers,
-    Credentials: c.Credentials,
-    MaxAge:      c.MaxAge,
-  }
-}
-
-func (c *Consumer) Check(method string, origin string) bool {
-
-  // check method is granted or denied
-  if !mapping.Keys(c.Methods).Contain(method) {
-
-    return false
-  }
-
-  // check origin
-  return c.CheckOrigin(origin)
-}
-
-func (c *Consumer) Apply(res *fasthttp.Response) {
-
-  var header *http.Header
   var value string
+  var header *http.Header
 
+  var ORIGIN string
+  var METHOD string
+
+  var methods []string
+  var headers []string
+
+  // may fix with, curr method and req method
+  methods = make([]string, 0)
+
+  ORIGIN = string(req.Header.Peek("Origin"))
+
+  // :|
+  //method = "*"
+
+  // noop, don't have any idea for used
+
+  METHOD = string(req.Header.Peek("Access-Control-Request-Method"))
+
+  if METHOD != "" {
+
+    // set current method and request method
+    methods = append(methods, strings.ToUpper(string(req.Header.Method())))
+    methods = append(methods, METHOD)
+  }
+
+  // :|
+  headers = strings.Split(string(req.Header.Peek("Access-Control-Request-Headers")), ",")
+
+  // passing error
   // get header from consumer information
-  header = c.Header()
+  header, _ = c.Header(ORIGIN, methods, headers)
 
   for _, key := range Headers {
 
@@ -173,4 +252,6 @@ func (c *Consumer) Apply(res *fasthttp.Response) {
       res.Header.Set(key, value)
     }
   }
+
+  return ctx
 }

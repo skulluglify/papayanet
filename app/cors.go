@@ -14,9 +14,10 @@ func ManageControlResourceShared(pn papaya.NetImpl) error {
 	}
 
 	// grant all methods
-	manageConsumers.GrantAll("http://localhost")
-	manageConsumers.GrantAll("http://localhost:8000")
-	manageConsumers.GrantAll("https://google.com")
+	//manageConsumers.Grant("*")
+	manageConsumers.Grant("http://localhost")
+	manageConsumers.Grant("http://localhost:8000")
+	//manageConsumers.Grant("https://google.com")
 
 	pn.Use(cors.MakeMiddlewareForManageConsumers(manageConsumers))
 

@@ -16,10 +16,10 @@ import (
 )
 
 type Net struct {
-  Console koala.KConsoleImpl
-  *fiber.Config
   *fiber.App
+  *fiber.Config
   *postgresql.DBConfig
+  Console      koala.KConsoleImpl
   DBConnection common.DBConnectionImpl
   version      koala.KVersionImpl
 }

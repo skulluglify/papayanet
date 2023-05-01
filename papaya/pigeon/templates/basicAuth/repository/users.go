@@ -155,7 +155,8 @@ func (u *UserRepository) SearchFast(username string, email string) (*models.User
 
     if email != "" {
 
-      if u.DB.Where("username = ? OR email = ?", username, email).Limit(1).Find(&users).Error != nil {
+      // have both, search by username and email
+      if u.DB.Where("username = ? AND email = ?", username, email).Limit(1).Find(&users).Error != nil {
 
         return nil, false
       }

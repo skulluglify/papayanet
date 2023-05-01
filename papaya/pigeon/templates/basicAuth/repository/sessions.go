@@ -181,7 +181,8 @@ func (s *SessionRepository) SearchFast(userId uuid.UUID, token string) (*models.
 
     if token != "" {
 
-      if s.DB.Where("user_id = ? OR token = ?", Idx(userId), token).Limit(1).Find(&sessions).Error != nil {
+      // have both, search by userId and token, vulnerability
+      if s.DB.Where("user_id = ? AND token = ?", Idx(userId), token).Limit(1).Find(&sessions).Error != nil {
 
         return nil, false
       }

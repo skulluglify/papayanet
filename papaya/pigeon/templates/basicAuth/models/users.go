@@ -82,6 +82,7 @@ type UserModel struct {
   CountryCode string         `gorm:"type:VARCHAR(4)" json:"country_code"`
   City        string         `gorm:"type:VARCHAR(64)" json:"city"`
   PostalCode  string         `gorm:"type:VARCHAR(10)" json:"postal_code"`
+  Verify      bool           `gorm:"type:BOOLEAN;default:FALSE" json:"verify"`
   Admin       bool           `gorm:"type:BOOLEAN;default:FALSE" json:"admin"`
   Sessions    []SessionModel `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"sessions"`
 }

@@ -4,7 +4,9 @@ import (
   "crypto/rand"
   "encoding/base64"
   "encoding/hex"
+  "encoding/json"
   "errors"
+  "skfw/papaya/ant/bpack"
   "skfw/papaya/bunny/swag"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "strings"
@@ -325,4 +327,44 @@ func RequestJWE(req *fasthttp.Request, privKey []byte, secret string, expiration
   }
 
   return nil, errors.New("no implemented authentication")
+}
+
+func GetTLDs() []string {
+
+  var data []string
+  data = make([]string, 0)
+
+  if packet := bpack.OpenPacket("/data/kornet/tlds.json"); packet != nil {
+
+    if err := json.Unmarshal(packet.Data, &data); err != nil {
+
+      return nil
+    }
+  }
+
+  return data
+}
+
+func TLDChecker(tlds []string, address string) bool {
+
+  if tlds != nil {
+
+    tokens := strings.Split(address, ".")
+    n := len(tokens)
+
+    if n > 1 {
+
+      suffix := tokens[n-1]
+
+      for _, tld := range tlds {
+
+        if strings.ToUpper(tld) == strings.ToUpper(suffix) {
+
+          return true
+        }
+      }
+    }
+  }
+
+  return false
 }

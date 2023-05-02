@@ -21,7 +21,7 @@ func App(pn papaya.NetImpl) error {
 	swagger := pn.MakeSwagger(&swag.SwagInfo{
 		Title:       "Example API",
 		Version:     "1.0.0",
-		Description: "Example API for documentation",
+		Description: "Example API for Documentation",
 	})
 
 	mainGroup := swagger.Group("/api/v1", "Schema")

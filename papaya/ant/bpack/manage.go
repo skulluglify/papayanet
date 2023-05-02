@@ -2,9 +2,9 @@ package bpack
 
 import (
   "errors"
+  "os"
   "skfw/papaya/koala/kio"
   "skfw/papaya/koala/tools/posix"
-  "os"
 )
 
 var FileNotFound = errors.New("file not found")
@@ -24,7 +24,7 @@ func OpenPacket(path string) *Packet {
 
 func OpenFile(path string) ([]byte, error) {
 
-  // try read from buffer
+  // try to read from buffer
   var data []byte
 
   if pkt := OpenPacket(path); pkt != nil {
@@ -32,12 +32,12 @@ func OpenFile(path string) ([]byte, error) {
     return pkt.Data, nil
   }
 
-  // fake rootdir
-  var rootdir string
+  // fake root directory
+  var rootDir string
 
-  if rootdir = FindDataPath(PATH); rootdir != "" {
+  if rootDir = FindDataPath(PATH); rootDir != "" {
 
-    path = posix.KPathNew(path).JoinStr(rootdir)
+    path = posix.KPathNew(path).JoinStr(rootDir)
   }
 
   // check existing

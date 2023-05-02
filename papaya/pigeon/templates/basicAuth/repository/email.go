@@ -11,6 +11,7 @@ var InvalidEmailAddress = errors.New("invalid e-mail address")
 
 type Email struct {
   address string
+  tlds    []string
 }
 
 type EmailImpl interface {
@@ -33,6 +34,8 @@ func (m *Email) Init(address string) error {
 
   address = strings.Trim(address, " ")
 
+  m.tlds = GetTLDs()
+
   if address != "" {
 
     m.address = address
@@ -43,6 +46,11 @@ func (m *Email) Init(address string) error {
 }
 
 func (m *Email) Verify() (bool, error) {
+
+  if !TLDChecker(m.tlds, m.address) {
+
+    return false, InvalidEmailAddress
+  }
 
   if _, err := mail.ParseAddress(m.address); err != nil {
 

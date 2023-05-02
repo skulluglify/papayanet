@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta
+        name="description"
+        content="Swagger"
+      />
+      <title>Swagger</title>
+      <link rel="stylesheet" href="/doc/swag/ui.css" />
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="/doc/swag/swagger.js" crossorigin></script>
+    <script src="/doc/swag/preset.js" crossorigin></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: "/api/v3/openapi.json",
+          dom_id: "#swagger-ui",
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          layout: "StandaloneLayout",
+        });
+      };
+    </script>
+</body>
+<html>

@@ -6,7 +6,6 @@ import (
   "path/filepath"
   "skfw/papaya/koala/kio"
   "skfw/papaya/koala/tools/posix"
-  "strconv"
   "strings"
 )
 
@@ -114,36 +113,4 @@ func ReadAllDataFromPath(path string) map[string][]byte {
   })
 
   return data
-}
-
-func ReprByte(size int) string {
-
-  var terabytes, gigabytes, megabytes, kilobytes int
-
-  terabytes = 1024 * 1024 * 1024 * 1024
-  gigabytes = 1024 * 1024 * 1024
-  megabytes = 1024 * 1024
-  kilobytes = 1024
-
-  switch {
-
-  case terabytes <= size:
-
-    return strconv.FormatFloat(float64(size/terabytes), 'f', 0, 32) + "T"
-
-  case gigabytes <= size:
-
-    return strconv.FormatFloat(float64(size/gigabytes), 'f', 0, 32) + "G"
-
-  case megabytes <= size:
-
-    return strconv.FormatFloat(float64(size/megabytes), 'f', 0, 32) + "M"
-
-  case kilobytes <= size:
-
-    return strconv.FormatFloat(float64(size/kilobytes), 'f', 0, 32) + "K"
-
-  }
-
-  return strconv.FormatFloat(float64(size), 'f', 0, 32) + "B"
 }

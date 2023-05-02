@@ -1,34 +1,34 @@
 package kornet
 
 const (
-  MethodGet = iota
-  MethodHead
-  MethodPost
-  MethodPut
-  MethodDelete
-  MethodConnect
-  MethodOptions
-  MethodTrace
+  GET = iota
+  HEAD
+  POST
+  PUT
+  DELETE
+  CONNECT
+  OPTIONS
+  TRACE
 )
 
 func KHttpGetMethod(value int) string {
 
   switch value {
-  case MethodGet:
+  case GET:
     return "GET"
-  case MethodHead:
+  case HEAD:
     return "HEAD"
-  case MethodPost:
+  case POST:
     return "POST"
-  case MethodPut:
+  case PUT:
     return "PUT"
-  case MethodDelete:
+  case DELETE:
     return "DELETE"
-  case MethodConnect:
+  case CONNECT:
     return "CONNECT"
-  case MethodOptions:
+  case OPTIONS:
     return "OPTIONS"
-  case MethodTrace:
+  case TRACE:
     return "TRACE"
   }
 

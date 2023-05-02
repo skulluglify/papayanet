@@ -53,30 +53,43 @@ func Main() {
   var mimetype string
   var charset string
 
+  var size uint64
+
   for name, buff := range dataMap {
 
     temp = ""
 
     mimetype, charset = kornet.KSafeContentTy(http.DetectContentType(buff))
 
+    // begin
     data += "{\"" + name + "\",\"" + mimetype + "\",\"" + charset + "\",[]byte{\n"
+
+    size = 0
 
     for i, b := range buff {
 
       if i > 0 && i%limit == 0 {
 
-        fmt.Print("\r", koala.KStrPadEnd(name, nameLenAvg), koala.KStrPadStart(ReprByte(i+1), 6))
+        fmt.Print("\r", koala.KStrPadEnd(name, nameLenAvg), koala.KStrPadStart(kornet.ReprByte(uint64(i+1)), 8))
         data += temp + "\n"
         temp = ""
       }
 
       temp += strconv.Itoa(int(b)) + ", "
+      size++
     }
 
-    fmt.Println() // new line
+    // rest
+    if temp != "" {
 
-    data += "},\n"
-    data += "},\n"
+      data += temp + "\n"
+      temp = ""
+    }
+
+    data += "\n"
+    data += "}," + strconv.FormatUint(size, 10) + "},\n" // end
+
+    fmt.Println() // new line
   }
 
   data += "}"

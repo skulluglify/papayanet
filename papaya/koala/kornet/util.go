@@ -17,7 +17,7 @@ import (
 
 // fallback to use default values
 
-func KRequestGetURL(req *http.Request) url.URL {
+func KSafeGetReqURL(req *http.Request) url.URL {
 
   URL := url.URL{
     User:     req.URL.User,
@@ -32,7 +32,8 @@ func KRequestGetURL(req *http.Request) url.URL {
 
 func KSafeContentTy(contentTy string) (string, string) {
 
-  charset := "UTF-8"
+  // must be text
+  charset := ""
 
   tokens := strings.Split(contentTy, ";")
 
@@ -54,9 +55,12 @@ func KSafeContentTy(contentTy string) (string, string) {
       }
     }
 
+    // check by extensions
+    // ex: application/json -> text/plain -> charset: UTF-8
+
     if !AvailableCharsets.Contain(charset) {
 
-      charset = "UTF-8"
+      charset = "UTF-8" // fallback use UTF-8
     }
 
   } else {

@@ -104,6 +104,7 @@ func Main() {
     fmt.Println(err)
     return
   }
+
   defer file.Close()
 
   _, err = file.WriteString(data)
@@ -112,6 +113,4 @@ func Main() {
     fmt.Println(err)
     return
   }
-
-  file.Close()
 }

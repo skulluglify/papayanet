@@ -1,0 +1,3 @@
+package bpack
+
+var Pkts Packets = make(Packets, 0)

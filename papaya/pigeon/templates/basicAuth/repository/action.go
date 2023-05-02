@@ -481,11 +481,42 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
 
       data := m.KMap(mm)
 
-      var username, email, password string
+      var username string
 
       username = m.KValueToString(data.Get("username"))
-      email = m.KValueToString(data.Get("email"))
-      password = m.KValueToString(data.Get("password"))
+
+      var valid bool
+      var email EmailImpl
+      var password PasswordImpl
+
+      email, err = EmailNew(m.KValueToString(data.Get("email")))
+      if err != nil {
+
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+      }
+
+      if valid, err = email.Verify(); !valid {
+
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+      }
+
+      password, err = PasswordNew(m.KValueToString(data.Get("password")))
+      if err != nil {
+
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+      }
+
+      // password contains
+      minChars := 8
+      specialChar := true
+      numberChar := true
+      upperChar := true
+      lowerChar := true
+
+      if valid, err = password.Verify(minChars, specialChar, numberChar, upperChar, lowerChar); !valid {
+
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+      }
 
       //user = &models.UserModel{
       //  //Name:        m.KValueToString(data.Get("name")),
@@ -502,13 +533,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       //  Admin: false,
       //}
 
-      //user.Password, err = HashPassword(user.Password)
-      //if err != nil {
-      //  return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to hash password", true))
-      //}
-
-      //err = s.userRepo.Create(user)
-      user, err = s.userRepo.CreateFast(username, email, password) // auto hashing password
+      user, err = s.userRepo.CreateFast(username, email.Value(), password.Value()) // auto hashing password
       if err != nil {
 
         return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))

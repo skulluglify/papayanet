@@ -3,8 +3,9 @@
 ## bundle data assets into data.go
 
 ```go
-// example implementation
-// if not found, check in real path
-file, err := bpack.OpenFile("/data/swag/ui.css", bpack.ReadOnly)
-file, err := bpack.OpenFile("/data/swag/ui.css", bpack.TemporaryFile)
+// example mock file
+file, err := bpack.OpenFile("/data/swag/ui.css") // fallback read in PATH = papaya/ant/bpack/data:data
+
+// example read packet
+file, err := bpack.OpenPacket("/data/swag/ui.css")
 ```

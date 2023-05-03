@@ -63,19 +63,18 @@ func (t *SwagTasksQueue) Start(exp m.KMapImpl, context *SwagContext) error {
 
   var i uint
 
-  // minify field of searching
-  iter := exp.Tree().Iterable()
-
   // for _, enum := range exp.Tree().Enums() {
 
-  for next := iter.Next(); next.HasNext(); next = next.Next() {
+  // Queue
+  // order by tasks
 
-    enum := next.Enum()
-    k, v := enum.Tuple()
+  for i = 0; i < t.tasks.Len(); i++ {
 
-    for i = 0; i < t.tasks.Len(); i++ {
+    task, err := t.tasks.Get(i)
 
-      task, err := t.tasks.Get(i)
+    for _, enum := range exp.Tree().Enums() {
+
+      k, v := enum.Tuple()
 
       if err != nil {
 
@@ -83,51 +82,53 @@ func (t *SwagTasksQueue) Start(exp m.KMapImpl, context *SwagContext) error {
         continue
       }
 
-      if k == task.Name {
+      if k != task.Name {
 
-        ///////////////////////////////////
+        continue
+      }
 
-        // maybe set key but want a run task
+      ///////////////////////////////////
 
-        var played bool
-        played = true
+      // maybe set key but want a run task
 
-        val := pp.KIndirectValueOf(v)
+      var played bool
+      played = true
 
-        if val.IsValid() {
+      val := pp.KIndirectValueOf(v)
 
-          ty := val.Type()
+      if val.IsValid() {
 
-          switch ty.Kind() {
+        ty := val.Type()
 
-          case reflect.Bool:
+        switch ty.Kind() {
 
-            // maybe false
-            played = val.Bool()
-            break
+        case reflect.Bool:
 
-          default:
+          // maybe false
+          played = val.Bool()
+          break
 
-            context.Solve(v)
-          }
+        default:
+
+          context.Solve(v)
+        }
+      }
+
+      ///////////////////////////////////
+
+      if played {
+
+        e := task.Handler(context)
+
+        if e != nil {
+
+          return errors.New("process failed task")
         }
 
-        ///////////////////////////////////
+        // catch var `context.Closed`
+        if context.Revoke() {
 
-        if played {
-
-          e := task.Handler(context)
-
-          if e != nil {
-
-            return errors.New("process failed task")
-          }
-
-          // catch var `context.Closed`
-          if context.Revoke() {
-
-            return errors.New("revoke context")
-          }
+          return errors.New("revoke context")
         }
       }
     }

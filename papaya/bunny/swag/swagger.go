@@ -83,7 +83,7 @@ func (swag *Swag) Version() koala.KVersionImpl {
 func (swag *Swag) Group(path string, tag string) SwagGroupImpl {
 
   tag = swag.tag + "\\" + tag
-  group := MakeSwagGroup(swag.root.Join(posix.KPathNew(path)), tag)
+  group := MakeSwagGroup(swag.root.Copy().Join(posix.KPathNew(path)), tag)
   group.Bind(swag.composes)
 
   return group
@@ -91,7 +91,7 @@ func (swag *Swag) Group(path string, tag string) SwagGroupImpl {
 
 func (swag *Swag) Router() SwagRouterImpl {
 
-  group := MakeSwagGroup(swag.root, swag.tag)
+  group := MakeSwagGroup(swag.root.Copy(), swag.tag)
   group.Bind(swag.composes)
 
   return group.Router()

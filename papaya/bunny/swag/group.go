@@ -39,7 +39,7 @@ func (group *SwagGroup) Init(path posix.KPathImpl, tag string) {
 func (group *SwagGroup) Group(path string, tag string) SwagGroupImpl {
 
   tag = group.tag + "\\" + tag
-  swagGroup := MakeSwagGroup(group.path.Join(posix.KPathNew(path)), tag)
+  swagGroup := MakeSwagGroup(group.path.Copy().Join(posix.KPathNew(path)), tag)
   swagGroup.Bind(group.composes)
 
   return swagGroup

@@ -152,6 +152,32 @@ func SwagContentFormatter(mapping any) m.KMapImpl {
       res = SwagUniversalObject(mm)
       break
 
+    case reflect.String:
+
+      // maybe text type string
+
+      t := val.String()
+
+      var retype bool
+      retype = false
+
+      if t != "" {
+
+        if m.Keys(Types).Contain(t) {
+
+          res = SwagUniversalType(t, nil)
+          retype = true
+        }
+      }
+
+      // fallback use type string as default
+      if !retype {
+
+        res = SwagUniversalType(ty.Name(), nil)
+      }
+
+      break
+
     default:
 
       // type any in traditional typing, like bool, int, string

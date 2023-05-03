@@ -3,8 +3,10 @@ package swag
 import (
   "errors"
   "fmt"
+  "reflect"
   "skfw/papaya/koala/collection"
   m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
 )
 
 type SwagTask struct {
@@ -83,19 +85,49 @@ func (t *SwagTasksQueue) Start(exp m.KMapImpl, context *SwagContext) error {
 
       if k == task.Name {
 
-        context.Solve(v)
+        ///////////////////////////////////
 
-        e := task.Handler(context)
+        // maybe set key but want a run task
 
-        if e != nil {
+        var played bool
+        played = true
 
-          return errors.New("process failed task")
+        val := pp.KIndirectValueOf(v)
+
+        if val.IsValid() {
+
+          ty := val.Type()
+
+          switch ty.Kind() {
+
+          case reflect.Bool:
+
+            // maybe false
+            played = val.Bool()
+            break
+
+          default:
+
+            context.Solve(v)
+          }
         }
 
-        // catch var `context.Closed`
-        if context.Revoke() {
+        ///////////////////////////////////
 
-          return errors.New("revoke context")
+        if played {
+
+          e := task.Handler(context)
+
+          if e != nil {
+
+            return errors.New("process failed task")
+          }
+
+          // catch var `context.Closed`
+          if context.Revoke() {
+
+            return errors.New("revoke context")
+          }
         }
       }
     }

@@ -18,27 +18,27 @@ func ReprByte(size uint64) string {
 
   case EXABYTES <= size:
 
-    return nosign.Look(size, EXABYTES, 1) + "EB"
+    return nosign.Look(size, EXABYTES, 2) + "EB"
 
   case PETABYTES <= size:
 
-    return nosign.Look(size, PETABYTES, 1) + "PB"
+    return nosign.Look(size, PETABYTES, 2) + "PB"
 
   case TERABYTES <= size:
 
-    return nosign.Look(size, TERABYTES, 1) + "TB"
+    return nosign.Look(size, TERABYTES, 2) + "TB"
 
   case GIGABYTES <= size:
 
-    return nosign.Look(size, GIGABYTES, 1) + "GB"
+    return nosign.Look(size, GIGABYTES, 2) + "GB"
 
   case MEGABYTES <= size:
 
-    return nosign.Look(size, MEGABYTES, 1) + "MB"
+    return nosign.Look(size, MEGABYTES, 2) + "MB"
 
   case KILOBYTES <= size:
 
-    return nosign.Look(size, KILOBYTES, 1) + "KB"
+    return nosign.Look(size, KILOBYTES, 2) + "KB"
 
   }
 

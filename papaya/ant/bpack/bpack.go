@@ -70,7 +70,7 @@ func Main() {
 
       if i > 0 && i%limit == 0 {
 
-        fmt.Print("\r", koala.KStrPadEnd(name, nameLenAvg), koala.KStrPadStart(kornet.ReprByte(uint64(i+1)), 8))
+        fmt.Print("\r", koala.KStrPadEnd(name, nameLenAvg), koala.KStrPadStart(kornet.ReprByte(uint64(i+1)), 10))
         data += temp + "\n"
         temp = ""
       }

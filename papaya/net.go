@@ -5,6 +5,7 @@ import (
   "skfw/papaya/bunny/swag"
   "skfw/papaya/koala"
   m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "skfw/papaya/pigeon"
   "skfw/papaya/pigeon/drivers/common"
   "skfw/papaya/pigeon/drivers/postgresql"
@@ -62,8 +63,10 @@ func (n *Net) Init() {
     n.Console = koala.KConsoleNew()
   }
 
-  // Load `.env`
-  if err := godotenv.Load(); err != nil {
+  dockerized, _ := strconv.ParseBool(os.Getenv("DOCKERIZED"))
+
+  // Load `.env` or `.env.docker`
+  if err := godotenv.Load(pp.LStr(dockerized, ".env.docker", ".env")); err != nil {
 
     n.Console.Error(err)
   }

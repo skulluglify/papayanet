@@ -99,23 +99,7 @@ func (r *SwagRenderer) Render(version koala.KVersionImpl, info *SwagInfo, tags [
     return err
   }
 
-  if err = bpack.HttpExposePacket(r.App, "/doc/swag/ui.css", "text/css", r.SwagStylePkt); err != nil {
-    return err
-  }
-
-  if err = bpack.HttpExposePacket(r.App, "/doc/swag/swagger.js", "application/javascript", r.SwagScriptPkt); err != nil {
-    return err
-  }
-
-  if err = bpack.HttpExposePacket(r.App, "/doc/swag/preset.js", "application/javascript", r.SwagPresetPkt); err != nil {
-    return err
-  }
-
   if err = bpack.HttpExposePacket(r.App, "/doc/swag/redoc", "text/html", r.RedocPkt); err != nil {
-    return err
-  }
-
-  if err = bpack.HttpExposePacket(r.App, "/doc/swag/redoc.js", "application/javascript", r.RedocScriptPkt); err != nil {
     return err
   }
 

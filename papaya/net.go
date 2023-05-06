@@ -1,6 +1,7 @@
 package papaya
 
 import (
+  "github.com/gofiber/fiber/v2"
   "os"
   "skfw/papaya/bunny/swag"
   "skfw/papaya/koala"
@@ -12,7 +13,6 @@ import (
   "skfw/papaya/util"
   "strconv"
 
-  "github.com/gofiber/fiber/v2"
   "github.com/joho/godotenv"
 )
 
@@ -64,6 +64,9 @@ func (n *Net) Init() {
   }
 
   dockerized, _ := strconv.ParseBool(os.Getenv("DOCKERIZED"))
+
+  // check /.dockerenv
+  // check /proc/self/cgroup contain docker
 
   // Load `.env` or `.env.docker`
   if err := godotenv.Load(pp.LStr(dockerized, ".env.docker", ".env")); err != nil {

@@ -8,12 +8,12 @@
         content="Swagger"
       />
       <title>Swagger</title>
-      <link rel="stylesheet" href="/doc/swag/ui.css" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css" />
+      <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js" defer></script>
+      <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-standalone-preset.js" defer></script>
 </head>
 <body>
     <div id="swagger-ui"></div>
-    <script src="/doc/swag/swagger.js" crossorigin></script>
-    <script src="/doc/swag/preset.js" crossorigin></script>
     <script>
       window.onload = () => {
         window.ui = SwaggerUIBundle({

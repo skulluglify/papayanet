@@ -284,7 +284,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
   router.Get("/sessions",
     &m.KMap{
       "AuthToken":   true,
-      "description": "Delete All Sessions",
+      "description": "Catch All Sessions",
       "request": &m.KMap{
         "headers": &m.KMap{
           "Authorization": "string",

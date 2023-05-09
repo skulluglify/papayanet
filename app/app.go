@@ -4,8 +4,8 @@ import (
 	"skfw/app/controllers"
 	"skfw/papaya"
 	"skfw/papaya/bunny/swag"
+	bac "skfw/papaya/pigeon/templates/basicAuth/controllers" // basic auth action
 	"skfw/papaya/pigeon/templates/basicAuth/models"
-	"skfw/papaya/pigeon/templates/basicAuth/repository"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func App(pn papaya.NetImpl) error {
 	activeDuration := time.Minute * 30 // interval
 	maxSessions := 6
 
-	basicAuth := repository.BasicAuthNew(conn, expired, activeDuration, maxSessions)
+	basicAuth := bac.BasicAuthNew(conn, expired, activeDuration, maxSessions)
 	basicAuth.Bind(swagger, userRouter)
 
 	// ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS

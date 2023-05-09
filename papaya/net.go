@@ -1,157 +1,172 @@
 package papaya
 
 import (
-  "github.com/gofiber/fiber/v2"
-  "os"
-  "skfw/papaya/bunny/swag"
-  "skfw/papaya/koala"
-  m "skfw/papaya/koala/mapping"
-  "skfw/papaya/koala/pp"
-  "skfw/papaya/pigeon"
-  "skfw/papaya/pigeon/drivers/common"
-  "skfw/papaya/pigeon/drivers/postgresql"
-  "skfw/papaya/util"
-  "strconv"
+	"github.com/gofiber/fiber/v2"
+	"os"
+	"skfw/papaya/bunny/swag"
+	"skfw/papaya/koala"
+	m "skfw/papaya/koala/mapping"
+	"skfw/papaya/koala/pp"
+	"skfw/papaya/pigeon"
+	"skfw/papaya/pigeon/drivers/common"
+	"skfw/papaya/pigeon/drivers/mysql"
+	"skfw/papaya/pigeon/drivers/postgresql"
+	"skfw/papaya/util"
+	"strconv"
+	"strings"
 
-  "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
 type Net struct {
-  *fiber.App
-  *fiber.Config
-  *postgresql.DBConfig
-  Console      koala.KConsoleImpl
-  DBConnection common.DBConnectionImpl
-  version      koala.KVersionImpl
+	*fiber.App
+	*fiber.Config
+	Console      koala.KConsoleImpl
+	DBConnection common.DBConnectionImpl
+	version      koala.KVersionImpl
 }
 
 type NetImpl interface {
-  Init()
-  Serve(host string, port int) error
-  MakeSwagger(info *swag.SwagInfo) swag.SwagImpl
-  Logger() koala.KConsoleImpl
-  Connection() common.DBConnectionImpl
-  Version() koala.KVersionImpl
-  Use(args ...any)
-  Close() error
+	Init()
+	Serve(host string, port int) error
+	MakeSwagger(info *swag.SwagInfo) swag.SwagImpl
+	Logger() koala.KConsoleImpl
+	Connection() common.DBConnectionImpl
+	Version() koala.KVersionImpl
+	Use(args ...any)
+	Close() error
 }
 
 func NetNew() NetImpl {
 
-  net := &Net{
-    Config: &fiber.Config{
-      DisableStartupMessage: true,
-    },
-    DBConfig: &postgresql.DBConfig{},
-  }
+	net := &Net{
+		Config: &fiber.Config{
+			DisableStartupMessage: true,
+		},
+	}
 
-  net.Init()
+	net.Init()
 
-  return net
+	return net
 }
 
 func (n *Net) Init() {
 
-  n.version = koala.KVersionNew(
-    util.VersionMajor,
-    util.VersionMinor,
-    util.VersionPatch,
-  )
+	var err error
 
-  if n.Console == nil {
+	n.version = koala.KVersionNew(
+		util.VersionMajor,
+		util.VersionMinor,
+		util.VersionPatch,
+	)
 
-    n.Console = koala.KConsoleNew()
-  }
+	if n.Console == nil {
 
-  dockerized, _ := strconv.ParseBool(os.Getenv("DOCKERIZED"))
+		n.Console = koala.KConsoleNew()
+	}
 
-  // check /.dockerenv
-  // check /proc/self/cgroup contain docker
+	dockerized, _ := strconv.ParseBool(os.Getenv("DOCKERIZED"))
 
-  // Load `.env` or `.env.docker`
-  if err := godotenv.Load(pp.LStr(dockerized, ".env.docker", ".env")); err != nil {
+	// check /.dockerenv
+	// check /proc/self/cgroup contain docker
 
-    n.Console.Error(err)
-  }
+	// Load `.env` or `.env.docker`
+	if err := godotenv.Load(pp.Lstr(dockerized, ".env.docker", ".env")); err != nil {
 
-  if n.App == nil {
+		n.Console.Error(err)
+	}
 
-    n.Config.ErrorHandler = func(ctx *fiber.Ctx, err error) error {
+	if n.App == nil {
 
-      return ctx.Status(fiber.StatusNotFound).JSON(&m.KMap{
-        "message": "site not found",
-        "error":   true,
-      })
-    }
+		n.Config.ErrorHandler = func(ctx *fiber.Ctx, err error) error {
 
-    n.Config.ServerHeader = "PapayaNet v" + n.Version().String()
+			return ctx.Status(fiber.StatusNotFound).JSON(&m.KMap{
+				"message": "site not found",
+				"error":   true,
+			})
+		}
 
-    n.App = fiber.New(*n.Config)
-  }
+		n.Config.ServerHeader = "PapayaNet v" + n.Version().String()
 
-  if n.DBConnection == nil {
+		n.App = fiber.New(*n.Config)
+	}
 
-    var err error
-    n.DBConnection, err = postgresql.DBConnectionNew(pigeon.InitLoadEnviron)
+	if n.DBConnection == nil {
 
-    if err != nil {
+		// set default use postgresql
+		driver := pp.Qstr(strings.ToLower(os.Getenv("DB_DRIVER")), "pg")
 
-      n.Console.Error(err)
-      os.Exit(1)
-    }
-  }
+		switch driver {
 
-  n.Console.Log(n.Console.Text(util.Banner(n.version), koala.ColorGreen, koala.ColorBlack, koala.StyleBold))
-  n.Console.Log("Server has started ...")
+		case "pg", "pq", "postgres", "postgresql":
+
+			n.DBConnection, err = postgresql.DBConnectionNew(pigeon.InitLoadEnviron)
+			break
+
+		case "my", "mysql":
+
+			n.DBConnection, err = mysql.DBConnectionNew(pigeon.InitLoadEnviron)
+			break
+		}
+
+		if err != nil {
+
+			n.Console.Error(err)
+			os.Exit(1)
+		}
+	}
+
+	n.Console.Log(n.Console.Text(util.Banner(n.version), koala.ColorGreen, koala.ColorBlack, koala.StyleBold))
+	n.Console.Log("Server has started ...")
 }
 
 func (n *Net) Serve(host string, port int) error {
 
-  return n.App.Listen(host + ":" + strconv.Itoa(port))
+	return n.App.Listen(host + ":" + strconv.Itoa(port))
 }
 
 func (n *Net) MakeSwagger(info *swag.SwagInfo) swag.SwagImpl {
 
-  return swag.MakeSwag(n.App, info)
+	return swag.MakeSwag(n.App, info)
 }
 
 func (n *Net) Connection() common.DBConnectionImpl {
 
-  return n.DBConnection
+	return n.DBConnection
 }
 
 func (n *Net) Version() koala.KVersionImpl {
 
-  return n.version
+	return n.version
 }
 
 func (n *Net) Logger() koala.KConsoleImpl {
 
-  return n.Console
+	return n.Console
 }
 
 func (n *Net) Use(args ...any) {
 
-  if n.App != nil {
+	if n.App != nil {
 
-    // registry new middleware
-    n.App.Use(args...)
-  }
+		// registry new middleware
+		n.App.Use(args...)
+	}
 }
 
 func (n *Net) Close() error {
 
-  if err := n.App.Shutdown(); err != nil {
+	if err := n.App.Shutdown(); err != nil {
 
-    return err
-  }
+		return err
+	}
 
-  if err := n.DBConnection.Close(); err != nil {
+	if err := n.DBConnection.Close(); err != nil {
 
-    return err
-  }
+		return err
+	}
 
-  n.Console.Log("Server has shutdown ...")
+	n.Console.Log("Server has shutdown ...")
 
-  return nil
+	return nil
 }

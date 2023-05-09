@@ -181,7 +181,7 @@ func (c *Consumer) Check(method string, origin string) bool {
       }
 
       // source scheme fallback into credential use case
-      if URL.Scheme == pp.QStr(c.URL.Scheme, "https") {
+      if URL.Scheme == pp.Qstr(c.URL.Scheme, "https") {
 
         // normalize url by remove prefix of www.
         URL.Host, _ = strings.CutPrefix(URL.Host, "www.")

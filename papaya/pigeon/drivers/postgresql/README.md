@@ -20,3 +20,9 @@ FROM "information_schema"."columns"
 WHERE "table_schema" = 'public'
 ORDER BY "column_name" ASC;
 ```
+
+## psql cli
+
+```sh
+psql -U user -h localhost -p 5432 -W -d main
+```

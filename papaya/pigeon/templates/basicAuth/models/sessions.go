@@ -1,9 +1,9 @@
 package models
 
 import (
-  "time"
+	"time"
 
-  "gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 // ID
@@ -28,26 +28,29 @@ import (
 // The user agent string for Google Chrome on iOS, which can be up to 8192 characters long,
 // due to the addition of extra debugging information.
 
-// MySQL, SQlite not support UUID datatype
+// MySQL, SQLite not support UUID datatype
 // PostgreSQL not support BINARY, or VARBINARY datatype
 
 // set into HEX
 
+// Token -> HashToken
+// SecretKey -> 32 bytes into 44 chars (base64)
+
 type SessionModel struct {
-  *gorm.Model
-  ID            string    `gorm:"type:VARCHAR(32);primary" json:"id"`
-  UserID        string    `gorm:"type:VARCHAR(32);not null" json:"user_id"`
-  ClientIP      string    `gorm:"type:VARCHAR(40)" json:"client_ip"`
-  UserAgent     string    `gorm:"type:TEXT" json:"user_agent"`
-  Token         string    `gorm:"type:TEXT;unique;not null" json:"token"`
-  SecretKey     string    `gorm:"type:TEXT;unique;not null" json:"secret_key"`
-  Expired       time.Time `gorm:"type:TIMESTAMP;not null" json:"expired"`
-  LastActivated time.Time `gorm:"type:TIMESTAMP;default:CURRENT_TIMESTAMP" json:"last_activated"`
+	*gorm.Model
+	ID            string    `gorm:"type:VARCHAR(32);primary" json:"id"`
+	UserID        string    `gorm:"type:VARCHAR(32);not null" json:"user_id"`
+	ClientIP      string    `gorm:"type:VARCHAR(40);not null" json:"client_ip"`
+	UserAgent     string    `gorm:"type:TEXT;not null" json:"user_agent"`
+	Token         string    `gorm:"type:VARCHAR(64);unique;not null" json:"token"`
+	SecretKey     string    `gorm:"type:VARCHAR(44);unique;not null" json:"secret_key"`
+	Expired       time.Time `gorm:"type:TIMESTAMP;not null" json:"expired"`
+	LastActivated time.Time `gorm:"type:TIMESTAMP;default:CURRENT_TIMESTAMP" json:"last_activated"`
 }
 
 // set table name
 
 func (SessionModel) TableName() string {
 
-  return "sessions"
+	return "sessions"
 }

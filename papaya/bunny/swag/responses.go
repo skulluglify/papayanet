@@ -1,64 +1,64 @@
 package swag
 
 import (
-  "net/http"
-  m "skfw/papaya/koala/mapping"
-  "skfw/papaya/koala/pp"
-  "strconv"
+	"net/http"
+	m "skfw/papaya/koala/mapping"
+	"skfw/papaya/koala/pp"
+	"strconv"
 )
 
 func SwagResponseSchemes(responses m.KMapImpl) m.KMapImpl {
 
-  res := &m.KMap{}
+	res := &m.KMap{}
 
-  // bypass responses, if not set up
-  if responses != nil {
+	// bypass responses, if not set up
+	if responses != nil {
 
-    for _, enum := range responses.Enums() {
+		for _, enum := range responses.Enums() {
 
-      k, v := enum.Tuple()
+			k, v := enum.Tuple()
 
-      if statusCode := m.KValueToString(k); statusCode != "" {
+			if statusCode := m.KValueToString(k); statusCode != "" {
 
-        // --- status code ---
+				// --- status code ---
 
-        n, err := strconv.Atoi(statusCode)
+				n, err := strconv.Atoi(statusCode)
 
-        if err != nil {
+				if err != nil {
 
-          n = 200
+					n = 200
 
-          // wrong implement status code
-          panic("wrong implemented status code in responses")
-        }
+					// wrong implement status code
+					panic("wrong implemented status code in responses")
+				}
 
-        statusMessage := http.StatusText(n)
+				statusMessage := http.StatusText(n)
 
-        // --- status code ---
+				// --- status code ---
 
-        if mm := m.KMapCast(v); mm != nil {
+				if mm := m.KMapCast(v); mm != nil {
 
-          if body := m.KMapCast(mm.Get("body")); body != nil {
+					if body := m.KMapCast(mm.Get("body")); body != nil {
 
-            for _, bEnum := range body.Enums() {
+						for _, bEnum := range body.Enums() {
 
-              bK, bV := bEnum.Tuple()
+							bK, bV := bEnum.Tuple()
 
-              if mimeTy := m.KValueToString(bK); bK != "" {
+							if mimeTy := m.KValueToString(bK); bK != "" {
 
-                if vM := m.KMapCast(bV); vM != nil {
+								if vM := m.KMapCast(bV); vM != nil {
 
-                  schema := vM.Get("schema")
-                  description := pp.QStr(m.KValueToString(vM.Get("description")), statusMessage)
-                  res.Put(statusCode, SwagContentSchema(mimeTy, schema, description))
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+									schema := vM.Get("schema")
+									description := pp.Qstr(m.KValueToString(vM.Get("description")), statusMessage)
+									res.Put(statusCode, SwagContentSchema(mimeTy, schema, description))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
-  return res
+	return res
 }

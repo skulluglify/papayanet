@@ -13,7 +13,7 @@ temp = a ? b : c
 ```
 
 ```go
-temp := pp.LAny(a, b, c)
+temp := pp.Lany(a, b, c)
 ```
 
 ```go
@@ -32,7 +32,7 @@ temp = a ?? b
 ```
 
 ```go
-temp := pp.QAny(a, b)
+temp := pp.Qany(a, b)
 ```
 
 ```go

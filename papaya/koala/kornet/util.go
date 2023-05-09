@@ -1,247 +1,247 @@
 package kornet
 
 import (
-  "encoding/json"
-  "errors"
-  "net/http"
-  "net/url"
-  "reflect"
-  m "skfw/papaya/koala/mapping"
-  "skfw/papaya/koala/pp"
-  "strconv"
-  "strings"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/url"
+	"reflect"
+	m "skfw/papaya/koala/mapping"
+	"skfw/papaya/koala/pp"
+	"strconv"
+	"strings"
 
-  "github.com/clbanning/mxj"
-  "github.com/valyala/fasthttp"
+	"github.com/clbanning/mxj"
+	"github.com/valyala/fasthttp"
 )
 
 // fallback to use default values
 
 func KSafeGetReqURL(req *http.Request) url.URL {
 
-  URL := url.URL{
-    User:     req.URL.User,
-    Scheme:   pp.QStr(req.URL.Scheme, "http"),
-    Host:     pp.QStr(req.URL.Host, "localhost"),
-    Path:     pp.QStr(req.URL.Path, "/"),
-    RawQuery: req.URL.RawQuery,
-  }
+	URL := url.URL{
+		User:     req.URL.User,
+		Scheme:   pp.Qstr(req.URL.Scheme, "http"),
+		Host:     pp.Qstr(req.URL.Host, "localhost"),
+		Path:     pp.Qstr(req.URL.Path, "/"),
+		RawQuery: req.URL.RawQuery,
+	}
 
-  return URL
+	return URL
 }
 
 func KSafeContentTy(contentTy string) (string, string) {
 
-  // must be text
-  charset := ""
+	// must be text
+	charset := ""
 
-  tokens := strings.Split(contentTy, ";")
+	tokens := strings.Split(contentTy, ";")
 
-  if len(tokens) > 0 {
+	if len(tokens) > 0 {
 
-    contentTy = strings.Trim(tokens[0], "")
+		contentTy = strings.Trim(tokens[0], "")
 
-    if len(tokens) > 1 {
+		if len(tokens) > 1 {
 
-      token := strings.Trim(tokens[1], " ")
-      if strings.HasPrefix("charset", token) {
+			token := strings.Trim(tokens[1], " ")
+			if strings.HasPrefix("charset", token) {
 
-        tokens = strings.Split(token, "=")
+				tokens = strings.Split(token, "=")
 
-        if len(tokens) > 0 {
+				if len(tokens) > 0 {
 
-          charset = strings.ToUpper(tokens[1])
-        }
-      }
-    }
+					charset = strings.ToUpper(tokens[1])
+				}
+			}
+		}
 
-    // check by extensions
-    // ex: application/json -> text/plain -> charset: UTF-8
+		// check by extensions
+		// ex: application/json -> text/plain -> charset: UTF-8
 
-    if !AvailableCharsets.Contain(charset) {
+		if !AvailableCharsets.Contain(charset) {
 
-      charset = "UTF-8" // fallback use UTF-8
-    }
+			charset = "UTF-8" // fallback use UTF-8
+		}
 
-  } else {
+	} else {
 
-    contentTy = "application/octet-stream"
-  }
+		contentTy = "application/octet-stream"
+	}
 
-  return contentTy, charset
+	return contentTy, charset
 }
 
 func KSafeParsingRequestBody(req *fasthttp.Request) (m.KMapImpl, error) {
 
-  //charset := "UTF-8"
-  contentTy := string(req.Header.ContentType())
-  contentTy, _ = KSafeContentTy(contentTy) // get content-type only
+	//charset := "UTF-8"
+	contentTy := string(req.Header.ContentType())
+	contentTy, _ = KSafeContentTy(contentTy) // get content-type only
 
-  // TODO: handle if request body is array
-  // request body must be type of object
-  // IF request body IS type of array, How to {{Ask Question}}
+	// TODO: handle if request body is array
+	// request body must be type of object
+	// IF request body IS type of array, How to {{Ask Question}}
 
-  res := &map[string]any{}
+	res := &map[string]any{}
 
-  switch contentTy {
+	switch contentTy {
 
-  case "application/json":
+	case "application/json":
 
-    if err := json.Unmarshal(req.Body(), res); err != nil {
+		if err := json.Unmarshal(req.Body(), res); err != nil {
 
-      return nil, err
-    }
+			return nil, err
+		}
 
-    break
+		break
 
-  case "text/xml", "application/xml", "application/atom+xml":
+	case "text/xml", "application/xml", "application/atom+xml":
 
-    // parse by mjx
+		// parse by mjx
 
-    mm, err := mxj.NewMapXml(req.Body(), true)
+		mm, err := mxj.NewMapXml(req.Body(), true)
 
-    if err != nil {
+		if err != nil {
 
-      return nil, err
-    }
+			return nil, err
+		}
 
-    // auto parsing
-    data := map[string]any(mm)
+		// auto parsing
+		data := map[string]any(mm)
 
-    if root, ok := data["root"]; ok {
-      if rootMap, ok := root.(map[string]any); ok {
+		if root, ok := data["root"]; ok {
+			if rootMap, ok := root.(map[string]any); ok {
 
-        res = &rootMap
-        break
-      }
-    }
+				res = &rootMap
+				break
+			}
+		}
 
-    res = &data
-    break
+		res = &data
+		break
 
-  case "multipart/form-data":
+	case "multipart/form-data":
 
-    form, err := req.MultipartForm()
+		form, err := req.MultipartForm()
 
-    if err != nil {
+		if err != nil {
 
-      return nil, err
-    }
+			return nil, err
+		}
 
-    mm := *res
+		mm := *res
 
-    for k, v := range form.Value {
+		for k, v := range form.Value {
 
-      if len(v) == 1 {
+			if len(v) == 1 {
 
-        mm[k] = v[0]
-        continue
-      }
+				mm[k] = v[0]
+				continue
+			}
 
-      mm[k] = v
-    }
-  }
+			mm[k] = v
+		}
+	}
 
-  mm := m.KMap(*res)
-  return &mm, nil
+	mm := m.KMap(*res)
+	return &mm, nil
 }
 
 func KSafeParsingBoolean(v any) (bool, error) {
 
-  val := pp.KIndirectValueOf(v)
+	val := pp.KIndirectValueOf(v)
 
-  if val.IsValid() {
+	if val.IsValid() {
 
-    ty := val.Type()
+		ty := val.Type()
 
-    switch ty.Kind() {
-    case reflect.Bool:
+		switch ty.Kind() {
+		case reflect.Bool:
 
-      return val.Bool(), nil
+			return val.Bool(), nil
 
-    case reflect.String:
+		case reflect.String:
 
-      // try parsing into boolean
-      y, err := strconv.ParseBool(val.String())
+			// try parsing into boolean
+			y, err := strconv.ParseBool(val.String())
 
-      if err != nil {
+			if err != nil {
 
-        return false, err
-      }
+				return false, err
+			}
 
-      return y, nil
-    }
-  }
+			return y, nil
+		}
+	}
 
-  return false, errors.New("invalid boolean")
+	return false, errors.New("invalid boolean")
 }
 
 func KSafeParsingNumber(v any) (any, error) {
 
-  val := pp.KIndirectValueOf(v)
+	val := pp.KIndirectValueOf(v)
 
-  if val.IsValid() {
+	if val.IsValid() {
 
-    ty := val.Type()
+		ty := val.Type()
 
-    switch ty.Kind() {
-    case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		switch ty.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 
-      return val.Int(), nil
+			return val.Int(), nil
 
-    case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 
-      return val.Uint(), nil
+			return val.Uint(), nil
 
-    case reflect.Float32, reflect.Float64:
+		case reflect.Float32, reflect.Float64:
 
-      return val.Float(), nil
+			return val.Float(), nil
 
-    case reflect.Complex64, reflect.Complex128:
+		case reflect.Complex64, reflect.Complex128:
 
-      return val.Complex(), nil
+			return val.Complex(), nil
 
-    case reflect.String:
+		case reflect.String:
 
-      k := val.String()
+			k := val.String()
 
-      var n any
+			var n any
 
-      // how about complex ?
-      // don't have any idea to parsing with complex
+			// how about complex ?
+			// don't have any idea to parsing with complex
 
-      n, err := strconv.ParseFloat(k, 10)
+			n, err := strconv.ParseFloat(k, 10)
 
-      if err != nil {
+			if err != nil {
 
-        n, err = strconv.ParseUint(k, 10, 64)
+				n, err = strconv.ParseUint(k, 10, 64)
 
-        if err != nil {
+				if err != nil {
 
-          return 0, err
-        }
-      }
+					return 0, err
+				}
+			}
 
-      return n, nil
-    }
+			return n, nil
+		}
 
-  }
+	}
 
-  return 0, errors.New("invalid number")
+	return 0, errors.New("invalid number")
 }
 
 func KSafeSimpleHeaders(headers url.Values) m.KMapImpl {
 
-  data := map[string]any{}
+	data := map[string]any{}
 
-  for k, v := range headers {
+	for k, v := range headers {
 
-    if len(v) > 0 {
+		if len(v) > 0 {
 
-      data[k] = v[0]
-    }
-  }
+			data[k] = v[0]
+		}
+	}
 
-  mm := m.KMap(data)
-  return &mm
+	mm := m.KMap(data)
+	return &mm
 }

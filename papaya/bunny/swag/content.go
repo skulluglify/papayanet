@@ -1,191 +1,191 @@
 package swag
 
 import (
-  "reflect"
-  m "skfw/papaya/koala/mapping"
-  "skfw/papaya/koala/pp"
+	"reflect"
+	m "skfw/papaya/koala/mapping"
+	"skfw/papaya/koala/pp"
 )
 
 func SwagContentSchema(mimeType string, data any, description string) m.KMapImpl {
 
-  content := &m.KMap{}
+	content := &m.KMap{}
 
-  switch mimeType {
-  case "application/json", "application/xml", "multipart/form-data":
+	switch mimeType {
+	case "application/json", "application/xml", "multipart/form-data":
 
-    content.Put(mimeType, &m.KMap{
-      "schema": SwagContentFormatter(data),
-    })
+		content.Put(mimeType, &m.KMap{
+			"schema": SwagContentFormatter(data),
+		})
 
-    break
+		break
 
-  default:
+	default:
 
-    // default media type is binary
-    content.Put(mimeType, &m.KMap{
-      "schema": &m.KMap{
-        "type":   "string",
-        "format": "binary",
-      },
-    })
+		// default media type is binary
+		content.Put(mimeType, &m.KMap{
+			"schema": &m.KMap{
+				"type":   "string",
+				"format": "binary",
+			},
+		})
 
-    break
+		break
 
-  }
+	}
 
-  return &m.KMap{
-    "description": description,
-    "content":     content,
-  }
+	return &m.KMap{
+		"description": description,
+		"content":     content,
+	}
 }
 
 func SwagContentSchemes(body m.KMapImpl) []m.KMapImpl {
 
-  res := make([]m.KMapImpl, 0)
-  if mm := m.KMapCast(body); mm != nil {
+	res := make([]m.KMapImpl, 0)
+	if mm := m.KMapCast(body); mm != nil {
 
-    for _, enum := range mm.Enums() {
+		for _, enum := range mm.Enums() {
 
-      k, v := enum.Tuple()
+			k, v := enum.Tuple()
 
-      if mimeTy := m.KValueToString(k); mimeTy != "" {
+			if mimeTy := m.KValueToString(k); mimeTy != "" {
 
-        if vM := m.KMapCast(v); vM != nil {
+				if vM := m.KMapCast(v); vM != nil {
 
-          schema := vM.Get("schema")
-          description := pp.QStr(m.KValueToString(vM.Get("description")), "Ok")
-          res = append(res, SwagContentSchema(mimeTy, schema, description))
-        }
-      }
+					schema := vM.Get("schema")
+					description := pp.Qstr(m.KValueToString(vM.Get("description")), "Ok")
+					res = append(res, SwagContentSchema(mimeTy, schema, description))
+				}
+			}
 
-    }
-  }
+		}
+	}
 
-  return res
+	return res
 }
 
 func SwagContentFormatter(mapping any) m.KMapImpl {
 
-  var res m.KMapImpl
-  val := pp.KIndirectValueOf(mapping)
+	var res m.KMapImpl
+	val := pp.KIndirectValueOf(mapping)
 
-  if val.IsValid() {
+	if val.IsValid() {
 
-    ty := val.Type()
+		ty := val.Type()
 
-    switch ty.Kind() {
-    case reflect.Array, reflect.Slice:
+		switch ty.Kind() {
+		case reflect.Array, reflect.Slice:
 
-      if val.Len() > 0 {
+			if val.Len() > 0 {
 
-        sample := val.Index(0).Interface()
-        res = SwagUniversalArray(SwagContentFormatter(sample))
+				sample := val.Index(0).Interface()
+				res = SwagUniversalArray(SwagContentFormatter(sample))
 
-      } else {
+			} else {
 
-        // sample type, normalize typing
-        t := SwagUniversalNormType(ty.Elem().Name())
+				// sample type, normalize typing
+				t := SwagUniversalNormType(ty.Elem().Name())
 
-        // catch a typeof elem array or slice
-        res = SwagUniversalArray(SwagUniversalType(t, nil))
-      }
+				// catch a typeof elem array or slice
+				res = SwagUniversalArray(SwagUniversalType(t, nil))
+			}
 
-      break
+			break
 
-    case reflect.Map:
+		case reflect.Map:
 
-      if ty == reflect.TypeOf(m.KMap{}) {
+			if ty == reflect.TypeOf(m.KMap{}) {
 
-        sample := val.Interface()
-        if mm := m.KMapCast(sample); mm != nil {
+				sample := val.Interface()
+				if mm := m.KMapCast(sample); mm != nil {
 
-          data := &m.KMap{}
+					data := &m.KMap{}
 
-          for _, enum := range mm.Enums() {
+					for _, enum := range mm.Enums() {
 
-            k, v := enum.Tuple()
+						k, v := enum.Tuple()
 
-            data.Put(k, SwagContentFormatter(v))
-          }
+						data.Put(k, SwagContentFormatter(v))
+					}
 
-          res = SwagUniversalObject(data)
-        }
-      }
+					res = SwagUniversalObject(data)
+				}
+			}
 
-      break
+			break
 
-    case reflect.Struct:
+		case reflect.Struct:
 
-      var i, n int
-      var vf reflect.Value
-      var vt reflect.StructField
-      var name, tag string
-      var value any
+			var i, n int
+			var vf reflect.Value
+			var vt reflect.StructField
+			var name, tag string
+			var value any
 
-      n = val.NumField()
+			n = val.NumField()
 
-      // convert struct as object mapping
-      mm := &m.KMap{}
+			// convert struct as object mapping
+			mm := &m.KMap{}
 
-      for i = 0; i < n; i++ {
+			for i = 0; i < n; i++ {
 
-        vf, vt = val.Field(i), ty.Field(i)
+				vf, vt = val.Field(i), ty.Field(i)
 
-        if vt.IsExported() {
+				if vt.IsExported() {
 
-          if vf.IsValid() {
+					if vf.IsValid() {
 
-            name = vt.Name
-            tag = vt.Tag.Get("json")
-            value = vf.Interface()
-            if tag != "" {
+						name = vt.Name
+						tag = vt.Tag.Get("json")
+						value = vf.Interface()
+						if tag != "" {
 
-              name = tag
-            }
+							name = tag
+						}
 
-            // put magic
-            mm.Put(name, SwagContentFormatter(value))
-          }
-        }
-      }
+						// put magic
+						mm.Put(name, SwagContentFormatter(value))
+					}
+				}
+			}
 
-      res = SwagUniversalObject(mm)
-      break
+			res = SwagUniversalObject(mm)
+			break
 
-    case reflect.String:
+		case reflect.String:
 
-      // maybe text type string
+			// maybe text type string
 
-      t := val.String()
+			t := val.String()
 
-      var retype bool
-      retype = false
+			var retype bool
+			retype = false
 
-      if t != "" {
+			if t != "" {
 
-        if m.Keys(Types).Contain(t) {
+				if m.Keys(Types).Contain(t) {
 
-          res = SwagUniversalType(t, nil)
-          retype = true
-        }
-      }
+					res = SwagUniversalType(t, nil)
+					retype = true
+				}
+			}
 
-      // fallback use type string as default
-      if !retype {
+			// fallback use type string as default
+			if !retype {
 
-        res = SwagUniversalType(ty.Name(), nil)
-      }
+				res = SwagUniversalType(ty.Name(), nil)
+			}
 
-      break
+			break
 
-    default:
+		default:
 
-      // type any in traditional typing, like bool, int, string
-      res = SwagUniversalType(ty.Name(), nil)
+			// type any in traditional typing, like bool, int, string
+			res = SwagUniversalType(ty.Name(), nil)
 
-      break
-    }
-  }
+			break
+		}
+	}
 
-  return res
+	return res
 }

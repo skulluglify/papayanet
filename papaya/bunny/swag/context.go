@@ -44,7 +44,7 @@ type SwagContextImpl interface {
 	Bind(req *kornet.Request, res *kornet.Response)
 
 	// wrapping http status + message + data
-	
+
 	Continue(result *kornet.Result) error
 	SwitchingProtocols(result *kornet.Result) error
 	Processing(result *kornet.Result) error
@@ -106,6 +106,14 @@ type SwagContextImpl interface {
 	LoopDetected(result *kornet.Result) error
 	NotExtended(result *kornet.Result) error
 	NetworkAuthenticationRequired(result *kornet.Result) error
+
+	// wrap a message only
+
+	Message(message string) error
+
+	// empty or nothing
+
+	Empty() error
 }
 
 func MakeSwagContext(ctx *fiber.Ctx, event bool) *SwagContext {
@@ -625,4 +633,14 @@ func (c *SwagContext) NetworkAuthenticationRequired(result *kornet.Result) error
 	result.Status = http.StatusText(http.StatusNetworkAuthenticationRequired)
 	result.Error = kornet.HttpCheckErrStat(http.StatusNetworkAuthenticationRequired)
 	return c.Ctx.Status(http.StatusNetworkAuthenticationRequired).JSON(result)
+}
+
+func (c *SwagContext) Message(message string) error {
+
+	return c.OK(kornet.MessageOnly(kornet.MessageNew(message, false)))
+}
+
+func (c *SwagContext) Empty() error {
+
+	return c.Ctx.Status(http.StatusNoContent).Send([]byte{})
 }

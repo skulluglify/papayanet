@@ -7,3 +7,16 @@
 
 ### dependencies
 - fasthttp
+
+### Standard Kornet Result
+
+```ts
+result = {
+    id: number, // RPC identify
+    logs: array<string>, // logs history
+    status: string, // status API
+    message: string, // message received
+    error: boolean, // error Bad Request Or Internal Server
+    data: object | array | null, // result data
+}
+```

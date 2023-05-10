@@ -4,12 +4,12 @@ package pp
 
 func L[T any](check bool, good T, bad T) T {
 
-	if check {
+  if check {
 
-		return good
-	}
+    return good
+  }
 
-	return bad
+  return bad
 }
 
 // auto type defined by name

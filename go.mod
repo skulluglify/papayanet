@@ -42,5 +42,5 @@ require gorm.io/driver/mysql v1.5.0
 
 require (
 	github.com/clbanning/mxj v1.8.4
-	github.com/go-sql-driver/mysql v1.7.0 // indirect
+	github.com/go-sql-driver/mysql v1.7.0
 )

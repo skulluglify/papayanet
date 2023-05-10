@@ -1,9 +1,9 @@
 package util
 
 import (
-	"errors"
-	"strings"
-	"unicode"
+  "errors"
+  "strings"
+  "unicode"
 )
 
 // exceptions
@@ -16,99 +16,99 @@ var PasswordDoestNotContainUpperCharacter = errors.New("password does not contai
 var PasswordDoesNotContainLowerCharacter = errors.New("password does not contain a lower character")
 
 type Password struct {
-	data    string
-	special bool
-	number  bool
-	upper   bool
-	lower   bool
-	size    int
+  data    string
+  special bool
+  number  bool
+  upper   bool
+  lower   bool
+  size    int
 }
 
 type PasswordImpl interface {
-	Init(password string) error
-	Verify(min int, special bool, num bool, upper bool, lower bool) (bool, error)
-	Value() string
+  Init(password string) error
+  Verify(min int, special bool, num bool, upper bool, lower bool) (bool, error)
+  Value() string
 }
 
 func PasswordNew(password string) (PasswordImpl, error) {
 
-	pass := &Password{}
-	if err := pass.Init(password); err != nil {
+  pass := &Password{}
+  if err := pass.Init(password); err != nil {
 
-		return nil, err
-	}
-	return pass, nil
+    return nil, err
+  }
+  return pass, nil
 }
 
 func (p *Password) Init(password string) error {
 
-	password = strings.Trim(password, " ") // trim
+  password = strings.Trim(password, " ") // trim
 
-	// unicode problem, convert into bytes
-	if len([]byte(password)) > 72 {
+  // unicode problem, convert into bytes
+  if len([]byte(password)) > 72 {
 
-		// bcrypt, request
-		return PasswordLongerThanSeventyTwoBytes
-	}
+    // bcrypt, request
+    return PasswordLongerThanSeventyTwoBytes
+  }
 
-	if password != "" {
-		p.data = password
-		return nil
-	}
+  if password != "" {
+    p.data = password
+    return nil
+  }
 
-	return PasswordIsEmptyString
+  return PasswordIsEmptyString
 }
 
 func (p *Password) Verify(min int, special bool, num bool, upper bool, lower bool) (bool, error) {
 
-	p.number = false
-	p.special = false
-	p.upper = false
-	p.lower = false
-	p.size = 0
+  p.number = false
+  p.special = false
+  p.upper = false
+  p.lower = false
+  p.size = 0
 
-	for _, c := range p.data {
+  for _, c := range p.data {
 
-		switch {
-		case unicode.IsPunct(c) || unicode.IsSymbol(c):
-			p.special = true
+    switch {
+    case unicode.IsPunct(c) || unicode.IsSymbol(c):
+      p.special = true
 
-		case unicode.IsNumber(c):
-			p.number = true
+    case unicode.IsNumber(c):
+      p.number = true
 
-		case unicode.IsUpper(c):
-			p.upper = true
+    case unicode.IsUpper(c):
+      p.upper = true
 
-		case unicode.IsLower(c):
-			p.lower = true
+    case unicode.IsLower(c):
+      p.lower = true
 
-		}
+    }
 
-		p.size++
-	}
+    p.size++
+  }
 
-	switch {
-	case p.size < min:
-		return false, PasswordIsTooShort
+  switch {
+  case p.size < min:
+    return false, PasswordIsTooShort
 
-	case special && !p.special:
-		return false, PasswordDoesNotContainSpecialCharacter
+  case special && !p.special:
+    return false, PasswordDoesNotContainSpecialCharacter
 
-	case num && !p.number:
-		return false, PasswordDoesNotContainNumberCharacter
+  case num && !p.number:
+    return false, PasswordDoesNotContainNumberCharacter
 
-	case upper && !p.upper:
-		return false, PasswordDoestNotContainUpperCharacter
+  case upper && !p.upper:
+    return false, PasswordDoestNotContainUpperCharacter
 
-	case lower && !p.lower:
-		return false, PasswordDoesNotContainLowerCharacter
+  case lower && !p.lower:
+    return false, PasswordDoesNotContainLowerCharacter
 
-	}
+  }
 
-	return true, nil
+  return true, nil
 }
 
 func (p *Password) Value() string {
 
-	return p.data
+  return p.data
 }

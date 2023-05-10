@@ -1,10 +1,10 @@
 package swag
 
 import (
-	"reflect"
-	m "skfw/papaya/koala/mapping"
-	"skfw/papaya/koala/pp"
-	"strings"
+  "reflect"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
+  "strings"
 )
 
 // convert expect into openapi format
@@ -18,133 +18,133 @@ import (
 
 func SwagUniversalBoolean() m.KMapImpl {
 
-	return &m.KMap{
-		"type": "boolean",
-	}
+  return &m.KMap{
+    "type": "boolean",
+  }
 }
 
 func SwagUniversalNumber() m.KMapImpl {
 
-	return &m.KMap{
-		"type": "number",
-	}
+  return &m.KMap{
+    "type": "number",
+  }
 }
 
 func SwagUniversalString() m.KMapImpl {
 
-	return &m.KMap{
-		"type": "string",
-	}
+  return &m.KMap{
+    "type": "string",
+  }
 }
 
 func SwagUniversalNull() m.KMapImpl {
 
-	return &m.KMap{
-		"type": "null",
-	}
+  return &m.KMap{
+    "type": "null",
+  }
 }
 
 func SwagUniversalArray(t m.KMapImpl) m.KMapImpl {
 
-	return &m.KMap{
-		"type":  "array",
-		"items": t,
-	}
+  return &m.KMap{
+    "type":  "array",
+    "items": t,
+  }
 }
 
 func SwagUniversalObject(t m.KMapImpl) m.KMapImpl {
 
-	return &m.KMap{
-		"type":       "object",
-		"properties": t,
-	}
+  return &m.KMap{
+    "type":       "object",
+    "properties": t,
+  }
 }
 
 func SwagUniversalReType(v any) string {
 
-	val := pp.KIndirectValueOf(v)
+  val := pp.KIndirectValueOf(v)
 
-	if val.IsValid() {
+  if val.IsValid() {
 
-		ty := val.Type()
+    ty := val.Type()
 
-		switch ty.Kind() {
+    switch ty.Kind() {
 
-		case reflect.Bool:
+    case reflect.Bool:
 
-			return "boolean"
+      return "boolean"
 
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-			reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
+    case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+      reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+      reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
 
-			return "number"
+      return "number"
 
-		case reflect.Array, reflect.Slice:
+    case reflect.Array, reflect.Slice:
 
-			return "array"
+      return "array"
 
-		case reflect.Map, reflect.Struct:
+    case reflect.Map, reflect.Struct:
 
-			return "object"
+      return "object"
 
-		case reflect.String:
+    case reflect.String:
 
-			return pp.Qstr(m.KValueToString(SwagUniversalType(val.String(), nil).Get("type")), "string")
-		}
-	}
+      return pp.Qstr(m.KValueToString(SwagUniversalType(val.String(), nil).Get("type")), "string")
+    }
+  }
 
-	return "null"
+  return "null"
 }
 
 func SwagUniversalType(t string, v m.KMapImpl) m.KMapImpl {
 
-	var cTy m.KMapImpl
+  var cTy m.KMapImpl
 
-	switch t {
-	case "bool", "boolean":
+  switch t {
+  case "bool", "boolean":
 
-		cTy = SwagUniversalBoolean()
-		break
+    cTy = SwagUniversalBoolean()
+    break
 
-	case "int", "int8", "int16", "int32", "int64",
-		"uint", "uint8", "uint16", "uint32", "uint64",
-		"float", "float32", "float64",
-		"complex", "complex64", "complex128",
-		"integer", "decimal", "number", "byte": // byte as uint8
+  case "int", "int8", "int16", "int32", "int64",
+    "uint", "uint8", "uint16", "uint32", "uint64",
+    "float", "float32", "float64",
+    "complex", "complex64", "complex128",
+    "integer", "decimal", "number", "byte": // byte as uint8
 
-		cTy = SwagUniversalNumber()
-		break
+    cTy = SwagUniversalNumber()
+    break
 
-	case "str", "text", "string":
+  case "str", "text", "string":
 
-		cTy = SwagUniversalString()
-		break
+    cTy = SwagUniversalString()
+    break
 
-	case "array", "slice": // [] as slice
+  case "array", "slice": // [] as slice
 
-		if v != nil {
+    if v != nil {
 
-			cTy = SwagUniversalArray(v)
-		}
-		break
+      cTy = SwagUniversalArray(v)
+    }
+    break
 
-	case "map", "object":
+  case "map", "object":
 
-		if v != nil {
+    if v != nil {
 
-			cTy = SwagUniversalObject(v)
-		}
-		break
+      cTy = SwagUniversalObject(v)
+    }
+    break
 
-	default:
+  default:
 
-		//case "nil", "null":
-		cTy = SwagUniversalNull()
-		break
-	}
+    //case "nil", "null":
+    cTy = SwagUniversalNull()
+    break
+  }
 
-	return cTy
+  return cTy
 }
 
 // array, slice cases
@@ -152,23 +152,23 @@ func SwagUniversalType(t string, v m.KMapImpl) m.KMapImpl {
 
 func SwagUniversalNormType(t string) string {
 
-	// map.+? is map
-	if strings.HasSuffix(t, "map") {
+  // map.+? is map
+  if strings.HasSuffix(t, "map") {
 
-		return "map"
-	}
+    return "map"
+  }
 
-	// [].+? is slice
-	if strings.HasSuffix(t, "[]") {
+  // [].+? is slice
+  if strings.HasSuffix(t, "[]") {
 
-		return "slice"
-	}
+    return "slice"
+  }
 
-	// [.+? is array
-	if strings.HasSuffix(t, "[") {
+  // [.+? is array
+  if strings.HasSuffix(t, "[") {
 
-		return "array"
-	}
+    return "array"
+  }
 
-	return t // as null
+  return t // as null
 }

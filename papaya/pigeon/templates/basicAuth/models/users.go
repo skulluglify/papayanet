@@ -1,8 +1,8 @@
 package models
 
 import (
-	"database/sql"
-	"gorm.io/gorm"
+  "database/sql"
+  "gorm.io/gorm"
 )
 
 // ID
@@ -68,27 +68,27 @@ import (
 // set into HEX
 
 type UserModel struct {
-	*gorm.Model
-	ID          string         `gorm:"type:VARCHAR(32);primary" json:"id"`
-	Name        string         `gorm:"type:VARCHAR(52);" json:"name"`
-	Username    string         `gorm:"type:VARCHAR(16);unique;not null" json:"username"`
-	Email       string         `gorm:"type:VARCHAR(254);unique;not null" json:"email"`
-	Password    string         `gorm:"type:VARCHAR(128);not null" json:"password"`
-	Gender      sql.NullString `gorm:"type:VARCHAR(1)" json:"gender"`
-	Phone       sql.NullString `gorm:"type:VARCHAR(24)" json:"phone"`
-	DOB         sql.NullTime   `gorm:"type:TIMESTAMP" json:"dob"`
-	Address     sql.NullString `gorm:"type:VARCHAR(128)" json:"address"`
-	CountryCode sql.NullString `gorm:"type:VARCHAR(4)" json:"country_code"`
-	City        sql.NullString `gorm:"type:VARCHAR(64)" json:"city"`
-	PostalCode  sql.NullString `gorm:"type:VARCHAR(10)" json:"postal_code"`
-	Verify      bool           `gorm:"type:BOOLEAN;default:FALSE" json:"verify"`
-	Admin       bool           `gorm:"type:BOOLEAN;default:FALSE" json:"admin"`
-	Sessions    []SessionModel `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"sessions"`
+  *gorm.Model
+  ID          string         `gorm:"type:VARCHAR(32);primary" json:"id"`
+  Name        string         `gorm:"type:VARCHAR(52);" json:"name"`
+  Username    string         `gorm:"type:VARCHAR(16);unique;not null" json:"username"`
+  Email       string         `gorm:"type:VARCHAR(254);unique;not null" json:"email"`
+  Password    string         `gorm:"type:VARCHAR(128);not null" json:"password"`
+  Gender      sql.NullString `gorm:"type:VARCHAR(1)" json:"gender"`
+  Phone       sql.NullString `gorm:"type:VARCHAR(24)" json:"phone"`
+  DOB         sql.NullTime   `gorm:"type:TIMESTAMP" json:"dob"`
+  Address     sql.NullString `gorm:"type:VARCHAR(128)" json:"address"`
+  CountryCode sql.NullString `gorm:"type:VARCHAR(4)" json:"country_code"`
+  City        sql.NullString `gorm:"type:VARCHAR(64)" json:"city"`
+  PostalCode  sql.NullString `gorm:"type:VARCHAR(10)" json:"postal_code"`
+  Verify      bool           `gorm:"type:BOOLEAN;default:FALSE" json:"verify"`
+  Admin       bool           `gorm:"type:BOOLEAN;default:FALSE" json:"admin"`
+  Sessions    []SessionModel `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"sessions"`
 }
 
 // set table name
 
 func (UserModel) TableName() string {
 
-	return "users"
+  return "users"
 }

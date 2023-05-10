@@ -277,44 +277,47 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
       required, token := SwagHeaderRequired(k)
 
-      if required {
+      if p, ok := h[token]; ok {
 
-        if p, ok := h[token]; ok {
+        switch t {
+        case "bool", "boolean":
 
-          switch t {
-          case "bool", "boolean":
+          y, err := strconv.ParseBool(p)
 
-            y, err := strconv.ParseBool(p)
+          if required {
 
             if err != nil {
 
               return request, fmt.Errorf("key `%s` either not set or is not a boolean in header", k)
             }
+          }
 
-            header[token] = y
+          header[token] = y
 
-            break
+          break
 
-          case "int", "number", "integer", "byte":
+        case "int", "number", "integer", "byte":
 
-            // try parsing if not number
-            n, err := kornet.KSafeParsingNumber(p)
+          // try parsing if not number
+          n, err := kornet.KSafeParsingNumber(p)
+
+          if required {
 
             if err != nil {
 
               return request, fmt.Errorf("key `%s` either not set or is not a number in request header", k)
             }
-
-            header[token] = n
-
-            break
-
-          case "str", "text", "string":
-
-            header[token] = p
-
-            break
           }
+
+          header[token] = n
+
+          break
+
+        case "str", "text", "string":
+
+          header[token] = p
+
+          break
         }
       }
     }
@@ -343,103 +346,112 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
       required, token := SwagParamRequired(k)
       isPath, name := SwagParamPathValid(token)
 
-      if required {
+      if isPath {
 
-        if isPath {
+        // path
 
-          // path
+        for p, q := range params {
 
-          for p, q := range params {
+          if p == name {
 
-            if p == name {
+            // try parsing into boolean, number
 
-              // try parsing into boolean, number
+            var found bool
 
-              var found bool
+            switch t {
+            case "bool", "boolean":
 
-              switch t {
-              case "bool", "boolean":
+              y, err := strconv.ParseBool(q)
 
-                y, err := strconv.ParseBool(q)
+              if required {
 
                 if err != nil {
 
                   return request, fmt.Errorf("key `%s` either not set or is not a boolean in path", name)
                 }
+              }
 
-                paths[name] = y
-                found = true
+              paths[name] = y
+              found = true
 
-                break
+              break
 
-              case "int", "number", "integer", "byte":
+            case "int", "number", "integer", "byte":
 
-                // try parsing if not number
-                n, err := kornet.KSafeParsingNumber(q)
+              // try parsing if not number
+              n, err := kornet.KSafeParsingNumber(q)
+
+              if required {
 
                 if err != nil {
 
                   return request, fmt.Errorf("key `%s` either not set or is not a number in path", name)
                 }
-
-                paths[name] = n
-                found = true
-
-                break
               }
 
-              if !found {
+              paths[name] = n
+              found = true
 
-                paths[name] = q
-              }
+              break
+            }
+
+            if !found {
+
+              paths[name] = q
             }
           }
+        }
 
-        } else {
+      } else {
 
-          // query
-          q := query.Get(name)
+        // query
+        q := query.Get(name)
 
-          var found bool
+        var found bool
 
-          switch t {
-          case "bool", "boolean":
+        switch t {
+        case "bool", "boolean":
 
-            y, err := strconv.ParseBool(q)
+          y, err := strconv.ParseBool(q)
+
+          if required {
 
             if err != nil {
 
               return request, fmt.Errorf("key `%s` either not set or is not a boolean in query", name)
             }
+          }
 
-            queries.Set(name, y)
-            found = true
+          queries.Set(name, y)
+          found = true
 
-            break
+          break
 
-          case "int", "number", "integer", "byte":
+        case "int", "number", "integer", "byte":
 
-            // try parsing if not number
-            n, err := kornet.KSafeParsingNumber(q)
+          // try parsing if not number
+          n, err := kornet.KSafeParsingNumber(q)
+
+          if required {
 
             if err != nil {
 
               return request, fmt.Errorf("key `%s` either not set or is not a number in query", k)
             }
-
-            queries.Set(name, n)
-            found = true
-
-            break
           }
 
-          // bypass if a string
-          // just parsing check on int, boolean
+          queries.Set(name, n)
+          found = true
 
-          if !found {
+          break
+        }
 
-            queries.Set(name, q)
-          }
+        // bypass if a string
+        // just parsing check on int, boolean
+
+        if !found {
+
+          queries.Set(name, q)
         }
       }
     }

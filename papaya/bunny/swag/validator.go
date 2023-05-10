@@ -1,501 +1,501 @@
 package swag
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/url"
-	"reflect"
-	"skfw/papaya/koala/kio/leaf"
-	"skfw/papaya/koala/kornet"
-	m "skfw/papaya/koala/mapping"
-	"skfw/papaya/koala/pp"
-	"strconv"
+  "encoding/json"
+  "errors"
+  "fmt"
+  "net/url"
+  "reflect"
+  "skfw/papaya/koala/kio/leaf"
+  "skfw/papaya/koala/kornet"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
+  "strconv"
 
-	"github.com/gofiber/fiber/v2"
+  "github.com/gofiber/fiber/v2"
 )
 
 // request validation, only on type json, xml, form
 
 type SwagRequestValidator struct {
-	*fiber.Ctx
-	exp m.KMapImpl
+  *fiber.Ctx
+  exp m.KMapImpl
 }
 
 type SwagRequestValidatorImpl interface {
-	Init(exp m.KMapImpl, ctx *fiber.Ctx)
-	Validation() (*kornet.Request, error)
+  Init(exp m.KMapImpl, ctx *fiber.Ctx)
+  Validation() (*kornet.Request, error)
 }
 
 func SwagRequestValidatorNew(exp m.KMapImpl, ctx *fiber.Ctx) SwagRequestValidatorImpl {
 
-	v := &SwagRequestValidator{}
-	v.Init(exp, ctx)
-	return v
+  v := &SwagRequestValidator{}
+  v.Init(exp, ctx)
+  return v
 }
 
 func (v *SwagRequestValidator) Init(exp m.KMapImpl, ctx *fiber.Ctx) {
 
-	v.Ctx = ctx
-	v.exp = exp
+  v.Ctx = ctx
+  v.exp = exp
 }
 
 func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
-	// try getting content-type and charset
+  // try getting content-type and charset
 
-	request := &kornet.Request{}
+  request := &kornet.Request{}
 
-	//charset := "UTF-8"
-	bCTy := string(v.Ctx.Request().Header.ContentType()) // body request content-type
-	bCTy, _ = kornet.KSafeContentTy(bCTy)
+  //charset := "UTF-8"
+  bCTy := string(v.Ctx.Request().Header.ContentType()) // body request content-type
+  bCTy, _ = kornet.KSafeContentTy(bCTy)
 
-	// -- end
+  // -- end
 
-	var body m.KMapImpl
-	body = &m.KMap{}
+  var body m.KMapImpl
+  body = &m.KMap{}
 
-	req := v.Ctx.Request()
+  req := v.Ctx.Request()
 
-	//params := m.KMapCast(v.exp.Get("params"))
-	//headers := m.KMapCast(v.exp.Get("headers"))
+  //params := m.KMapCast(v.exp.Get("params"))
+  //headers := m.KMapCast(v.exp.Get("headers"))
 
-	// validation the request body
-	if content := m.KMapCast(v.exp.Get("request.body")); content != nil {
+  // validation the request body
+  if content := m.KMapCast(v.exp.Get("request.body")); content != nil {
 
-		cTys := content.Keys()
+    cTys := content.Keys()
 
-		if cTys.Contain(bCTy) {
+    if cTys.Contain(bCTy) {
 
-			mm, err := kornet.KSafeParsingRequestBody(req)
+      mm, err := kornet.KSafeParsingRequestBody(req)
 
-			if err != nil {
+      if err != nil {
 
-				return request, fmt.Errorf("data format does not match mime type %s", bCTy)
-			}
+        return request, fmt.Errorf("data format does not match mime type %s", bCTy)
+      }
 
-			body = mm
+      body = mm
 
-		} else {
+    } else {
 
-			// use lucky
-			// try parsing with format json
-			data := &map[string]any{}
-			if err := json.Unmarshal(req.Body(), data); err != nil {
+      // use lucky
+      // try parsing with format json
+      data := &map[string]any{}
+      if err := json.Unmarshal(req.Body(), data); err != nil {
 
-				return request, errors.New("failed parsing into data json")
-			}
+        return request, errors.New("failed parsing into data json")
+      }
 
-			// update current content-type
-			bCTy = "application/json"
+      // update current content-type
+      bCTy = "application/json"
 
-			mm := m.KMap(*data)
-			body = &mm
-		}
+      mm := m.KMap(*data)
+      body = &mm
+    }
 
-		var requestBodySameAsContentTypeRequired bool
-		var requestBodyKeySameAsSampleKey bool
+    var requestBodySameAsContentTypeRequired bool
+    var requestBodyKeySameAsSampleKey bool
 
-		for _, cTy := range cTys {
+    for _, cTy := range cTys {
 
-			if cTy != bCTy {
+      if cTy != bCTy {
 
-				continue
-			}
+        continue
+      }
 
-			schema := content.Get(cTy + ".schema") // ex: application/json.schema
+      schema := content.Get(cTy + ".schema") // ex: application/json.schema
 
-			if schema == nil { // schema from expectation
+      if schema == nil { // schema from expectation
 
-				// {{content-type}}.schema not found
-				// not set up schema for handle it
+        // {{content-type}}.schema not found
+        // not set up schema for handle it
 
-				return request, errors.New("schema from request body is not implemented")
+        return request, errors.New("schema from request body is not implemented")
 
-			}
+      }
 
-			if mm := m.KMapCast(schema); mm != nil {
+      if mm := m.KMapCast(schema); mm != nil {
 
-				for _, schemaEnum := range mm.Tree().Enums() { // schema required
+        for _, schemaEnum := range mm.Tree().Enums() { // schema required
 
-					schemaKey, schemaType := schemaEnum.Tuple()
+          schemaKey, schemaType := schemaEnum.Tuple()
 
-					rt := SwagUniversalReType(schemaKey)
+          rt := SwagUniversalReType(schemaKey)
 
-					compareSampleKey, err := CompareSampleKeyNew(schemaKey)
+          compareSampleKey, err := CompareSampleKeyNew(schemaKey)
 
-					if err != nil {
+          if err != nil {
 
-						return request, errors.New("unable to compare with sample key from schema object")
-					}
+            return request, errors.New("unable to compare with sample key from schema object")
+          }
 
-					requestBodyKeySameAsSampleKey = false
+          requestBodyKeySameAsSampleKey = false
 
-					for _, enum := range body.Tree().Enums() { // schema request body
+          for _, enum := range body.Tree().Enums() { // schema request body
 
-						bK, bV := enum.Tuple()
+            bK, bV := enum.Tuple()
 
-						if !compareSampleKey.Check(bK) {
+            if !compareSampleKey.Check(bK) {
 
-							continue
-						}
+              continue
+            }
 
-						requestBodyKeySameAsSampleKey = true
+            requestBodyKeySameAsSampleKey = true
 
-						switch rt {
+            switch rt {
 
-						case "bool", "boolean":
+            case "bool", "boolean":
 
-							y, err := kornet.KSafeParsingBoolean(bV)
+              y, err := kornet.KSafeParsingBoolean(bV)
 
-							if err != nil {
+              if err != nil {
 
-								return request, fmt.Errorf("key `%s` either not set or is not a boolean in request body", schemaKey)
-							}
+                return request, fmt.Errorf("key `%s` either not set or is not a boolean in request body", schemaKey)
+              }
 
-							// update value from request body
-							body.Set(bK, y)
+              // update value from request body
+              body.Set(bK, y)
 
-							break
+              break
 
-						case "int", "number", "numeric", "integer", "byte": // byte -> uint8
+            case "int", "number", "numeric", "integer", "byte": // byte -> uint8
 
-							// try parsing if not number
-							n, err := kornet.KSafeParsingNumber(bV)
+              // try parsing if not number
+              n, err := kornet.KSafeParsingNumber(bV)
 
-							if err != nil {
+              if err != nil {
 
-								return request, fmt.Errorf("key `%s` either not set or is not a number in request body", schemaKey)
-							}
+                return request, fmt.Errorf("key `%s` either not set or is not a number in request body", schemaKey)
+              }
 
-							// update value from request body
-							body.Set(bK, n)
+              // update value from request body
+              body.Set(bK, n)
 
-							break
+              break
 
-						case "str", "string", "text", "word":
+            case "str", "string", "text", "word":
 
-							// check is string or not
-							if tx := m.KValueToString(bV); tx == "" {
+              // check is string or not
+              if tx := m.KValueToString(bV); tx == "" {
 
-								return request, fmt.Errorf("key `%s` either not set or is not a string in request body", schemaKey)
-							}
+                return request, fmt.Errorf("key `%s` either not set or is not a string in request body", schemaKey)
+              }
 
-							break
+              break
 
-						case "array":
+            case "array":
 
-							schemaTypeOf := reflect.TypeOf(schemaType) // type of type
+              schemaTypeOf := reflect.TypeOf(schemaType) // type of type
 
-							// test body value
-							val := pp.KIndirectValueOf(bV)
+              // test body value
+              val := pp.KIndirectValueOf(bV)
 
-							if val.IsValid() {
+              if val.IsValid() {
 
-								bodyTypeOf := val.Type() // get type of body value
+                bodyTypeOf := val.Type() // get type of body value
 
-								schemaTypeOfKey := schemaTypeOf.Elem() // type of type element
+                schemaTypeOfKey := schemaTypeOf.Elem() // type of type element
 
-								// get a element type in universal type
-								uniTypeSchemaTypeOfKey := SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
+                // get a element type in universal type
+                uniTypeSchemaTypeOfKey := SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
 
-								switch bodyTypeOf.Kind() {
-								case reflect.Array, reflect.Slice: // check body value is array, or slice
+                switch bodyTypeOf.Kind() {
+                case reflect.Array, reflect.Slice: // check body value is array, or slice
 
-									for i := 0; i < val.Len(); i++ {
+                  for i := 0; i < val.Len(); i++ {
 
-										indexBodyValue := pp.KIndirectValueOf(val.Index(i))
+                    indexBodyValue := pp.KIndirectValueOf(val.Index(i))
 
-										if indexBodyValue.IsValid() {
+                    if indexBodyValue.IsValid() {
 
-											typeIndexBodyValue := indexBodyValue.Type()
+                      typeIndexBodyValue := indexBodyValue.Type()
 
-											// that problem is,
-											// tte = map[k]v
-											// vtt = map[k]v
-											// tte != vtt
-											// same as a array or slice too
+                      // that problem is,
+                      // tte = map[k]v
+                      // vtt = map[k]v
+                      // tte != vtt
+                      // same as a array or slice too
 
-											// fast compare
-											if schemaTypeOfKey.Kind() != typeIndexBodyValue.Kind() {
+                      // fast compare
+                      if schemaTypeOfKey.Kind() != typeIndexBodyValue.Kind() {
 
-												return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
-											}
-										}
-									}
+                        return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
+                      }
+                    }
+                  }
 
-								default:
+                default:
 
-									return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
-								}
-							}
+                  return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
+                }
+              }
 
-							break
+              break
 
-						case "object":
+            case "object":
 
-							// skip map, not null
+              // skip map, not null
 
-							if bV == nil {
+              if bV == nil {
 
-								return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
-							}
+                return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+              }
 
-							break
-						}
-					}
+              break
+            }
+          }
 
-					if !requestBodyKeySameAsSampleKey {
+          if !requestBodyKeySameAsSampleKey {
 
-						return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
-					}
-				}
-			}
+            return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+          }
+        }
+      }
 
-			requestBodySameAsContentTypeRequired = true
-			break
-		}
+      requestBodySameAsContentTypeRequired = true
+      break
+    }
 
-		if !requestBodySameAsContentTypeRequired {
+    if !requestBodySameAsContentTypeRequired {
 
-			return request, fmt.Errorf("content-type from request body is not supported")
-		}
-	}
+      return request, fmt.Errorf("content-type from request body is not supported")
+    }
+  }
 
-	// re-packing into json format
-	request.Body = leaf.KMakeBuffer([]byte(body.JSON()))
+  // re-packing into json format
+  request.Body = leaf.KMakeBuffer([]byte(body.JSON()))
 
-	header := map[string]any{}
+  header := map[string]any{}
 
-	if content := m.KMapCast(v.exp.Get("request.headers")); content != nil {
+  if content := m.KMapCast(v.exp.Get("request.headers")); content != nil {
 
-		h := v.Ctx.GetReqHeaders()
+    h := v.Ctx.GetReqHeaders()
 
-		for _, enum := range content.Enums() {
+    for _, enum := range content.Enums() {
 
-			k, t := enum.Tuple()
+      k, t := enum.Tuple()
 
-			required, token := SwagHeaderRequired(k)
+      required, token := SwagHeaderRequired(k)
 
-			if p, ok := h[token]; ok {
+      if p, ok := h[token]; ok {
 
-				switch t {
-				case "bool", "boolean":
+        switch t {
+        case "bool", "boolean":
 
-					y, err := strconv.ParseBool(p)
+          y, err := strconv.ParseBool(p)
 
-					if required {
+          if required {
 
-						if err != nil {
+            if err != nil {
 
-							return request, fmt.Errorf("key `%s` either not set or is not a boolean in header", k)
-						}
-					}
+              return request, fmt.Errorf("key `%s` either not set or is not a boolean in header", k)
+            }
+          }
 
-					header[token] = y
+          header[token] = y
 
-					break
+          break
 
-				case "int", "number", "integer", "byte":
+        case "int", "number", "integer", "byte":
 
-					// try parsing if not number
-					n, err := kornet.KSafeParsingNumber(p)
+          // try parsing if not number
+          n, err := kornet.KSafeParsingNumber(p)
 
-					if required {
+          if required {
 
-						if err != nil {
+            if err != nil {
 
-							return request, fmt.Errorf("key `%s` either not set or is not a number in request header", k)
-						}
-					}
+              return request, fmt.Errorf("key `%s` either not set or is not a number in request header", k)
+            }
+          }
 
-					header[token] = n
+          header[token] = n
 
-					break
+          break
 
-				case "str", "string", "text", "word":
+        case "str", "string", "text", "word":
 
-					if required {
+          if required {
 
-						if p == "" {
+            if p == "" {
 
-							return request, fmt.Errorf("key `%s` not found in header", k)
-						}
-					}
+              return request, fmt.Errorf("key `%s` not found in header", k)
+            }
+          }
 
-					header[token] = p
+          header[token] = p
 
-					break
-				}
-			}
-		}
-	}
+          break
+        }
+      }
+    }
+  }
 
-	mm := m.KMap(header)
-	request.Header = &mm
+  mm := m.KMap(header)
+  request.Header = &mm
 
-	paths := map[string]any{}
-	queries := kornet.Query{}
+  paths := map[string]any{}
+  queries := kornet.Query{}
 
-	if content := m.KMapCast(v.exp.Get("request.params")); content != nil {
+  if content := m.KMapCast(v.exp.Get("request.params")); content != nil {
 
-		params := v.Ctx.AllParams()
-		rawQuery := v.Ctx.Context().QueryArgs().String()
-		query, _ := url.ParseQuery(rawQuery)
+    params := v.Ctx.AllParams()
+    rawQuery := v.Ctx.Context().QueryArgs().String()
+    query, _ := url.ParseQuery(rawQuery)
 
-		var found bool
+    var found bool
 
-		for _, enum := range content.Enums() {
+    for _, enum := range content.Enums() {
 
-			k, t := enum.Tuple()
+      k, t := enum.Tuple()
 
-			//fmt.Println(k, t)
+      //fmt.Println(k, t)
 
-			// params
+      // params
 
-			required, token := SwagParamRequired(k)
-			isPath, name := SwagParamPathValid(token)
+      required, token := SwagParamRequired(k)
+      isPath, name := SwagParamPathValid(token)
 
-			found = false
+      found = false
 
-			if isPath {
+      if isPath {
 
-				// path
+        // path
 
-				for p, q := range params {
+        for p, q := range params {
 
-					if p == name {
+          if p == name {
 
-						// try parsing into boolean, number
+            // try parsing into boolean, number
 
-						switch t {
-						case "bool", "boolean":
+            switch t {
+            case "bool", "boolean":
 
-							y, err := strconv.ParseBool(q)
+              y, err := strconv.ParseBool(q)
 
-							if required {
+              if required {
 
-								if err != nil {
+                if err != nil {
 
-									return request, fmt.Errorf("key `%s` either not set or is not a boolean in path", name)
-								}
-							}
+                  return request, fmt.Errorf("key `%s` either not set or is not a boolean in path", name)
+                }
+              }
 
-							paths[name] = y
-							found = true
+              paths[name] = y
+              found = true
 
-							break
+              break
 
-						case "int", "number", "integer", "byte":
+            case "int", "number", "integer", "byte":
 
-							// try parsing if not number
-							n, err := kornet.KSafeParsingNumber(q)
+              // try parsing if not number
+              n, err := kornet.KSafeParsingNumber(q)
 
-							if required {
+              if required {
 
-								if err != nil {
+                if err != nil {
 
-									return request, fmt.Errorf("key `%s` either not set or is not a number in path", name)
-								}
-							}
+                  return request, fmt.Errorf("key `%s` either not set or is not a number in path", name)
+                }
+              }
 
-							paths[name] = n
-							found = true
+              paths[name] = n
+              found = true
 
-							break
+              break
 
-						case "str", "string", "text", "word":
+            case "str", "string", "text", "word":
 
-							if required {
+              if required {
 
-								if q == "" {
+                if q == "" {
 
-									return request, fmt.Errorf("key `%s` not found in path", name)
-								}
-							}
+                  return request, fmt.Errorf("key `%s` not found in path", name)
+                }
+              }
 
-							paths[name] = q
-							found = true
+              paths[name] = q
+              found = true
 
-							break
-						}
+              break
+            }
 
-						if !found {
+            if !found {
 
-							paths[name] = q
-						}
-					}
-				}
+              paths[name] = q
+            }
+          }
+        }
 
-			} else {
+      } else {
 
-				// query
-				q := query.Get(name)
+        // query
+        q := query.Get(name)
 
-				switch t {
-				case "bool", "boolean":
+        switch t {
+        case "bool", "boolean":
 
-					y, err := strconv.ParseBool(q)
+          y, err := strconv.ParseBool(q)
 
-					if required {
+          if required {
 
-						if err != nil {
+            if err != nil {
 
-							return request, fmt.Errorf("key `%s` either not set or is not a boolean in query", name)
-						}
-					}
+              return request, fmt.Errorf("key `%s` either not set or is not a boolean in query", name)
+            }
+          }
 
-					queries.Set(name, y)
-					found = true
+          queries.Set(name, y)
+          found = true
 
-					break
+          break
 
-				case "int", "number", "integer", "byte":
+        case "int", "number", "integer", "byte":
 
-					// try parsing if not number
-					n, err := kornet.KSafeParsingNumber(q)
+          // try parsing if not number
+          n, err := kornet.KSafeParsingNumber(q)
 
-					if required {
+          if required {
 
-						if err != nil {
+            if err != nil {
 
-							return request, fmt.Errorf("key `%s` either not set or is not a number in query", k)
-						}
-					}
+              return request, fmt.Errorf("key `%s` either not set or is not a number in query", k)
+            }
+          }
 
-					queries.Set(name, n)
-					found = true
+          queries.Set(name, n)
+          found = true
 
-					break
+          break
 
-				case "str", "string", "text", "word":
+        case "str", "string", "text", "word":
 
-					if required {
+          if required {
 
-						if q == "" {
+            if q == "" {
 
-							return request, fmt.Errorf("key `%s` not found in query", name)
-						}
-					}
+              return request, fmt.Errorf("key `%s` not found in query", name)
+            }
+          }
 
-					queries.Set(name, q)
-					found = true
+          queries.Set(name, q)
+          found = true
 
-					break
-				}
+          break
+        }
 
-				if !found {
+        if !found {
 
-					queries.Set(name, q)
-				}
-			}
-		}
-	}
+          queries.Set(name, q)
+        }
+      }
+    }
+  }
 
-	mp := m.KMap(paths)
-	request.Path = &mp
+  mp := m.KMap(paths)
+  request.Path = &mp
 
-	request.Query = queries
+  request.Query = queries
 
-	return request, nil
+  return request, nil
 }

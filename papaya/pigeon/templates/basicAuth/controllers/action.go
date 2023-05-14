@@ -155,11 +155,11 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
           case repository.TokenExpiredOrUserNoLongerActive, repository.SessionReachedLimit:
 
             ctx.Prevent()
-            return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew(err.Error(), true))
+            return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
           }
 
           ctx.Prevent()
-          return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))
+          return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
         }
 
         //////// Recovery Token By Database ////////
@@ -169,7 +169,7 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
         if claims, err = util.DecodeJWT(token, session.SecretKey); err != nil {
 
           ctx.Prevent()
-          return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Invalid JWT", true))
+          return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Invalid JWT", true), nil))
         }
 
         if uid, ok := claims["uid"]; ok {
@@ -179,13 +179,13 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
           if !bytes.Equal([]byte(session.UserID), []byte(userId)) {
 
             ctx.Prevent()
-            return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Invalid JWT", true))
+            return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Invalid JWT", true), nil))
           }
 
         } else {
 
           ctx.Prevent()
-          return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Invalid JWT", true))
+          return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Invalid JWT", true), nil))
         }
 
         //////// JWT Checker ////////
@@ -201,7 +201,7 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
                 if err = s.sessionRepo.CheckIn(session); err != nil {
 
                   ctx.Prevent()
-                  return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))
+                  return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
                 }
 
                 ctx.Solve(user)
@@ -209,27 +209,27 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
               }
 
               ctx.Prevent()
-              return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to get user information", true))
+              return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to get user information", true), nil))
             }
 
             ctx.Prevent()
-            return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("user is no longer active", true))
+            return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("user is no longer active", true), nil))
           }
 
           ctx.Prevent()
-          return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Token has expired", true))
+          return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Token has expired", true), nil))
         }
 
         ctx.Prevent()
-        return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Device not recognized", true))
+        return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Device not recognized", true), nil))
       }
 
       ctx.Prevent()
-      return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Token not recognized", true))
+      return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Token not recognized", true), nil))
     }
 
     ctx.Prevent()
-    return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Unauthorized", true))
+    return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Unauthorized", true), nil))
   })
 }
 
@@ -247,7 +247,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON(kornet.Message{}),
+      "responses": swag.OkJSON(&kornet.Result{}),
     },
     func(ctx *swag.SwagContext) error {
 
@@ -259,7 +259,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
 
         if err != nil {
 
-          return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew("unable to parse uuid", true))
+          return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew("unable to parse uuid", true), nil))
         }
 
         if !util.EmptyIdx(sessionId) {
@@ -273,25 +273,25 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
                 err := s.sessionRepo.Delete(session)
                 if err != nil {
 
-                  return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to remove session", true))
+                  return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to remove session", true), nil))
                 }
 
-                return ctx.Status(http.StatusOK).JSON(kornet.MessageNew("remove session", false))
+                return ctx.Status(http.StatusOK).JSON(kornet.ResultNew(kornet.MessageNew("remove session", false), nil))
               }
 
-              return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("Unauthorized", true))
+              return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("Unauthorized", true), nil))
             }
 
-            return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to get session information", true))
+            return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to get session information", true), nil))
           }
 
-          return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to get user information", true))
+          return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to get user information", true), nil))
         }
 
-        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew("uuid is empty", true))
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew("uuid is empty", true), nil))
       }
 
-      return ctx.Status(http.StatusNotAcceptable).JSON(kornet.MessageNew("not accepted by the event", true))
+      return ctx.Status(http.StatusNotAcceptable).JSON(kornet.ResultNew(kornet.MessageNew("not accepted by the event", true), nil))
     })
 
   router.Delete("/sessions",
@@ -303,7 +303,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON(kornet.Message{}),
+      "responses": swag.OkJSON(&kornet.Result{}),
     },
     func(ctx *swag.SwagContext) error {
 
@@ -313,14 +313,14 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
 
           if err := s.sessionRepo.DeleteFast(util.Ids(user.ID), "*"); err != nil {
 
-            return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to remove all sessions", true))
+            return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to remove all sessions", true), nil))
           }
 
-          return ctx.Status(http.StatusOK).JSON(kornet.MessageNew("remove all sessions", false))
+          return ctx.Status(http.StatusOK).JSON(kornet.ResultNew(kornet.MessageNew("remove all sessions", false), nil))
         }
       }
 
-      return ctx.Status(http.StatusNotAcceptable).JSON(kornet.MessageNew("not accepted by the event", true))
+      return ctx.Status(http.StatusNotAcceptable).JSON(kornet.ResultNew(kornet.MessageNew("not accepted by the event", true), nil))
     })
 
   router.Get("/sessions",
@@ -332,14 +332,16 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON([]m.KMap{
-        {
-          "id":             "string",
-          "used":           "boolean",
-          "client_ip":      "string",
-          "user_agent":     "string",
-          "last_activated": "number",
-          "expired":        "number",
+      "responses": swag.OkJSON(&kornet.Result{
+        Data: []m.KMap{
+          {
+            "id":             "string",
+            "used":           "boolean",
+            "client_ip":      "string",
+            "user_agent":     "string",
+            "last_activated": "number",
+            "expired":        "number",
+          },
         },
       }),
     },
@@ -354,7 +356,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           sessions, err := s.sessionRepo.GetAll(util.Ids(user.ID), s.maxSessions)
           if err != nil {
 
-            return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to delete all sessions", true))
+            return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to delete all sessions", true), nil))
           }
 
           var res []m.KMap
@@ -378,7 +380,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
         }
       }
 
-      return ctx.Status(http.StatusNotAcceptable).JSON(kornet.MessageNew("not accepted by the event", true))
+      return ctx.Status(http.StatusNotAcceptable).JSON(kornet.ResultNew(kornet.MessageNew("not accepted by the event", true), nil))
     })
 }
 
@@ -408,10 +410,12 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
           },
         },
       },
-      "responses": swag.CreatedJSON(&m.KMap{
-        "token":   "string",
-        "message": "string",
-        "error":   "boolean",
+      "responses": swag.CreatedJSON(&kornet.Result{
+        Data: &m.KMap{
+          "token":   "string",
+          "message": "string",
+          "error":   "boolean",
+        },
       }),
     },
     func(ctx *swag.SwagContext) error {
@@ -427,7 +431,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
       err = json.Unmarshal(buff, &mm)
       if err != nil {
 
-        return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to parse body into json", true))
+        return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to parse body into json", true), nil))
       }
 
       var ok, found bool
@@ -450,7 +454,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
           if err != repository.TokenExpiredOrUserNoLongerActive {
 
             ctx.Prevent()
-            return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew(err.Error(), true))
+            return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
           }
         }
 
@@ -464,7 +468,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
             token, err = s.sessionRepo.CreateFastAutoToken(user, clientIP, userAgent, currentTime.Add(s.expired), s.activeDuration, s.maxSessions)
             if err != nil {
 
-              return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))
+              return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
             }
 
             return ctx.Status(http.StatusCreated).JSON(&m.KMap{
@@ -474,11 +478,11 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
             })
           }
 
-          return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("wrong password", true))
+          return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("wrong password", true), nil))
         }
       }
 
-      return ctx.Status(http.StatusUnauthorized).JSON(kornet.MessageNew("username, or email not found", true))
+      return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("username, or email not found", true), nil))
     })
 }
 
@@ -494,10 +498,12 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
           "password": "string",
         }),
       },
-      "responses": swag.CreatedJSON(&m.KMap{
-        "token":   "string",
-        "message": "string",
-        "error":   "boolean",
+      "responses": swag.CreatedJSON(&kornet.Result{
+        Data: &m.KMap{
+          "token":   "string",
+          "message": "string",
+          "error":   "boolean",
+        },
       }),
     },
     func(ctx *swag.SwagContext) error {
@@ -513,7 +519,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       err = json.Unmarshal(buff, &mm)
       if err != nil {
 
-        return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew("unable to parse body into json", true))
+        return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew("unable to parse body into json", true), nil))
       }
 
       var user *models.UserModel
@@ -534,18 +540,18 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       email, err = util.EmailNew(m.KValueToString(data.Get("email")))
       if err != nil {
 
-        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
       if valid, err = email.Verify(); !valid {
 
-        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
       password, err = util.PasswordNew(m.KValueToString(data.Get("password")))
       if err != nil {
 
-        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
       // password contains
@@ -557,7 +563,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
 
       if valid, err = password.Verify(minChars, specialChar, numberChar, upperChar, lowerChar); !valid {
 
-        return ctx.Status(http.StatusBadRequest).JSON(kornet.MessageNew(err.Error(), true))
+        return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
       //user = &models.UserModel{
@@ -578,13 +584,13 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       user, err = s.userRepo.CreateFast(username, email.Value(), password.Value()) // auto hashing password
       if err != nil {
 
-        return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))
+        return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
       token, err = s.sessionRepo.CreateFastAutoToken(user, ctx.IP(), ctx.Get("User-Agent"), currentTime.Add(s.expired), s.activeDuration, s.maxSessions)
       if err != nil {
 
-        return ctx.Status(http.StatusInternalServerError).JSON(kornet.MessageNew(err.Error(), true))
+        return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
       return ctx.Status(http.StatusCreated).JSON(m.KMap{

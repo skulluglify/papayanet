@@ -20,7 +20,7 @@ type UserRepositoryImpl interface {
   Search(user *models.UserModel) bool
   Delete(user *models.UserModel) error
   SearchFast(username string, email string) (*models.UserModel, bool)
-  CreateFast(username string, email string, password string) (*models.UserModel, error)
+  CreateFast(name string, username string, email string, password string) (*models.UserModel, error)
   DeleteFast(username string, email string) error
 
   SearchFastById(userId uuid.UUID) (*models.UserModel, bool)
@@ -194,7 +194,7 @@ func (u *UserRepository) SearchFast(username string, email string) (*models.User
   return nil, false
 }
 
-func (u *UserRepository) CreateFast(username string, email string, password string) (*models.UserModel, error) {
+func (u *UserRepository) CreateFast(name string, username string, email string, password string) (*models.UserModel, error) {
 
   var err error
 
@@ -209,10 +209,9 @@ func (u *UserRepository) CreateFast(username string, email string, password stri
     return nil, errors.New("password can't be hashed")
   }
 
-  var id []byte
   var user models.UserModel
 
-  id, err = uuid.New().MarshalBinary()
+  sID := util.Idx(uuid.New())
 
   if err != nil {
 
@@ -220,11 +219,13 @@ func (u *UserRepository) CreateFast(username string, email string, password stri
   }
 
   user = models.UserModel{
-    ID:       hex.EncodeToString(id),
+    Name:     name,
     Username: username,
     Email:    email,
     Password: password,
   }
+
+  user.Model.ID = sID
 
   if _, found := u.SearchFast(username, email); found {
 

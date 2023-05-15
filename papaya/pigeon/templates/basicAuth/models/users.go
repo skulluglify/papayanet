@@ -2,7 +2,7 @@ package models
 
 import (
   "database/sql"
-  "gorm.io/gorm"
+  "skfw/papaya/pigeon/easy"
 )
 
 // ID
@@ -68,8 +68,7 @@ import (
 // set into HEX
 
 type UserModel struct {
-  *gorm.Model
-  ID          string         `gorm:"type:VARCHAR(32);primary" json:"id"`
+  *easy.Model
   Name        string         `gorm:"type:VARCHAR(52);" json:"name"`
   Username    string         `gorm:"type:VARCHAR(16);unique;not null" json:"username"`
   Email       string         `gorm:"type:VARCHAR(254);unique;not null" json:"email"`

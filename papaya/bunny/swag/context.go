@@ -637,7 +637,7 @@ func (c *SwagContext) NetworkAuthenticationRequired(result *kornet.Result) error
 
 func (c *SwagContext) Message(message string) error {
 
-  return c.OK(kornet.MessageOnly(kornet.MessageNew(message, false)))
+  return c.OK(kornet.Msg(message, false))
 }
 
 func (c *SwagContext) Empty() error {

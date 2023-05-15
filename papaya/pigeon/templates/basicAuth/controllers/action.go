@@ -247,9 +247,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON(&kornet.Result{
-        Data: &kornet.Message{},
-      }),
+      "responses": swag.OkJSON(&kornet.Result{}),
     },
     func(ctx *swag.SwagContext) error {
 
@@ -305,9 +303,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON(&kornet.Result{
-        Data: &kornet.Message{},
-      }),
+      "responses": swag.OkJSON(&kornet.Result{}),
     },
     func(ctx *swag.SwagContext) error {
 
@@ -409,9 +405,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
       },
       "responses": swag.CreatedJSON(&kornet.Result{
         Data: &m.KMap{
-          "token":   "string",
-          "message": "string",
-          "error":   "boolean",
+          "token": "string",
         },
       }),
     },
@@ -468,11 +462,9 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
               return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
             }
 
-            return ctx.Status(http.StatusCreated).JSON(&m.KMap{
-              "token":   token,
-              "message": "login successful",
-              "error":   false,
-            })
+            return ctx.Status(http.StatusCreated).JSON(kornet.ResultNew(kornet.MessageNew("login successful", false), &m.KMap{
+              "token": token,
+            }))
           }
 
           return ctx.Status(http.StatusUnauthorized).JSON(kornet.ResultNew(kornet.MessageNew("wrong password", true), nil))
@@ -490,6 +482,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       "description": "Register New User",
       "request": &m.KMap{
         "body": swag.JSON(&m.KMap{
+          "name":     "string", // real name | full name
           "username": "string",
           "email":    "string",
           "password": "string",
@@ -497,9 +490,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       },
       "responses": swag.CreatedJSON(&kornet.Result{
         Data: &m.KMap{
-          "token":   "string",
-          "message": "string",
-          "error":   "boolean",
+          "token": "string",
         },
       }),
     },
@@ -526,8 +517,9 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
 
       data := m.KMap(mm)
 
-      var username string
+      var name, username string
 
+      name = m.KValueToString(data.Get("name"))
       username = m.KValueToString(data.Get("username"))
 
       var valid bool
@@ -578,7 +570,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       //  Admin: false,
       //}
 
-      user, err = s.userRepo.CreateFast(username, email.Value(), password.Value()) // auto hashing password
+      user, err = s.userRepo.CreateFast(name, username, email.Value(), password.Value()) // auto hashing password
       if err != nil {
 
         return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
@@ -590,10 +582,8 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
         return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
-      return ctx.Status(http.StatusCreated).JSON(m.KMap{
-        "token":   token,
-        "message": "create new user successful",
-        "error":   false,
-      })
+      return ctx.Status(http.StatusCreated).JSON(kornet.ResultNew(kornet.MessageNew("create new user successful", false), &m.KMap{
+        "token": token,
+      }))
     })
 }

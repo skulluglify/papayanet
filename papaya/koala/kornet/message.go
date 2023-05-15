@@ -12,3 +12,10 @@ func MessageNew(message string, bad bool) *Message {
     Error:   bad,
   }
 }
+
+// shorthand
+
+func Msg(message string, bad bool) *Result {
+
+  return ResultNew(MessageNew(message, bad), nil)
+}

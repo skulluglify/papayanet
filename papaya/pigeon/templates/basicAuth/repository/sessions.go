@@ -247,7 +247,6 @@ func (s *SessionRepository) CreateFast(userId uuid.UUID, clientIP string, userAg
   var session models.SessionModel
 
   session = models.SessionModel{
-    ID:            sID,
     UserID:        uID,
     ClientIP:      clientIP,
     UserAgent:     userAgent,
@@ -256,6 +255,8 @@ func (s *SessionRepository) CreateFast(userId uuid.UUID, clientIP string, userAg
     Expired:       expired,
     LastActivated: currentTime,
   }
+
+  session.Model.ID = sID
 
   if err := s.RecoveryFast(userId, token, activeDuration, maxSessions); err != nil {
 

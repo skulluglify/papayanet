@@ -1,9 +1,8 @@
 package models
 
 import (
+  "skfw/papaya/pigeon/easy"
   "time"
-
-  "gorm.io/gorm"
 )
 
 // ID
@@ -37,8 +36,7 @@ import (
 // SecretKey -> 32 bytes into 44 chars (base64)
 
 type SessionModel struct {
-  *gorm.Model
-  ID            string    `gorm:"type:VARCHAR(32);primary" json:"id"`
+  *easy.Model
   UserID        string    `gorm:"type:VARCHAR(32);not null" json:"user_id"`
   ClientIP      string    `gorm:"type:VARCHAR(40);not null" json:"client_ip"`
   UserAgent     string    `gorm:"type:TEXT;not null" json:"user_agent"`

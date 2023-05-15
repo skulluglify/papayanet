@@ -12,7 +12,8 @@ tidy:
 	go mod tidy
 
 push:
-	bash beauty.sh record.sh
+	bash scripts/Beautifier.sh
+	bash scripts/Record.sh
 	git add .
 	git commit -am 'heat/feat/update'
 	git push

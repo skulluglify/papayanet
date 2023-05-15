@@ -3,6 +3,7 @@ package repository
 import (
   "encoding/hex"
   "errors"
+  "skfw/papaya/pigeon/easy"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "skfw/papaya/pigeon/templates/basicAuth/util"
   "time"
@@ -247,6 +248,7 @@ func (s *SessionRepository) CreateFast(userId uuid.UUID, clientIP string, userAg
   var session models.SessionModel
 
   session = models.SessionModel{
+    Model:         &easy.Model{},
     UserID:        uID,
     ClientIP:      clientIP,
     UserAgent:     userAgent,

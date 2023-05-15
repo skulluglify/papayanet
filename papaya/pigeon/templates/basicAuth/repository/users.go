@@ -1,8 +1,10 @@
 package repository
 
 import (
+  "database/sql"
   "encoding/hex"
   "errors"
+  "skfw/papaya/pigeon/easy"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "skfw/papaya/pigeon/templates/basicAuth/util"
 
@@ -219,7 +221,11 @@ func (u *UserRepository) CreateFast(name string, username string, email string, 
   }
 
   user = models.UserModel{
-    Name:     name,
+    Model: &easy.Model{},
+    Name: sql.NullString{
+      String: name,
+      Valid:  true,
+    },
     Username: username,
     Email:    email,
     Password: password,

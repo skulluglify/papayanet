@@ -54,9 +54,17 @@ func SwagUniversalArray(t m.KMapImpl) m.KMapImpl {
 
 func SwagUniversalObject(t m.KMapImpl) m.KMapImpl {
 
+  if t != nil {
+
+    return &m.KMap{
+      "type":       "object",
+      "properties": t,
+    }
+  }
+
+  // no props for NULL
   return &m.KMap{
-    "type":       "object",
-    "properties": t,
+    "type": "object",
   }
 }
 

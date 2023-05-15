@@ -185,7 +185,10 @@ func SwagContentFormatter(mapping any) m.KMapImpl {
 
       break
     }
+
+    return res
   }
 
-  return res
+  // mapping is NULL
+  return SwagUniversalObject(nil)
 }

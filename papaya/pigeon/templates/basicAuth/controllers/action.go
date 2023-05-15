@@ -247,7 +247,9 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON(&kornet.Result{}),
+      "responses": swag.OkJSON(&kornet.Result{
+        Data: &kornet.Message{},
+      }),
     },
     func(ctx *swag.SwagContext) error {
 
@@ -303,7 +305,9 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
           "Authorization": "string",
         },
       },
-      "responses": swag.OkJSON(&kornet.Result{}),
+      "responses": swag.OkJSON(&kornet.Result{
+        Data: &kornet.Message{},
+      }),
     },
     func(ctx *swag.SwagContext) error {
 
@@ -395,13 +399,6 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
         },
         "body": &m.KMap{
           "application/json": &m.KMap{
-            "schema": &m.KMap{
-              "username": "string",
-              "email":    "string",
-              "password": "string",
-            },
-          },
-          "application/xml": &m.KMap{
             "schema": &m.KMap{
               "username": "string",
               "email":    "string",

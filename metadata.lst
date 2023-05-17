@@ -23,7 +23,7 @@ f6ec47fd7b0761ee0c835483bed16b0b papaya/bunny/swag/router.go
 f870439174afa4f992b9e3d111f2734f papaya/bunny/swag/typed.go
 6e2d99824844974f885467f3120d143b papaya/bunny/swag/universal.go
 bc600e9c5891268595f5fca6e6b23a9d papaya/bunny/swag/util.go
-9e27f7b6e5ead55f0534c83a8046bea6 papaya/bunny/swag/validator.go
+3659da7abe8a2bbe24b76ae76061b64c papaya/bunny/swag/validator.go
 5a99339b47203721cac28f93c01dd156 papaya/bunny/swag/validator_compare_sample_key_helper.go
 c9c9c67bb3900097a411e77d97a0c09d papaya/bunny/swag/vars.go
 9f9365bdd9db5f4b37a831b863cad3db papaya/koala/collection/action.go
@@ -53,7 +53,7 @@ be720d4f2aab1c3642b1a91f21b83d7e papaya/koala/kornet/extra.go
 4ec68c82ca05f1358b09118c1981a720 papaya/koala/kornet/method.go
 22d4a08e250fd4823c89d900d3bc4a50 papaya/koala/kornet/result.go
 a722415018377bcf62ed1a0d45c2064a papaya/koala/kornet/typed.go
-f630e4e86363da41f0711678d1759539 papaya/koala/kornet/util.go
+bf1752116a9e6e80fdc6f1975fd8aab8 papaya/koala/kornet/util.go
 33b01ca97fa1c9b2d44331220b731064 papaya/koala/kornet/vars.go
 29a8669a65800b3155969ecdf1b61c22 papaya/koala/kornet/view.go
 0abaf8ec61f5d3349d15beecd35c7fd9 papaya/koala/mapping/action.go

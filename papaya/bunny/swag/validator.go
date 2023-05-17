@@ -1,7 +1,6 @@
 package swag
 
 import (
-  "encoding/json"
   "errors"
   "fmt"
   "net/url"
@@ -42,6 +41,8 @@ func (v *SwagRequestValidator) Init(exp m.KMapImpl, ctx *fiber.Ctx) {
 
 func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
+  var err error
+
   // try getting content-type and charset
 
   request := &kornet.Request{}
@@ -63,35 +64,22 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
   // validation the request body
   if content := m.KMapCast(v.exp.Get("request.body")); content != nil {
 
+    ////////// try parsing //////////
+
     cTys := content.Keys()
 
-    if cTys.Contain(bCTy) {
+    body, err = kornet.KSafeParsingRequestBody(req)
 
-      mm, err := kornet.KSafeParsingRequestBody(req)
+    if err != nil {
 
-      if err != nil {
-
-        return request, fmt.Errorf("data format does not match mime type %s", bCTy)
-      }
-
-      body = mm
-
-    } else {
-
-      // use lucky
-      // try parsing with format json
-      data := &map[string]any{}
-      if err := json.Unmarshal(req.Body(), data); err != nil {
-
-        return request, errors.New("failed parsing into data json")
-      }
-
-      // update current content-type
-      bCTy = "application/json"
-
-      mm := m.KMap(*data)
-      body = &mm
+      return request, fmt.Errorf("data format does not match mime type %s", bCTy)
     }
+
+    // fake result as JSON
+
+    bCTy = "application/json"
+
+    ////////// try parsing //////////
 
     var requestBodySameAsContentTypeRequired bool
     var requestBodyKeySameAsSampleKey bool

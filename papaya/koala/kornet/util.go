@@ -75,6 +75,7 @@ func KSafeParsingRequestBody(req *fasthttp.Request) (m.KMapImpl, error) {
 
   //charset := "UTF-8"
   contentTy := string(req.Header.ContentType())
+
   contentTy, _ = KSafeContentTy(contentTy) // get content-type only
 
   // TODO: handle if request body is array

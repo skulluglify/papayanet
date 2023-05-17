@@ -96,7 +96,7 @@ cb5c81615640d79fe48d6f0a55004751 papaya/pigeon/drivers/mysql/conn.go
 72c3eedef3e50fc0bd2fc0994b15687e papaya/pigeon/drivers/postgresql/util.go
 5f3cfe1777db33590849cba5ec54417b papaya/pigeon/drivers/sqlite/conn.go
 95ef710814dd4dac225931b1e7ab60e6 papaya/pigeon/easy/model.go
-a0bb9342249acb414195b049f9900113 papaya/pigeon/easy/repository.go
+a94c9a63ced16b96da23c812a298c0b1 papaya/pigeon/easy/repository.go
 823c39d8047cc67e4fa2dddaa1430304 papaya/pigeon/easy/util.go
 1d4d6e9f9a1f64a9b9a4ab6ffe63aa64 papaya/pigeon/templates/basicAuth/controllers/action.go
 88012ea44074507dd6f62906608a62ae papaya/pigeon/templates/basicAuth/models/sessions.go

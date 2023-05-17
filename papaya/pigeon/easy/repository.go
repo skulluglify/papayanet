@@ -18,10 +18,12 @@ type RepositoryImpl[T any] interface {
   SessionNew()
   Find(query any, args ...any) (*T, error)
   FindAll(size int, page int, query any, args ...any) ([]T, error)
+  CatchAll(size int, page int) ([]T, error)
   Create(model *T) (*T, error)
   Update(model *T, query any, args ...any) error
   Remove(query any, args ...any) error
   Delete(query any, args ...any) error
+  Unscoped() RepositoryImpl[T]
 }
 
 func RepositoryNew[T any](DB *gorm.DB, model *T) (RepositoryImpl[T], error) {
@@ -79,6 +81,28 @@ func (u *Repository[T]) FindAll(size int, page int, query any, args ...any) ([]T
     limit := size
 
     if err = u.DB.Where(query, args).Offset(offset).Limit(limit).Find(&models).Error; err != nil {
+
+      return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
+    }
+  }
+
+  return models, nil
+}
+
+func (u *Repository[T]) CatchAll(size int, page int) ([]T, error) {
+
+  u.SessionNew()
+
+  var err error
+
+  models := make([]T, 0)
+
+  if page > 0 {
+
+    offset := size * (page - 1)
+    limit := size
+
+    if err = u.DB.Offset(offset).Limit(limit).Find(&models).Error; err != nil {
 
       return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
     }
@@ -197,4 +221,12 @@ func (u *Repository[T]) Delete(query any, args ...any) error {
   }
 
   return nil
+}
+
+func (u *Repository[T]) Unscoped() RepositoryImpl[T] {
+
+  return &Repository[T]{
+    DB:   u.DB.Unscoped(),
+    Name: u.Name,
+  }
 }

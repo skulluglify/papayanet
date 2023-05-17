@@ -51,7 +51,7 @@ dccf340ab4ac49fbca9fa15c4007dcf5 papaya/koala/kornet/client.go
 be720d4f2aab1c3642b1a91f21b83d7e papaya/koala/kornet/extra.go
 3ff6f496d34a11d0d6bdb5a9751c7c84 papaya/koala/kornet/message.go
 4ec68c82ca05f1358b09118c1981a720 papaya/koala/kornet/method.go
-22d4a08e250fd4823c89d900d3bc4a50 papaya/koala/kornet/result.go
+cb56b1dd2e9188fc9be0c2488b1a9044 papaya/koala/kornet/result.go
 a722415018377bcf62ed1a0d45c2064a papaya/koala/kornet/typed.go
 bf1752116a9e6e80fdc6f1975fd8aab8 papaya/koala/kornet/util.go
 33b01ca97fa1c9b2d44331220b731064 papaya/koala/kornet/vars.go

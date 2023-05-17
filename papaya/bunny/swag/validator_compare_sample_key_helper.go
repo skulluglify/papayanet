@@ -16,6 +16,7 @@ type CompareSampleKey struct {
 type CompareSampleKeyImpl interface {
   Init(key string) error
   Check(key string) bool
+  ReCheck(key string) bool
 }
 
 func CompareSampleKeyNew(key string) (CompareSampleKeyImpl, error) {
@@ -48,25 +49,52 @@ func (c *CompareSampleKey) Check(key string) bool {
     return false
   }
 
-  for i := 0; i < n; i++ {
+  if n > 0 {
 
-    token = c.tokens[i]
+    for i := 0; i < n; i++ {
 
-    if token == "0" {
+      token = c.tokens[i]
 
-      if _, err := kornet.KSafeParsingNumber(tokens[i]); err != nil {
+      if token == "0" {
+
+        if _, err := kornet.KSafeParsingNumber(tokens[i]); err != nil {
+
+          return false
+        }
+
+        continue
+      }
+
+      if token != tokens[i] {
 
         return false
       }
-
-      continue
     }
 
-    if token != tokens[i] {
-
-      return false
-    }
+    return true
   }
 
-  return true
+  return false
+}
+
+func (c *CompareSampleKey) ReCheck(key string) bool {
+
+  // check key without "?" "!"
+
+  n := len(c.tokens)
+
+  if n > 0 {
+
+    pref := c.tokens[n-1]
+
+    _, token := SwagRequired(pref) // remove "?" "!" char
+
+    tokens := append(c.tokens[:n-1], token)
+
+    csk := CompareSampleKey{tokens: tokens}
+
+    return csk.Check(key)
+  }
+
+  return false // no tokens to be found
 }

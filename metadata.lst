@@ -16,6 +16,7 @@ de878ca08ce91c52a24aecdba82d159f papaya/bunny/swag/expect.go
 245bf0fc780175df1133295b05708b46 papaya/bunny/swag/method/http1.go
 5c8d8265ad874a055adcde68a7540d56 papaya/bunny/swag/params.go
 67185bf0b196ed6caa5feb90332a63c4 papaya/bunny/swag/renderer.go
+36cb3253af8bfbc73e91953501e7e64a papaya/bunny/swag/required.go
 eb1117c853cc104a0a58c7902621ddaf papaya/bunny/swag/responses.go
 f6ec47fd7b0761ee0c835483bed16b0b papaya/bunny/swag/router.go
 36115858a978974a49f1193ef6b0587e papaya/bunny/swag/swagger.go
@@ -23,8 +24,8 @@ f6ec47fd7b0761ee0c835483bed16b0b papaya/bunny/swag/router.go
 f870439174afa4f992b9e3d111f2734f papaya/bunny/swag/typed.go
 6e2d99824844974f885467f3120d143b papaya/bunny/swag/universal.go
 bc600e9c5891268595f5fca6e6b23a9d papaya/bunny/swag/util.go
-3659da7abe8a2bbe24b76ae76061b64c papaya/bunny/swag/validator.go
-5a99339b47203721cac28f93c01dd156 papaya/bunny/swag/validator_compare_sample_key_helper.go
+7695f831cce85859d98249f47fd42da8 papaya/bunny/swag/validator.go
+44153737e41f61972cc1609777ee36e8 papaya/bunny/swag/validator_compare_sample_key_helper.go
 c9c9c67bb3900097a411e77d97a0c09d papaya/bunny/swag/vars.go
 9f9365bdd9db5f4b37a831b863cad3db papaya/koala/collection/action.go
 797c2405af1e118fd57191b5de8b3b56 papaya/koala/collection/array.go

@@ -82,7 +82,6 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
     ////////// try parsing //////////
 
     var requestBodySameAsContentTypeRequired bool
-    var requestBodyKeySameAsSampleKey bool
 
     for _, cTy := range cTys {
 
@@ -104,31 +103,36 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
       if mm := m.KMapCast(schema); mm != nil {
 
+        var found bool
+        var required bool
+        var compareSampleKey CompareSampleKeyImpl
+
         for _, schemaEnum := range mm.Tree().Enums() { // schema required
 
           schemaKey, schemaType := schemaEnum.Tuple()
 
-          rt := SwagUniversalReType(schemaKey)
+          compareSampleKey, err = CompareSampleKeyNew(schemaKey) // watch requireable keys
+          required, schemaKey = SwagRequired(schemaKey)          // remove "?" "!" char
 
-          compareSampleKey, err := CompareSampleKeyNew(schemaKey)
+          rt := SwagUniversalReType(schemaType)
 
           if err != nil {
 
             return request, errors.New("unable to compare with sample key from schema object")
           }
 
-          requestBodyKeySameAsSampleKey = false
+          found = false
 
           for _, enum := range body.Tree().Enums() { // schema request body
 
-            bK, bV := enum.Tuple()
+            key, bV := enum.Tuple()
 
-            if !compareSampleKey.Check(bK) {
+            if !compareSampleKey.ReCheck(key) {
 
               continue
             }
 
-            requestBodyKeySameAsSampleKey = true
+            found = true
 
             switch rt {
 
@@ -136,13 +140,16 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
               y, err := kornet.KSafeParsingBoolean(bV)
 
-              if err != nil {
+              if required {
 
-                return request, fmt.Errorf("key `%s` either not set or is not a boolean in request body", schemaKey)
+                if err != nil {
+
+                  return request, fmt.Errorf("key `%s` either not set or is not a boolean in request body", schemaKey)
+                }
               }
 
               // update value from request body
-              body.Set(bK, y)
+              body.Set(key, y)
 
               break
 
@@ -151,23 +158,32 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
               // try parsing if not number
               n, err := kornet.KSafeParsingNumber(bV)
 
-              if err != nil {
+              if required {
 
-                return request, fmt.Errorf("key `%s` either not set or is not a number in request body", schemaKey)
+                if err != nil {
+
+                  return request, fmt.Errorf("key `%s` either not set or is not a number in request body", schemaKey)
+                }
               }
 
               // update value from request body
-              body.Set(bK, n)
+              body.Set(key, n)
 
               break
 
             case "str", "string", "text", "word":
 
-              // check is string or not
-              if tx := m.KValueToString(bV); tx == "" {
+              tx := m.KValueToString(bV)
 
-                return request, fmt.Errorf("key `%s` either not set or is not a string in request body", schemaKey)
+              if required {
+
+                if tx == "" {
+
+                  return request, fmt.Errorf("key `%s` either not set or is not a string in request body", schemaKey)
+                }
               }
+
+              body.Set(key, tx)
 
               break
 
@@ -178,43 +194,46 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
               // test body value
               val := pp.KIndirectValueOf(bV)
 
-              if val.IsValid() {
+              if required {
 
-                bodyTypeOf := val.Type() // get type of body value
+                if val.IsValid() {
 
-                schemaTypeOfKey := schemaTypeOf.Elem() // type of type element
+                  bodyTypeOf := val.Type() // get a type of body value
 
-                // get a element type in universal type
-                uniTypeSchemaTypeOfKey := SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
+                  schemaTypeOfKey := schemaTypeOf.Elem() // type of type element
 
-                switch bodyTypeOf.Kind() {
-                case reflect.Array, reflect.Slice: // check body value is array, or slice
+                  // get a element type in universal type
+                  uniTypeSchemaTypeOfKey := SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
 
-                  for i := 0; i < val.Len(); i++ {
+                  switch bodyTypeOf.Kind() {
+                  case reflect.Array, reflect.Slice: // check body value is array, or slice
 
-                    indexBodyValue := pp.KIndirectValueOf(val.Index(i))
+                    for i := 0; i < val.Len(); i++ {
 
-                    if indexBodyValue.IsValid() {
+                      indexBodyValue := pp.KIndirectValueOf(val.Index(i))
 
-                      typeIndexBodyValue := indexBodyValue.Type()
+                      if indexBodyValue.IsValid() {
 
-                      // that problem is,
-                      // tte = map[k]v
-                      // vtt = map[k]v
-                      // tte != vtt
-                      // same as a array or slice too
+                        typeIndexBodyValue := indexBodyValue.Type()
 
-                      // fast compare
-                      if schemaTypeOfKey.Kind() != typeIndexBodyValue.Kind() {
+                        // that problem is,
+                        // tte = map[k]v
+                        // vtt = map[k]v
+                        // tte != vtt
+                        // same as a array or slice too
 
-                        return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
+                        // fast compare
+                        if schemaTypeOfKey.Kind() != typeIndexBodyValue.Kind() {
+
+                          return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
+                        }
                       }
                     }
+
+                  default:
+
+                    return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
                   }
-
-                default:
-
-                  return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
                 }
               }
 
@@ -224,18 +243,24 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
               // skip map, not null
 
-              if bV == nil {
+              if required {
 
-                return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+                if bV == nil {
+
+                  return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+                }
               }
 
               break
             }
           }
 
-          if !requestBodyKeySameAsSampleKey {
+          if required {
 
-            return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+            if !found {
+
+              return request, fmt.Errorf("key `%s` is null in request body", schemaKey)
+            }
           }
         }
       }

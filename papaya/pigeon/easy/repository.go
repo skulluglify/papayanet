@@ -176,12 +176,19 @@ func (u *Repository[T]) Update(model *T, query any, args ...any) error {
       return errors.New(fmt.Sprintf("invalid ID from %s information", u.Name))
     }
 
-    if err = u.DB.Where(query, args...).Updates(&model).Error; err != nil {
+    prepared := u.DB.Where(query, args...).Updates(&model)
+
+    if err = prepared.Error; err != nil {
 
       return errors.New(fmt.Sprintf("unable to update %s information", u.Name))
     }
 
-    return nil
+    if prepared.RowsAffected > 0 {
+
+      return nil
+    }
+
+    return errors.New(fmt.Sprintf("not match any data from %s ", u.Name))
   }
 
   return errors.New(fmt.Sprintf("%s is NULL", u.Name))
@@ -197,12 +204,19 @@ func (u *Repository[T]) Remove(query any, args ...any) error {
     return err
   }
 
-  if err = u.DB.Where(query, args...).Delete(&info).Error; err != nil {
+  prepared := u.DB.Where(query, args...).Delete(&info)
+
+  if err = prepared.Error; err != nil {
 
     return errors.New(fmt.Sprintf("unable to remove %s", u.Name))
   }
 
-  return nil
+  if prepared.RowsAffected > 0 {
+
+    return nil
+  }
+
+  return errors.New(fmt.Sprintf("not match any data from %s ", u.Name))
 }
 
 func (u *Repository[T]) Delete(query any, args ...any) error {
@@ -215,12 +229,19 @@ func (u *Repository[T]) Delete(query any, args ...any) error {
     return err
   }
 
-  if err = u.DB.Unscoped().Where(query, args...).Delete(&info).Error; err != nil {
+  prepared := u.DB.Unscoped().Where(query, args...).Delete(&info)
+
+  if err = prepared.Error; err != nil {
 
     return errors.New(fmt.Sprintf("unable to delete %s", u.Name))
   }
 
-  return nil
+  if prepared.RowsAffected > 0 {
+
+    return nil
+  }
+
+  return errors.New(fmt.Sprintf("not match any data from %s ", u.Name))
 }
 
 func (u *Repository[T]) Unscoped() RepositoryImpl[T] {

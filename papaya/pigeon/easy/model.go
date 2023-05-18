@@ -1,10 +1,15 @@
 package easy
 
-import "gorm.io/gorm"
+import (
+  "gorm.io/gorm"
+  "time"
+)
 
 type Model struct {
-  *gorm.Model
-  ID string `gorm:"type:VARCHAR(32);primary" json:"id"`
+  ID        string         `gorm:"type:VARCHAR(32);primary" json:"id"`
+  CreatedAt time.Time      `json:"created_at"`
+  UpdatedAt time.Time      `json:"updated_at"`
+  DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
 
 func (Model) TableName() string {

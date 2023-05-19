@@ -24,6 +24,7 @@ type RepositoryImpl[T any] interface {
   Remove(query any, args ...any) error
   Delete(query any, args ...any) error
   Unscoped() RepositoryImpl[T]
+  GORM() *gorm.DB
 }
 
 func RepositoryNew[T any](DB *gorm.DB, model *T) (RepositoryImpl[T], error) {
@@ -250,4 +251,9 @@ func (u *Repository[T]) Unscoped() RepositoryImpl[T] {
     DB:   u.DB.Unscoped(),
     Name: u.Name,
   }
+}
+
+func (u *Repository[T]) GORM() *gorm.DB {
+
+  return u.DB
 }

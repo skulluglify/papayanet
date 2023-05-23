@@ -8,5 +8,5 @@ echo -n >metadata.lst
 find papaya -name '*.go' -type f -print0 | while IFS= read -r -d '' file
 do
 
-  echo $(cat "$file" | md5sum | awk '{print $1}') "$file" >>metadata.lst
+  echo $(cat "$file" | sha1sum | awk '{print $1}') "$file" >>metadata.lst
 done

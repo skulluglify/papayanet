@@ -55,7 +55,7 @@ func (u *Repository[T]) Find(query any, args ...any) (*T, error) {
   var err error
   var models []T
 
-  if models, err = u.FindAll(1, 1, query, args); err != nil {
+  if models, err = u.FindAll(1, 1, query, args...); err != nil {
 
     return nil, err
   }
@@ -81,7 +81,7 @@ func (u *Repository[T]) FindAll(size int, page int, query any, args ...any) ([]T
     offset := size * (page - 1)
     limit := size
 
-    if err = u.DB.Where(query, args).Offset(offset).Limit(limit).Find(&models).Error; err != nil {
+    if err = u.DB.Where(query, args...).Offset(offset).Limit(limit).Find(&models).Error; err != nil {
 
       return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
     }

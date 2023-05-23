@@ -52,7 +52,7 @@ dccf340ab4ac49fbca9fa15c4007dcf5 papaya/koala/kornet/client.go
 be720d4f2aab1c3642b1a91f21b83d7e papaya/koala/kornet/extra.go
 3ff6f496d34a11d0d6bdb5a9751c7c84 papaya/koala/kornet/message.go
 4ec68c82ca05f1358b09118c1981a720 papaya/koala/kornet/method.go
-cb56b1dd2e9188fc9be0c2488b1a9044 papaya/koala/kornet/result.go
+108baa17e0025a62a9ab23e4fc733e2a papaya/koala/kornet/result.go
 a722415018377bcf62ed1a0d45c2064a papaya/koala/kornet/typed.go
 bf1752116a9e6e80fdc6f1975fd8aab8 papaya/koala/kornet/util.go
 33b01ca97fa1c9b2d44331220b731064 papaya/koala/kornet/vars.go
@@ -97,7 +97,7 @@ cb5c81615640d79fe48d6f0a55004751 papaya/pigeon/drivers/mysql/conn.go
 72c3eedef3e50fc0bd2fc0994b15687e papaya/pigeon/drivers/postgresql/util.go
 5f3cfe1777db33590849cba5ec54417b papaya/pigeon/drivers/sqlite/conn.go
 dfcca3a41651d09079cd928cfc117ea6 papaya/pigeon/easy/model.go
-85ddfe867afa65d0f224f73ed1593e3d papaya/pigeon/easy/repository.go
+d546531d38547a66431c9767aa71db4b papaya/pigeon/easy/repository.go
 823c39d8047cc67e4fa2dddaa1430304 papaya/pigeon/easy/util.go
 1d4d6e9f9a1f64a9b9a4ab6ffe63aa64 papaya/pigeon/templates/basicAuth/controllers/action.go
 88012ea44074507dd6f62906608a62ae papaya/pigeon/templates/basicAuth/models/sessions.go

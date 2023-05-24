@@ -24,7 +24,7 @@ e3f336b347cd9a54bcc2e0ccff1cc62d79360eb4 papaya/bunny/swag/tasks.go
 2758e1f8cf42a16f039d5842f40b82bd96a68b78 papaya/bunny/swag/typed.go
 4d774650fdf2743635cc780b8576bb14ebe984f1 papaya/bunny/swag/universal.go
 bfdd1890e733fb80b9d0bab47be853318cadf595 papaya/bunny/swag/util.go
-34cb68f2876cb94f19c61cb32983d4dcc1a8eba4 papaya/bunny/swag/validator.go
+98779370cf445e24db62caf3d838b5355f45a37d papaya/bunny/swag/validator.go
 b104b212b829fa04a698074dd9ce0a967a1c8647 papaya/bunny/swag/validator_compare_sample_key_helper.go
 d17f50e63fc74af0ae0565b0e996de239c9e51de papaya/bunny/swag/vars.go
 e561f6f2fa185b04ef6cd8840deed990bf2095dc papaya/koala/collection/action.go

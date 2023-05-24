@@ -202,8 +202,16 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
 
                   schemaTypeOfKey := schemaTypeOf.Elem() // type of type element
 
+                  var uniTypeSchemaTypeOfKey string
                   // get a element type in universal type
-                  uniTypeSchemaTypeOfKey := SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
+                  switch schemaTypeOfKey.Kind() {
+                  case reflect.String:
+                    uniTypeSchemaTypeOfKey = SwagUniversalReType(schemaTypeOfKey.Name()) // re type, type of type
+                  case reflect.Struct, reflect.Map:
+                    uniTypeSchemaTypeOfKey = "object"
+                  default:
+                    uniTypeSchemaTypeOfKey = "null"
+                  }
 
                   switch bodyTypeOf.Kind() {
                   case reflect.Array, reflect.Slice: // check body value is array, or slice
@@ -220,10 +228,32 @@ func (v *SwagRequestValidator) Validation() (*kornet.Request, error) {
                         // tte = map[k]v
                         // vtt = map[k]v
                         // tte != vtt
-                        // same as a array or slice too
-
+                        // same as an array or slice too
                         // fast compare
-                        if schemaTypeOfKey.Kind() != typeIndexBodyValue.Kind() {
+
+                        // check similarity kind of type like object
+                        check := func() bool {
+
+                          // map, or struct like object
+                          switch schemaTypeOfKey.Kind() {
+                          case reflect.Struct, reflect.Map:
+
+                            // map, or struct like object
+                            switch typeIndexBodyValue.Kind() {
+                            case reflect.Struct, reflect.Map:
+                              return true
+                            }
+
+                          default:
+
+                            // compare kind
+                            return schemaTypeOfKey.Kind() == typeIndexBodyValue.Kind()
+                          }
+
+                          return false
+                        }()
+
+                        if !check {
 
                           return request, fmt.Errorf("key `%s` either not set or is not a array<%s> in request body", schemaKey, uniTypeSchemaTypeOfKey)
                         }

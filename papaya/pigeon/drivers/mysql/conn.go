@@ -120,13 +120,16 @@ func (c *DBConnection) DSN() string {
   }
 
   config := my.Config{
-    Net:       pp.Lstr(c.IsUnixSock(), "unix", "tcp"),
-    Addr:      c.DBConfig.Host,
-    User:      c.DBConfig.Username,
-    Passwd:    c.DBConfig.Password,
-    DBName:    c.DBConfig.Name,
-    ParseTime: true,
-    Loc:       time.UTC,
+    Net:                  pp.Lstr(c.IsUnixSock(), "unix", "tcp"),
+    Addr:                 c.DBConfig.Host,
+    User:                 c.DBConfig.Username,
+    Passwd:               c.DBConfig.Password,
+    DBName:               c.DBConfig.Name,
+    Loc:                  time.UTC,
+    AllowNativePasswords: true,
+    CheckConnLiveness:    false,
+    MaxAllowedPacket:     0,
+    ParseTime:            true,
   }
 
   return config.FormatDSN()

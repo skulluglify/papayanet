@@ -90,6 +90,8 @@ func (u *Repository[T]) FindAll(size int, page int, query any, args ...any) ([]T
   return models, nil
 }
 
+// new concept, catch all include ordering, and sorting
+
 func (u *Repository[T]) CatchAll(size int, page int) ([]T, error) {
 
   u.SessionNew()
@@ -103,7 +105,11 @@ func (u *Repository[T]) CatchAll(size int, page int) ([]T, error) {
     offset := size * (page - 1)
     limit := size
 
-    if err = u.DB.Offset(offset).Limit(limit).Find(&models).Error; err != nil {
+    if err = u.DB.
+      Offset(offset).
+      Limit(limit).
+      Order("created_at DESC").
+      Find(&models).Error; err != nil {
 
       return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
     }
@@ -135,7 +141,7 @@ func (u *Repository[T]) Create(model *T) (*T, error) {
       return model, nil
     }
 
-    return model, errors.New("user has been added")
+    return model, errors.New(fmt.Sprintf("%s has been added", u.Name))
   }
 
   return model, errors.New(fmt.Sprintf("%s is NULL", u.Name))

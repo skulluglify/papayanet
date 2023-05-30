@@ -76,7 +76,16 @@ func (u *Repository[T]) FindAll(size int, page int, query any, args ...any) ([]T
 
   models := make([]T, 0)
 
-  if page > 0 {
+  if size == -1 && page == -1 {
+
+    if err = u.DB.
+      Where(query, args...).
+      Order("updated_at DESC").
+      Find(&models).Error; err != nil {
+
+      return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
+    }
+  } else if page > 0 {
 
     offset := size * (page - 1)
     limit := size
@@ -105,7 +114,16 @@ func (u *Repository[T]) CatchAll(size int, page int) ([]T, error) {
 
   models := make([]T, 0)
 
-  if page > 0 {
+  if size == -1 && page == -1 {
+
+    if err = u.DB.
+      Order("updated_at DESC").
+      Find(&models).Error; err != nil {
+
+      return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
+    }
+
+  } else if page > 0 {
 
     offset := size * (page - 1)
     limit := size

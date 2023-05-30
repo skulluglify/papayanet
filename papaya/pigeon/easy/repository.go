@@ -81,7 +81,12 @@ func (u *Repository[T]) FindAll(size int, page int, query any, args ...any) ([]T
     offset := size * (page - 1)
     limit := size
 
-    if err = u.DB.Where(query, args...).Offset(offset).Limit(limit).Find(&models).Error; err != nil {
+    if err = u.DB.
+      Where(query, args...).
+      Offset(offset).
+      Limit(limit).
+      Order("updated_at DESC").
+      Find(&models).Error; err != nil {
 
       return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))
     }
@@ -108,7 +113,7 @@ func (u *Repository[T]) CatchAll(size int, page int) ([]T, error) {
     if err = u.DB.
       Offset(offset).
       Limit(limit).
-      Order("created_at DESC").
+      Order("updated_at DESC").
       Find(&models).Error; err != nil {
 
       return models, errors.New(fmt.Sprintf("unable to catch %ss", u.Name))

@@ -99,7 +99,7 @@ ab694e0233687d7a3e748fab5b6f30c31eada20e papaya/pigeon/cors/middleware.go
 587893c53a38bbfb03782e2881f5d506e8c72df8 papaya/pigeon/easy/model.go
 743b1db05812d141bb30e4086774ccf4b3bcb535 papaya/pigeon/easy/repository.go
 bcae203889d0be33432bc9bb2dda04063c6b4e73 papaya/pigeon/easy/util.go
-e7f89e1d8830ed07e122c55ad9d9b72b90788a1a papaya/pigeon/templates/basicAuth/controllers/action.go
+9dc45ed4ba696ce89cf5e1a4e8958bd2a7f67c27 papaya/pigeon/templates/basicAuth/controllers/action.go
 1680f5ada3d30ac5d98acc48a6ee3d18404ecbb9 papaya/pigeon/templates/basicAuth/models/sessions.go
 dea817cc3be8d6d065fbff29dd59218f2c1b6f4d papaya/pigeon/templates/basicAuth/models/users.go
 53531be79b808d014cf5c9a59684077203c830cb papaya/pigeon/templates/basicAuth/repository/sessions.go

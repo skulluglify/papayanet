@@ -9,7 +9,6 @@ import (
   "skfw/papaya/bunny/swag"
   "skfw/papaya/koala/kornet"
   m "skfw/papaya/koala/mapping"
-  "skfw/papaya/koala/pp"
   "skfw/papaya/pigeon/drivers/common"
   "skfw/papaya/pigeon/drivers/postgresql"
   "skfw/papaya/pigeon/templates/basicAuth/models"
@@ -394,6 +393,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
         "headers": &m.KMap{
           "Authorization":    "string",
           "X-Forwarded-For?": "string",
+          "X-Real-IP?":       "string",
         },
         "body": &m.KMap{
           "application/json": &m.KMap{
@@ -413,10 +413,7 @@ func (s *BasicAuth) MakeUserLoginEndpoint(router swag.SwagRouterImpl) {
     },
     func(ctx *swag.SwagContext) error {
 
-      kReq, _ := ctx.Kornet()
-
-      XForwardedFor := m.KValueToString(kReq.Header.Get("X-Forwarded-For"))
-      ClientIP := pp.Qstr(XForwardedFor, ctx.IP())
+      ClientIP := util.GetClientIP(ctx)
 
       buff := ctx.Body()
 

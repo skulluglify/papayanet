@@ -99,13 +99,13 @@ ab694e0233687d7a3e748fab5b6f30c31eada20e papaya/pigeon/cors/middleware.go
 587893c53a38bbfb03782e2881f5d506e8c72df8 papaya/pigeon/easy/model.go
 743b1db05812d141bb30e4086774ccf4b3bcb535 papaya/pigeon/easy/repository.go
 bcae203889d0be33432bc9bb2dda04063c6b4e73 papaya/pigeon/easy/util.go
-54c8f9145575cbebf272ccdf87180f82d3e23a0a papaya/pigeon/templates/basicAuth/controllers/action.go
+d67e865a80bc39e0f49c877232486dcfda5a6e34 papaya/pigeon/templates/basicAuth/controllers/action.go
 1680f5ada3d30ac5d98acc48a6ee3d18404ecbb9 papaya/pigeon/templates/basicAuth/models/sessions.go
 dea817cc3be8d6d065fbff29dd59218f2c1b6f4d papaya/pigeon/templates/basicAuth/models/users.go
 53531be79b808d014cf5c9a59684077203c830cb papaya/pigeon/templates/basicAuth/repository/sessions.go
 69e2762d757a483eafb810f9589c114dceb056fb papaya/pigeon/templates/basicAuth/repository/users.go
 c104da38a786a7540ec26b81e1eee123853da58f papaya/pigeon/templates/basicAuth/util/email.go
-371726192c6e87c25b2f3c454ce0d5aea08dd7d6 papaya/pigeon/templates/basicAuth/util/extra.go
+b49c7702b29802c2f8f5ed7039ffffb9c01c5fde papaya/pigeon/templates/basicAuth/util/extra.go
 fd322061d56c2ddebc5f86c69147a09ce98f9d94 papaya/pigeon/templates/basicAuth/util/password.go
 56c0232c6d8f4689977bf9fe73a2d275579769f6 papaya/pigeon/vars.go
 2c779d9f1cd19283f54049340274c3f9cd4c13f4 papaya/util/banner.go

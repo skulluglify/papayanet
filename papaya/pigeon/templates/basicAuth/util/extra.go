@@ -10,6 +10,7 @@ import (
   "fmt"
   "golang.org/x/crypto/sha3"
   "io"
+  "net/url"
   "skfw/papaya/ant/bpack"
   "skfw/papaya/bunny/swag"
   "skfw/papaya/koala/pp"
@@ -116,11 +117,57 @@ func Ids(id string) uuid.UUID {
   return Id(data)
 }
 
+func URLValid(rawURL string) bool {
+
+  if rawURL != "" {
+
+    if _, err := url.Parse(rawURL); err != nil {
+
+      return false
+    }
+
+    return true
+  }
+
+  return false
+}
+
+func GetClientIPFromXForwardedFor(ctx *swag.SwagContext) string {
+
+  XForwardedFor := ctx.Get("X-Forwarded-For")
+  tokens := strings.Split(XForwardedFor, ",")
+  n := len(tokens)
+
+  if n > 0 {
+
+    for i := 0; i < n; i++ {
+      j := n - i - 1
+
+      token := strings.Trim(tokens[j], " ")
+
+      if URLValid(token) {
+
+        return token
+      }
+    }
+  }
+
+  return ""
+}
+
+func GetClientIP(ctx *swag.SwagContext) string {
+
+  ClientIPFromRealIP := ctx.Get("X-Real-IP")
+  ClientIPFromXForwardedFor := GetClientIPFromXForwardedFor(ctx)
+  ClientIP := ctx.IP()
+
+  return pp.Qstr(ClientIPFromRealIP, ClientIPFromXForwardedFor, ClientIP)
+}
+
 func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool {
 
   // fix issue, still catch 127.0.0.1 from ip catcher
-  XForwardedFor := ctx.Get("X-Forwarded-For")
-  ClientIP := pp.Qstr(XForwardedFor, ctx.IP())
+  ClientIP := GetClientIP(ctx)
 
   fmt.Printf("[TRY-LOGIN] ClientIP: %s UserAgent: %s\n", ClientIP, ctx.Get("User-Agent"))
 

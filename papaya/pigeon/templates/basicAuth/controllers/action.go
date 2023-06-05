@@ -191,7 +191,7 @@ func (s *BasicAuth) MakeAuthTokenTask() *swag.SwagTask {
 
         //////// JWT Checker ////////
 
-        if util.DeviceRecognition(session, ctx) {
+        if util.DeviceRecognition(ctx, session) {
 
           if currentTime.Before(session.Expired) {
 

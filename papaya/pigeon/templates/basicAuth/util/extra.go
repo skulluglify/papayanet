@@ -11,6 +11,8 @@ import (
   "io"
   "skfw/papaya/ant/bpack"
   "skfw/papaya/bunny/swag"
+  m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "strings"
   "time"
@@ -114,9 +116,15 @@ func Ids(id string) uuid.UUID {
   return Id(data)
 }
 
-func DeviceRecognition(session *models.SessionModel, ctx *swag.SwagContext) bool {
+func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool {
 
-  return session.ClientIP == ctx.IP() && session.UserAgent == ctx.Get("User-Agent")
+  kReq, _ := ctx.Kornet()
+
+  // fix issue, still catch 127.0.0.1 from ip catcher
+  XForwardedFor := m.KValueToString(kReq.Header.Get("X-Forwarded-For"))
+  ClientIP := pp.Qstr(XForwardedFor, ctx.IP())
+
+  return session.ClientIP == ClientIP && session.UserAgent == ctx.Get("User-Agent")
 }
 
 func HashPassword(password string) (string, error) {

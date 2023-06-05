@@ -9,6 +9,7 @@ import (
   "errors"
   "golang.org/x/crypto/sha3"
   "io"
+  "net"
   "net/url"
   "skfw/papaya/ant/bpack"
   "skfw/papaya/bunny/swag"
@@ -163,12 +164,47 @@ func GetClientIP(ctx *swag.SwagContext) string {
   return pp.Qstr(ClientIPFromRealIP, ClientIPFromXForwardedFor, ClientIP)
 }
 
+func CheckClientIPOnCClass(sessionClientIP string, currentClientIP string) bool {
+
+  // random ipv4
+  // issue about development in emulator
+
+  // insensitive case check, 'c' class
+  sIP := net.ParseIP(sessionClientIP)
+  cIP := net.ParseIP(currentClientIP)
+
+  // same ipv4
+  if sIP.To4() != nil && cIP.To4() != nil {
+
+    sIP = sIP.Mask(net.CIDRMask(24, 32))
+    cIP = cIP.Mask(net.CIDRMask(24, 32))
+
+    return sIP.Equal(cIP)
+  }
+
+  // iam don't know what have done yet, same ipv6
+  if sIP.To16() != nil && cIP.To16() != nil {
+
+    sIP = sIP.Mask(net.CIDRMask(48, 128))
+    cIP = cIP.Mask(net.CIDRMask(48, 128))
+
+    return sIP.Equal(cIP)
+  }
+
+  return false
+}
+
 func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool {
 
   // fix issue, still catch 127.0.0.1 from ip catcher
   ClientIP := GetClientIP(ctx)
 
-  return session.ClientIP == ClientIP && session.UserAgent == ctx.Get("User-Agent")
+  switch ctx.Get("X-IPChecker-Bypass", "no") {
+  case "no", "false":
+    return CheckClientIPOnCClass(session.ClientIP, ClientIP) && session.UserAgent == ctx.Get("User-Agent")
+  }
+
+  return session.UserAgent == ctx.Get("User-Agent")
 }
 
 func HashPassword(password string) (string, error) {

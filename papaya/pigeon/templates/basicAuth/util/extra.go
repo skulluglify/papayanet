@@ -7,11 +7,11 @@ import (
   "encoding/hex"
   "encoding/json"
   "errors"
+  "fmt"
   "golang.org/x/crypto/sha3"
   "io"
   "skfw/papaya/ant/bpack"
   "skfw/papaya/bunny/swag"
-  m "skfw/papaya/koala/mapping"
   "skfw/papaya/koala/pp"
   "skfw/papaya/pigeon/templates/basicAuth/models"
   "strings"
@@ -118,11 +118,11 @@ func Ids(id string) uuid.UUID {
 
 func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool {
 
-  kReq, _ := ctx.Kornet()
-
   // fix issue, still catch 127.0.0.1 from ip catcher
-  XForwardedFor := m.KValueToString(kReq.Header.Get("X-Forwarded-For"))
+  XForwardedFor := ctx.Get("X-Forwarded-For")
   ClientIP := pp.Qstr(XForwardedFor, ctx.IP())
+
+  fmt.Printf("[TRY-LOGIN] ClientIP: %s UserAgent: %s\n", ClientIP, ctx.Get("User-Agent"))
 
   return session.ClientIP == ClientIP && session.UserAgent == ctx.Get("User-Agent")
 }

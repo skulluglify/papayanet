@@ -376,7 +376,7 @@ func (s *BasicAuth) MakeSessionEndpoint(router swag.SwagRouterImpl) {
             })
           }
 
-          return ctx.Status(http.StatusOK).JSON(res)
+          return ctx.Status(http.StatusOK).JSON(kornet.ResultNew(kornet.MessageNew("get all sessions", false), res))
         }
       }
 

@@ -7,7 +7,6 @@ import (
   "encoding/hex"
   "encoding/json"
   "errors"
-  "fmt"
   "golang.org/x/crypto/sha3"
   "io"
   "net/url"
@@ -168,8 +167,6 @@ func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool
 
   // fix issue, still catch 127.0.0.1 from ip catcher
   ClientIP := GetClientIP(ctx)
-
-  fmt.Printf("[TRY-LOGIN] ClientIP: %s UserAgent: %s\n", ClientIP, ctx.Get("User-Agent"))
 
   return session.ClientIP == ClientIP && session.UserAgent == ctx.Get("User-Agent")
 }

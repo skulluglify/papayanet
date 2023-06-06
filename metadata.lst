@@ -18,8 +18,8 @@ a7816d5c16485edb2f5ee76fa1a9a6ae5ff5ede0 papaya/bunny/swag/info.go
 ed652b5c737c6344a5dff9c40a352bd7d3ab0660 papaya/bunny/swag/renderer.go
 547a24c2d2dfa0a5a52edcbb9ccbe9f86bf562c7 papaya/bunny/swag/required.go
 2aeb7124b5623755de0efb8a46c91f72c0f5bc8e papaya/bunny/swag/responses.go
-ff39fde5930461af51ce6ed06d6ee40fbe330477 papaya/bunny/swag/router.go
-309bf801fde5efe6ff289753d830b9b33c0b5c53 papaya/bunny/swag/swagger.go
+694d31dc875b4745f7cecd12641ead9e5abc8da0 papaya/bunny/swag/router.go
+50bffb9fa81b2558f54631172fd3e3bbf80d2893 papaya/bunny/swag/swagger.go
 e3f336b347cd9a54bcc2e0ccff1cc62d79360eb4 papaya/bunny/swag/tasks.go
 2758e1f8cf42a16f039d5842f40b82bd96a68b78 papaya/bunny/swag/typed.go
 4d774650fdf2743635cc780b8576bb14ebe984f1 papaya/bunny/swag/universal.go
@@ -85,11 +85,11 @@ e0d7d7f5762ff5b8dbfc326a94a57589428b13f8 papaya/koala/vmo/loader.go
 b20d072af58a24d8104069fd83c01390400deb88 papaya/panda/nosign/view.go
 44cba20cb711adb2e3db9caf3b49529b5bd8ebd3 papaya/panda/panda.go
 ee08e3fb46fdc4eef10df6108cf7b3460564393e papaya/panda/vector.go
-7affd9ad25173bcf448e0ad28021cb436b6fb451 papaya/pigeon/cors/consumer.go
+563629a7c9caf178c5e008f73227116d29b97def papaya/pigeon/cors/consumer.go
 3294f9461cafb6176d3f2d7d7794d72e1d1c23af papaya/pigeon/cors/helper.go
 f3cd892c940d26430bf358b457d42452dc87b76d papaya/pigeon/cors/manage.go
 ab694e0233687d7a3e748fab5b6f30c31eada20e papaya/pigeon/cors/middleware.go
-4a231de22f53350faa919883692b063b484dbe71 papaya/pigeon/cors/util.go
+9c3d3352169ee68519e3c80f2e3ddd5cef449904 papaya/pigeon/cors/util.go
 69ac34f72ca8f7a89fd8682900b3e094e5a2b93c papaya/pigeon/cors/vars.go
 43cb488a43680661ef676543cf0001f31bbf1cb5 papaya/pigeon/drivers/common/conn.go
 4c96d84508406b753426cd8fe914353910a3d219 papaya/pigeon/drivers/mysql/conn.go
@@ -105,7 +105,7 @@ dea817cc3be8d6d065fbff29dd59218f2c1b6f4d papaya/pigeon/templates/basicAuth/model
 53531be79b808d014cf5c9a59684077203c830cb papaya/pigeon/templates/basicAuth/repository/sessions.go
 69e2762d757a483eafb810f9589c114dceb056fb papaya/pigeon/templates/basicAuth/repository/users.go
 c104da38a786a7540ec26b81e1eee123853da58f papaya/pigeon/templates/basicAuth/util/email.go
-37c2088c4ed63f4f6eb379c099c12c2743eb7d03 papaya/pigeon/templates/basicAuth/util/extra.go
+d5e1e81421ebc9e05845ecc43909231a669ec2c8 papaya/pigeon/templates/basicAuth/util/extra.go
 fd322061d56c2ddebc5f86c69147a09ce98f9d94 papaya/pigeon/templates/basicAuth/util/password.go
 56c0232c6d8f4689977bf9fe73a2d275579769f6 papaya/pigeon/vars.go
 2c779d9f1cd19283f54049340274c3f9cd4c13f4 papaya/util/banner.go

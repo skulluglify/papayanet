@@ -61,7 +61,7 @@ func (c *Consumer) Header(origin string, requestMethods []string, requestHeaders
   var err error
 
   var URL *url.URL
-  var ORIGIN string
+  var Origin string
 
   var header *http.Header
 
@@ -82,7 +82,7 @@ func (c *Consumer) Header(origin string, requestMethods []string, requestHeaders
 
     if URL.Scheme != "" && URL.Host != "" {
 
-      ORIGIN = URL.Scheme + "://" + URL.Host
+      Origin = URL.Scheme + "://" + URL.Host
 
     } else {
 
@@ -95,12 +95,12 @@ func (c *Consumer) Header(origin string, requestMethods []string, requestHeaders
 
       // fixing a problem if replace current origin
       // got a problem if origin a have prefix of www.
-      ORIGIN = SafeURL(c.URL)
+      Origin = SafeURL(c.URL)
 
     } else {
 
       // origin asterisk allowed
-      ORIGIN = "*"
+      Origin = "*"
     }
   }
 
@@ -130,7 +130,7 @@ func (c *Consumer) Header(origin string, requestMethods []string, requestHeaders
 
   // asterisk
 
-  header.Add("Access-Control-Allow-Origin", ORIGIN)
+  header.Add("Access-Control-Allow-Origin", Origin)
   header.Add("Access-Control-Allow-Methods", SafeMethods(methods))
   header.Add("Access-Control-Allow-Headers", SafeHeaders(headers))
   header.Add("Access-Control-Allow-Credentials", SafeCredentials(c.Credentials))
@@ -213,8 +213,9 @@ func (c *Consumer) Apply(ctx *fiber.Ctx) *fiber.Ctx {
   var value string
   var header *http.Header
 
-  var ORIGIN string
-  var METHOD string
+  var Origin string
+  var Referer string
+  var Method string
 
   var methods []string
   var headers []string
@@ -222,20 +223,29 @@ func (c *Consumer) Apply(ctx *fiber.Ctx) *fiber.Ctx {
   // may fix with, curr method and req method
   methods = make([]string, 0)
 
-  ORIGIN = string(req.Header.Peek("Origin"))
+  Origin = string(req.Header.Peek("Origin"))
+  Referer = string(req.Header.Peek("Referer"))
+
+  if Referer != "" {
+
+    // fix issue about strict cross-origin
+    Referer, _ = RefererIntoOrigin(Referer)
+    Origin = pp.Qstr(Origin, Referer)
+  }
 
   // :|
   //method = "*"
 
   // noop, don't have any idea for used
 
-  METHOD = string(req.Header.Peek("Access-Control-Request-Method"))
+  Method = string(req.Header.Peek("Access-Control-Request-Method"))
 
-  if METHOD != "" {
+  // set current method and request method
+  methods = append(methods, strings.ToUpper(string(req.Header.Method())))
 
-    // set current method and request method
-    methods = append(methods, strings.ToUpper(string(req.Header.Method())))
-    methods = append(methods, METHOD)
+  if Method != "" {
+
+    methods = append(methods, Method)
   }
 
   // :|
@@ -243,7 +253,7 @@ func (c *Consumer) Apply(ctx *fiber.Ctx) *fiber.Ctx {
 
   // passing error
   // get header from consumer information
-  header, _ = c.Header(ORIGIN, methods, headers)
+  header, _ = c.Header(Origin, methods, headers)
 
   for _, key := range Headers {
 

@@ -1,6 +1,7 @@
 package cors
 
 import (
+  "net/url"
   m "skfw/papaya/bunny/swag/method"
   "strings"
 )
@@ -64,4 +65,21 @@ func NormListBySources(sources []string, data []string) []string {
   }
 
   return temp
+}
+
+func RefererIntoOrigin(referer string) (string, error) {
+
+  var err error
+  var URL *url.URL
+
+  if URL, err = url.Parse(referer); err != nil {
+
+    return "", err
+  }
+
+  URL.Path = ""
+  URL.RawPath = ""
+  URL.RawQuery = ""
+
+  return URL.String(), nil
 }

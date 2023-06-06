@@ -1,6 +1,7 @@
 package swag
 
 import (
+  "net/http"
   "skfw/papaya/bunny/swag/method"
   "skfw/papaya/koala/collection"
   "skfw/papaya/koala/mapping"
@@ -52,6 +53,17 @@ func (router *SwagRouter) Group(path string, tag string) SwagGroupImpl {
   return group
 }
 
+func (router *SwagRouter) OptionsBypass(path string) {
+
+  router.Options(path, &mapping.KMap{
+    "hidden":      true,
+    "description": "Passing Options On Chrome Browser",
+  }, func(ctx *SwagContext) error {
+
+    return ctx.Status(http.StatusOK).Send(nil)
+  })
+}
+
 func (router *SwagRouter) Get(path string, expect *mapping.KMap, handler SwagRouteHandler) {
 
   p := router.path.Copy()
@@ -61,6 +73,9 @@ func (router *SwagRouter) Get(path string, expect *mapping.KMap, handler SwagRou
 
   compose := MakeSwagCompose(method.GET, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Head(path string, expect *mapping.KMap, handler SwagRouteHandler) {
@@ -72,6 +87,9 @@ func (router *SwagRouter) Head(path string, expect *mapping.KMap, handler SwagRo
 
   compose := MakeSwagCompose(method.HEAD, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Post(path string, expect *mapping.KMap, handler SwagRouteHandler) {
@@ -83,6 +101,9 @@ func (router *SwagRouter) Post(path string, expect *mapping.KMap, handler SwagRo
 
   compose := MakeSwagCompose(method.POST, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Put(path string, expect *mapping.KMap, handler SwagRouteHandler) {
@@ -94,6 +115,9 @@ func (router *SwagRouter) Put(path string, expect *mapping.KMap, handler SwagRou
 
   compose := MakeSwagCompose(method.PUT, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Delete(path string, expect *mapping.KMap, handler SwagRouteHandler) {
@@ -105,6 +129,9 @@ func (router *SwagRouter) Delete(path string, expect *mapping.KMap, handler Swag
 
   compose := MakeSwagCompose(method.DELETE, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Connect(path string, expect *mapping.KMap, handler SwagRouteHandler) {
@@ -116,6 +143,9 @@ func (router *SwagRouter) Connect(path string, expect *mapping.KMap, handler Swa
 
   compose := MakeSwagCompose(method.CONNECT, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Options(path string, expect *mapping.KMap, handler SwagRouteHandler) {
@@ -138,6 +168,9 @@ func (router *SwagRouter) Trace(path string, expect *mapping.KMap, handler SwagR
 
   compose := MakeSwagCompose(method.TRACE, router.tag, p, expect, handler)
   router.composes.Push(compose)
+
+  // fix issue options
+  router.OptionsBypass(path)
 }
 
 func (router *SwagRouter) Bind(composes collection.KListImpl[SwagComposeImpl]) {

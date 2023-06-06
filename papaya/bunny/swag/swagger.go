@@ -198,8 +198,11 @@ func (swag *Swag) Start() error {
       return value.Handler(context)
     })
 
-    swag.AddTag(tag)
-    swag.AddPath(path, method, expect)
+    if !m.KValueToBool(exp.Get("hidden")) {
+
+      swag.AddTag(tag)
+      swag.AddPath(path, method, expect)
+    }
 
     return nil
 

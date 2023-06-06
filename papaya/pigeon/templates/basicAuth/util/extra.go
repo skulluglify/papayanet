@@ -164,7 +164,7 @@ func GetClientIP(ctx *swag.SwagContext) string {
   return pp.Qstr(ClientIPFromRealIP, ClientIPFromXForwardedFor, ClientIP)
 }
 
-func CheckClientIPOnCClass(sessionClientIP string, currentClientIP string) bool {
+func CheckIP(sessionClientIP string, currentClientIP string) bool {
 
   // random ipv4
   // issue about development in emulator
@@ -176,8 +176,8 @@ func CheckClientIPOnCClass(sessionClientIP string, currentClientIP string) bool 
   // same ipv4
   if sIP.To4() != nil && cIP.To4() != nil {
 
-    sIP = sIP.Mask(net.CIDRMask(24, 32))
-    cIP = cIP.Mask(net.CIDRMask(24, 32))
+    sIP = sIP.Mask(net.CIDRMask(32, 32))
+    cIP = cIP.Mask(net.CIDRMask(32, 32))
 
     return sIP.Equal(cIP)
   }
@@ -185,8 +185,8 @@ func CheckClientIPOnCClass(sessionClientIP string, currentClientIP string) bool 
   // iam don't know what have done yet, same ipv6
   if sIP.To16() != nil && cIP.To16() != nil {
 
-    sIP = sIP.Mask(net.CIDRMask(48, 128))
-    cIP = cIP.Mask(net.CIDRMask(48, 128))
+    sIP = sIP.Mask(net.CIDRMask(128, 128))
+    cIP = cIP.Mask(net.CIDRMask(128, 128))
 
     return sIP.Equal(cIP)
   }
@@ -196,15 +196,19 @@ func CheckClientIPOnCClass(sessionClientIP string, currentClientIP string) bool 
 
 func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool {
 
-  // fix issue, still catch 127.0.0.1 from ip catcher
   ClientIP := GetClientIP(ctx)
+  UserAgent := strings.Trim(ctx.Get("User-Agent"), " ")
 
-  switch ctx.Get("X-IPChecker-Bypass", "no") {
-  case "no", "false":
-    return CheckClientIPOnCClass(session.ClientIP, ClientIP) && session.UserAgent == ctx.Get("User-Agent")
+  if strings.HasPrefix(session.UserAgent, "Dart/3") ||
+    strings.HasPrefix(session.UserAgent, "Java/1") {
+    // issue test on emulator 'Dart/3.0 (dart:io)'
+    // randomize Client IP on emulator
+    return session.UserAgent == UserAgent
   }
 
-  return session.UserAgent == ctx.Get("User-Agent")
+  // Aggressive Checker
+  return CheckIP(session.ClientIP, ClientIP) &&
+    session.UserAgent == ctx.Get("User-Agent")
 }
 
 func HashPassword(password string) (string, error) {

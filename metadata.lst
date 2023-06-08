@@ -87,7 +87,7 @@ b20d072af58a24d8104069fd83c01390400deb88 papaya/panda/nosign/view.go
 ee08e3fb46fdc4eef10df6108cf7b3460564393e papaya/panda/vector.go
 563629a7c9caf178c5e008f73227116d29b97def papaya/pigeon/cors/consumer.go
 3294f9461cafb6176d3f2d7d7794d72e1d1c23af papaya/pigeon/cors/helper.go
-f3cd892c940d26430bf358b457d42452dc87b76d papaya/pigeon/cors/manage.go
+8e7784e2ce62921f210a059867e7239198c8c979 papaya/pigeon/cors/manage.go
 ab694e0233687d7a3e748fab5b6f30c31eada20e papaya/pigeon/cors/middleware.go
 9c3d3352169ee68519e3c80f2e3ddd5cef449904 papaya/pigeon/cors/util.go
 69ac34f72ca8f7a89fd8682900b3e094e5a2b93c papaya/pigeon/cors/vars.go

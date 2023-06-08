@@ -103,7 +103,7 @@ bcae203889d0be33432bc9bb2dda04063c6b4e73 papaya/pigeon/easy/util.go
 1680f5ada3d30ac5d98acc48a6ee3d18404ecbb9 papaya/pigeon/templates/basicAuth/models/sessions.go
 dea817cc3be8d6d065fbff29dd59218f2c1b6f4d papaya/pigeon/templates/basicAuth/models/users.go
 53531be79b808d014cf5c9a59684077203c830cb papaya/pigeon/templates/basicAuth/repository/sessions.go
-69e2762d757a483eafb810f9589c114dceb056fb papaya/pigeon/templates/basicAuth/repository/users.go
+ce9af0a67511326d567041cee34fc13a18f647b3 papaya/pigeon/templates/basicAuth/repository/users.go
 c104da38a786a7540ec26b81e1eee123853da58f papaya/pigeon/templates/basicAuth/util/email.go
 d5e1e81421ebc9e05845ecc43909231a669ec2c8 papaya/pigeon/templates/basicAuth/util/extra.go
 fd322061d56c2ddebc5f86c69147a09ce98f9d94 papaya/pigeon/templates/basicAuth/util/password.go

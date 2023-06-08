@@ -233,9 +233,14 @@ func (u *UserRepository) CreateFast(name string, username string, email string, 
 
   user.Model.ID = sID
 
-  if _, found := u.SearchFast(username, email); found {
+  if _, found := u.SearchFast(username, "*"); found {
 
-    return nil, errors.New("user has been added")
+    return nil, errors.New("username is already in use for someone")
+  }
+
+  if _, found := u.SearchFast("*", email); found {
+
+    return nil, errors.New("email is already in use for someone")
   }
 
   if u.DB.Create(&user).Error != nil {

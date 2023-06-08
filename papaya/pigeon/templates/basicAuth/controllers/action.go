@@ -9,6 +9,7 @@ import (
   "skfw/papaya/bunny/swag"
   "skfw/papaya/koala/kornet"
   m "skfw/papaya/koala/mapping"
+  "skfw/papaya/koala/pp"
   "skfw/papaya/pigeon/drivers/common"
   "skfw/papaya/pigeon/drivers/postgresql"
   "skfw/papaya/pigeon/templates/basicAuth/models"
@@ -500,6 +501,8 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
     },
     func(ctx *swag.SwagContext) error {
 
+      ClientIP := util.GetClientIP(ctx)
+
       buff := ctx.Body()
 
       var err error
@@ -554,6 +557,8 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
       upperChar := true
       lowerChar := true
 
+      pp.Void(&specialChar, &numberChar, &upperChar, &lowerChar)
+
       if valid, err = password.Verify(minChars, specialChar, numberChar, upperChar, lowerChar); !valid {
 
         return ctx.Status(http.StatusBadRequest).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
@@ -580,7 +585,7 @@ func (s *BasicAuth) MakeUserRegisterEndpoint(router swag.SwagRouterImpl) {
         return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))
       }
 
-      token, err = s.sessionRepo.CreateFastAutoToken(user, ctx.IP(), ctx.Get("User-Agent"), currentTime.Add(s.expired), s.activeDuration, s.maxSessions)
+      token, err = s.sessionRepo.CreateFastAutoToken(user, ClientIP, ctx.Get("User-Agent"), currentTime.Add(s.expired), s.activeDuration, s.maxSessions)
       if err != nil {
 
         return ctx.Status(http.StatusInternalServerError).JSON(kornet.ResultNew(kornet.MessageNew(err.Error(), true), nil))

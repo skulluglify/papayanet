@@ -3,7 +3,9 @@ package swag
 import (
   "github.com/gofiber/fiber/v2"
   "net/http"
+  "os"
   "skfw/papaya/koala/kornet"
+  "skfw/papaya/koala/pp"
 )
 
 type SwagContext struct {
@@ -42,6 +44,8 @@ type SwagContextImpl interface {
 
   Kornet() (*kornet.Request, *kornet.Response)
   Bind(req *kornet.Request, res *kornet.Response)
+
+  BaseURL() string
 
   // wrapping http status + message + data
 
@@ -206,6 +210,18 @@ func (c *SwagContext) Bind(req *kornet.Request, res *kornet.Response) {
     c.body = req.Body.ReadAll()
     req.Body.Seek(0)
   }
+}
+
+func (c *SwagContext) BaseURL() string {
+
+  // issue with use nginx
+  if c.Get("X-Forwarded-For") != "" ||
+    c.Get("X-Real-IP") != "" {
+
+    return pp.Qstr(os.Getenv("BASE_URL"), "https://skfw.net/")
+  }
+
+  return c.Ctx.BaseURL()
 }
 
 func (c *SwagContext) Continue(result *kornet.Result) error {

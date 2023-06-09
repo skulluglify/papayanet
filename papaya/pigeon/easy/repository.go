@@ -266,6 +266,8 @@ func (u *Repository[T]) Delete(query any, args ...any) error {
 
 func (u *Repository[T]) Unscoped() RepositoryImpl[T] {
 
+  u.SessionNew()
+
   return &Repository[T]{
     DB:   u.DB.Unscoped(),
     Name: u.Name,

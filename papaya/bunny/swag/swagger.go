@@ -172,6 +172,11 @@ func (swag *Swag) Start() error {
 
       context := MakeSwagContext(ctx, false)
 
+      if m.KValueToBool(exp.Get("DisableDeviceCheck")) {
+        
+        context.DisableDeviceCheck()
+      }
+
       if requestValidation {
 
         validator := SwagRequestValidatorNew(exp, ctx)

@@ -10,15 +10,18 @@ import (
 
 type SwagContext struct {
   *fiber.Ctx
-  event    bool
-  data     any
-  body     []byte
-  kReq     *kornet.Request
-  kRes     *kornet.Response
-  finished bool
+  deviceCheck bool
+  event       bool
+  data        any
+  body        []byte
+  kReq        *kornet.Request
+  kRes        *kornet.Response
+  finished    bool
 }
 
 type SwagContextImpl interface {
+  DisableDeviceCheck()
+  DeviceCheck() bool
 
   // create event if run on a task
 
@@ -123,20 +126,32 @@ type SwagContextImpl interface {
 func MakeSwagContext(ctx *fiber.Ctx, event bool) *SwagContext {
 
   return &SwagContext{
-    Ctx:   ctx,
-    event: event,
-    data:  nil,
+    Ctx:         ctx,
+    deviceCheck: true,
+    event:       event,
+    data:        nil,
   }
 }
 
 func MakeSwagContextEvent(ctx *fiber.Ctx, data any) *SwagContext {
 
   return &SwagContext{
-    Ctx:   ctx,
-    event: true,
-    body:  nil,
-    data:  data,
+    Ctx:         ctx,
+    deviceCheck: true,
+    event:       true,
+    body:        nil,
+    data:        data,
   }
+}
+
+func (c *SwagContext) DisableDeviceCheck() {
+
+  c.deviceCheck = false
+}
+
+func (c *SwagContext) DeviceCheck() bool {
+
+  return c.deviceCheck
 }
 
 func (c *SwagContext) Event() bool {

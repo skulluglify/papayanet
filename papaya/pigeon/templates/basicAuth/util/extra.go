@@ -196,6 +196,12 @@ func CheckIP(sessionClientIP string, currentClientIP string) bool {
 
 func DeviceRecognition(ctx *swag.SwagContext, session *models.SessionModel) bool {
 
+  // passing device recognition
+  if !ctx.DeviceCheck() {
+
+    return true
+  }
+
   ClientIP := GetClientIP(ctx)
   UserAgent := strings.Trim(ctx.Get("User-Agent"), " ")
 

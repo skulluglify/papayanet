@@ -60,7 +60,7 @@ func (router *SwagRouter) OptionsBypass(path string) {
     "description": "Passing Options On Chrome Browser",
   }, func(ctx *SwagContext) error {
 
-    return ctx.Status(http.StatusOK).Send(nil)
+    return ctx.SendStatus(http.StatusNoContent)
   })
 }
 

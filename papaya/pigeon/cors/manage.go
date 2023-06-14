@@ -74,7 +74,17 @@ func (c *ManageConsumers) Add(method string, origin string) error {
     headers := make([]string, 0)
 
     methods = append(methods, method) // append new method
-    headers = append(headers, "Authorization")
+    headers = append(headers,
+      "Accept",
+      "Accept-Language",
+      "Cache-Control",
+      "Content-Language",
+      "Content-Length",
+      "Content-Type",
+      "Expires",
+      "Last-Modified",
+      "Pragma",
+      "Authorization")
 
     consumer, err = ConsumerNew(URL, methods, headers, false, 0)
     if err != nil {

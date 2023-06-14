@@ -18,7 +18,7 @@ a7816d5c16485edb2f5ee76fa1a9a6ae5ff5ede0 papaya/bunny/swag/info.go
 ed652b5c737c6344a5dff9c40a352bd7d3ab0660 papaya/bunny/swag/renderer.go
 547a24c2d2dfa0a5a52edcbb9ccbe9f86bf562c7 papaya/bunny/swag/required.go
 2aeb7124b5623755de0efb8a46c91f72c0f5bc8e papaya/bunny/swag/responses.go
-694d31dc875b4745f7cecd12641ead9e5abc8da0 papaya/bunny/swag/router.go
+167c5ba66b0aba0b547b43f151d584dadc85e099 papaya/bunny/swag/router.go
 1d2f2066bc5d08ee0e598c0374658ac54291b6d2 papaya/bunny/swag/swagger.go
 e3f336b347cd9a54bcc2e0ccff1cc62d79360eb4 papaya/bunny/swag/tasks.go
 2758e1f8cf42a16f039d5842f40b82bd96a68b78 papaya/bunny/swag/typed.go
@@ -87,7 +87,7 @@ b20d072af58a24d8104069fd83c01390400deb88 papaya/panda/nosign/view.go
 ee08e3fb46fdc4eef10df6108cf7b3460564393e papaya/panda/vector.go
 563629a7c9caf178c5e008f73227116d29b97def papaya/pigeon/cors/consumer.go
 3294f9461cafb6176d3f2d7d7794d72e1d1c23af papaya/pigeon/cors/helper.go
-8e7784e2ce62921f210a059867e7239198c8c979 papaya/pigeon/cors/manage.go
+842b15abad3e4f0d9457abd3e21a707955299774 papaya/pigeon/cors/manage.go
 ab694e0233687d7a3e748fab5b6f30c31eada20e papaya/pigeon/cors/middleware.go
 9c3d3352169ee68519e3c80f2e3ddd5cef449904 papaya/pigeon/cors/util.go
 69ac34f72ca8f7a89fd8682900b3e094e5a2b93c papaya/pigeon/cors/vars.go
